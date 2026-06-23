@@ -1,71 +1,69 @@
 import Link from 'next/link'
-import { Zap } from 'lucide-react'
+
+const PAYMENT_LOGOS = ['Visa', 'Mastercard', 'Apple Pay', 'Google Pay', 'Scalapay', 'Revolut']
 
 export default function Footer() {
   const year = new Date().getFullYear()
   return (
-    <footer
-      className="mt-auto pt-16 pb-8"
-      style={{ borderTop: '1px solid var(--border)', background: 'var(--surface)' }}
-    >
+    <footer className="mt-auto pt-14 pb-8" style={{ borderTop: '1px solid var(--border)', background: 'var(--surface)' }}>
       <div className="jc-container">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
           {/* Brand */}
           <div className="md:col-span-1">
-            <Link href="/" className="flex items-center gap-2 font-bold text-base mb-3">
-              <span
-                className="flex items-center justify-center w-7 h-7 rounded-lg text-white"
-                style={{ background: 'var(--primary)' }}
-              >
-                <Zap size={14} fill="currentColor" />
-              </span>
-              Juste Connecté
-            </Link>
-            <p className="text-sm leading-relaxed" style={{ color: 'oklch(0.18 0.004 264 / 0.5)' }}>
-              Smartphones reconditionnés certifiés pour les Antilles &amp; la Guyane françaises.
+            <p className="font-semibold text-sm mb-3">Juste Connecté</p>
+            <p className="text-xs leading-relaxed opacity-50 mb-4">
+              Revendeur de smartphones authentiques en Guadeloupe, Martinique et Guyane. Livraison express, garantie constructeur, support réactif.
             </p>
           </div>
 
           {/* Boutique */}
           <div>
-            <h3 className="text-sm font-semibold mb-4">Boutique</h3>
-            <ul className="flex flex-col gap-2 text-sm" style={{ color: 'oklch(0.18 0.004 264 / 0.55)' }}>
-              <li><Link href="/boutique" className="hover:opacity-100 transition-opacity">Tous les produits</Link></li>
-              <li><Link href="/boutique?marque=apple" className="hover:opacity-100 transition-opacity">Apple</Link></li>
-              <li><Link href="/boutique?marque=samsung" className="hover:opacity-100 transition-opacity">Samsung</Link></li>
-              <li><Link href="/boutique?marque=google" className="hover:opacity-100 transition-opacity">Google</Link></li>
+            <p className="text-[10px] font-bold uppercase tracking-widest mb-4 opacity-40">Boutique</p>
+            <ul className="flex flex-col gap-2 text-sm opacity-60">
+              {['Apple', 'Samsung', 'Xiaomi', 'Google Pixel', 'Tout le catalogue'].map(l => (
+                <li key={l}>
+                  <Link href={`/boutique${l !== 'Tout le catalogue' ? `?marque=${l.toLowerCase()}` : ''}`}
+                    className="hover:opacity-100 transition-opacity">{l}</Link>
+                </li>
+              ))}
             </ul>
           </div>
 
-          {/* Infos */}
+          {/* Aide */}
           <div>
-            <h3 className="text-sm font-semibold mb-4">Informations</h3>
-            <ul className="flex flex-col gap-2 text-sm" style={{ color: 'oklch(0.18 0.004 264 / 0.55)' }}>
-              <li><a href="#" className="hover:opacity-100 transition-opacity">À propos</a></li>
-              <li><a href="#" className="hover:opacity-100 transition-opacity">Garantie &amp; SAV</a></li>
-              <li><a href="#" className="hover:opacity-100 transition-opacity">Livraison</a></li>
-              <li><a href="#" className="hover:opacity-100 transition-opacity">Contact</a></li>
+            <p className="text-[10px] font-bold uppercase tracking-widest mb-4 opacity-40">Aide</p>
+            <ul className="flex flex-col gap-2 text-sm opacity-60">
+              {['Livraison Guadeloupe et Martinique', 'Retours et garantie', 'Suivre ma commande', 'Contact'].map(l => (
+                <li key={l}><a href="#" className="hover:opacity-100 transition-opacity">{l}</a></li>
+              ))}
             </ul>
           </div>
 
-          {/* Légal */}
+          {/* Paiement */}
           <div>
-            <h3 className="text-sm font-semibold mb-4">Légal</h3>
-            <ul className="flex flex-col gap-2 text-sm" style={{ color: 'oklch(0.18 0.004 264 / 0.55)' }}>
-              <li><a href="#" className="hover:opacity-100 transition-opacity">Mentions légales</a></li>
-              <li><a href="#" className="hover:opacity-100 transition-opacity">CGV</a></li>
-              <li><a href="#" className="hover:opacity-100 transition-opacity">Politique de confidentialité</a></li>
-              <li><a href="#" className="hover:opacity-100 transition-opacity">Cookies</a></li>
-            </ul>
+            <p className="text-[10px] font-bold uppercase tracking-widest mb-4 opacity-40">Paiement</p>
+            <div className="flex flex-wrap gap-2">
+              {PAYMENT_LOGOS.map(p => (
+                <span key={p}
+                  className="text-[10px] font-semibold px-2.5 py-1 rounded-md border"
+                  style={{ borderColor: 'var(--border-strong)', opacity: 0.6 }}>
+                  {p}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
 
         <div
-          className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 text-xs"
-          style={{ borderTop: '1px solid var(--border)', color: 'oklch(0.18 0.004 264 / 0.4)' }}
+          className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-6 text-xs opacity-35"
+          style={{ borderTop: '1px solid var(--border)' }}
         >
-          <p>&copy; {year} Juste Connecté. Tous droits réservés.</p>
-          <p>Smartphones reconditionnés — Antilles &amp; Guyane françaises</p>
+          <p>&copy; {year} Juste Connecté · Tous droits réservés</p>
+          <div className="flex gap-4">
+            <a href="#">Mentions légales</a>
+            <a href="#">CGV</a>
+            <a href="#">Confidentialité</a>
+          </div>
         </div>
       </div>
     </footer>

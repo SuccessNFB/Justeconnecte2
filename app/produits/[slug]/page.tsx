@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase-server'
 import ProductDetail from './ProductDetail'
 import type { Brand, Product, ProductVariant, ProductZonePrice } from '@/lib/types'
+import { DEMO_PRODUCTS } from '@/lib/demo-data'
 
 type FullProduct = Product & {
   brands: Brand
@@ -10,14 +11,17 @@ type FullProduct = Product & {
 }
 
 async function getProduct(slug: string): Promise<FullProduct | null> {
-  const supabase = createClient()
-  const { data } = await supabase
-    .from('products')
-    .select(`*, brands(*), product_variants(*, product_zone_prices(*))`)
-    .eq('slug', slug)
-    .eq('is_active', true)
-    .single()
-  return data as FullProduct | null
+  try {
+    const supabase = createClient()
+    const { data } = await supabase
+      .from('products')
+      .select(`*, brands(*), product_variants(*, product_zone_prices(*))`)
+      .eq('slug', slug)
+      .eq('is_active', true)
+      .single()
+    if (data) return data as FullProduct
+  } catch {}
+  return (DEMO_PRODUCTS.find(p => p.slug === slug) ?? null) as FullProduct | null
 }
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {

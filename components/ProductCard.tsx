@@ -1,6 +1,5 @@
 'use client'
 import Link from 'next/link'
-import Image from 'next/image'
 import { useZone } from '@/contexts/ZoneContext'
 import { formatPrice } from '@/lib/utils'
 import type { Product, ProductVariant, ProductZonePrice } from '@/lib/types'
@@ -12,86 +11,103 @@ interface Props {
   }
 }
 
+function PhoneIllustration({ colorHex }: { colorHex?: string }) {
+  const fill = colorHex || '#e8e0d4'
+  return (
+    <svg viewBox="0 0 140 240" fill="none" xmlns="http://www.w3.org/2000/svg"
+      className="w-28 h-auto drop-shadow-sm">
+      <rect x="12" y="4" width="116" height="232" rx="22" fill={fill} />
+      <rect x="16" y="8" width="108" height="224" rx="19" fill={fill} opacity="0.7" />
+      {/* Screen */}
+      <rect x="18" y="24" width="104" height="192" rx="14" fill="#f0f0f0" opacity="0.9" />
+      {/* Dynamic Island */}
+      <rect x="52" y="28" width="36" height="10" rx="5" fill="#d0ccc6" />
+      {/* Camera bump */}
+      <rect x="26" y="30" width="34" height="34" rx="10" fill={fill} opacity="0.4" />
+      <circle cx="35" cy="43" r="7" fill="#1a1a1a" opacity="0.6" />
+      <circle cx="35" cy="43" r="4" fill="#333" opacity="0.7" />
+      <circle cx="51" cy="43" r="7" fill="#1a1a1a" opacity="0.6" />
+      <circle cx="51" cy="43" r="4" fill="#333" opacity="0.7" />
+      {/* Home indicator */}
+      <rect x="54" y="210" width="32" height="4" rx="2" fill="#aaa" opacity="0.5" />
+    </svg>
+  )
+}
+
 export default function ProductCard({ product }: Props) {
   const { zone } = useZone()
-
   const allVariants = product.product_variants ?? []
   const prices = allVariants.flatMap(v => v.product_zone_prices ?? [])
 
   let minPrice: number | null = null
+  let comparePrice: number | null = null
+
   if (zone) {
-    const zonePrices = prices.filter(p => p.zone_id === zone.id).map(p => p.price)
-    if (zonePrices.length) minPrice = Math.min(...zonePrices)
+    const zonePrices = prices.filter(p => p.zone_id === zone.id)
+    if (zonePrices.length) {
+      minPrice = Math.min(...zonePrices.map(p => p.price))
+      const withCompare = zonePrices.find(p => p.compare_at_price && p.price === minPrice)
+      comparePrice = withCompare?.compare_at_price ?? null
+    }
   }
   if (minPrice === null) {
-    const allPrices = prices.map(p => p.price)
-    if (allPrices.length) minPrice = Math.min(...allPrices)
+    const allP = prices.map(p => p.price)
+    if (allP.length) minPrice = Math.min(...allP)
   }
 
-  const image = `/images/placeholder-phone.svg`
+  const scalapayInstalment = minPrice ? (minPrice / 4).toFixed(2).replace('.', ',') : null
+  const firstVariant = allVariants[0]
+  const colorHex = firstVariant?.color_hex
+
+  const badge = product.badge
+  const badgeClass = badge?.toLowerCase().includes('best') || badge?.toLowerCase().includes('top')
+    ? 'jc-badge-best' : 'jc-badge-new'
 
   return (
-    <Link href={`/produits/${product.slug}`} className="block jc-card overflow-hidden group">
-      {/* Image zone */}
+    <Link href={`/produits/${product.slug}`} className="block group">
       <div
-        className="relative aspect-square flex items-center justify-center p-8"
-        style={{
-          background: 'radial-gradient(ellipse at 50% 40%, oklch(0.745 0.085 78 / 0.08) 0%, var(--surface-soft) 70%)',
-        }}
+        className="rounded-2xl overflow-hidden transition-all duration-200 group-hover:shadow-lg group-hover:-translate-y-1"
+        style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
       >
-        {product.badge && (
-          <span
-            className="absolute top-3 left-3 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider text-white"
-            style={{ background: 'var(--gold-deep)' }}
-          >
-            {product.badge}
-          </span>
-        )}
-        {product.is_new && !product.badge && (
-          <span
-            className="absolute top-3 left-3 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider text-white"
-            style={{ background: 'var(--success)' }}
-          >
-            Nouveau
-          </span>
-        )}
-        {/* Phone placeholder SVG */}
-        <svg
-          viewBox="0 0 120 200"
-          className="w-32 h-auto transition-transform duration-300 group-hover:scale-105"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <rect x="10" y="5" width="100" height="190" rx="16" fill="var(--primary)" opacity="0.08"/>
-          <rect x="14" y="9" width="92" height="182" rx="13" fill="var(--primary)" opacity="0.12"/>
-          <rect x="18" y="13" width="84" height="174" rx="10" fill="var(--primary)" opacity="0.85"/>
-          <rect x="22" y="20" width="76" height="140" rx="6" fill="oklch(0.88 0.002 247)"/>
-          <circle cx="60" cy="173" r="8" fill="oklch(0.75 0.002 247)"/>
-        </svg>
-      </div>
-
-      {/* Info */}
-      <div className="p-4">
-        <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--gold-deep)' }}>
-          {product.brands?.name}
-        </p>
-        <h3 className="font-semibold text-sm leading-snug mb-3">{product.name}</h3>
-
-        <div className="flex items-center justify-between">
-          {minPrice !== null ? (
-            <p className="text-sm">
-              <span className="text-xs opacity-50 mr-1">À partir de</span>
-              <span className="font-bold">{formatPrice(minPrice)}</span>
-            </p>
-          ) : (
-            <p className="text-sm text-opacity-50">Prix non disponible</p>
+        {/* Image zone */}
+        <div className="relative flex items-center justify-center pt-8 pb-4 px-6"
+          style={{ background: 'linear-gradient(160deg, #faf8f5 0%, #f0ece4 100%)' }}>
+          {badge && (
+            <span className={`${badgeClass} absolute top-3 left-3`}>{badge}</span>
           )}
-          <span
-            className="text-xs font-semibold px-3 py-1.5 rounded-lg text-white transition-all group-hover:opacity-90"
-            style={{ background: 'var(--gradient-gold)' }}
-          >
-            Voir →
-          </span>
+          <PhoneIllustration colorHex={colorHex} />
+        </div>
+
+        {/* Info */}
+        <div className="px-4 pb-4 pt-3">
+          <p className="text-[10px] font-semibold uppercase tracking-widest mb-1 opacity-45">
+            {product.brands?.name}
+          </p>
+          <h3 className="font-semibold text-sm leading-snug mb-1.5">{product.name}</h3>
+
+          {/* Stars */}
+          <div className="flex items-center gap-1.5 mb-2">
+            <span className="jc-stars text-xs">★★★★★</span>
+            <span className="text-[11px] font-medium" style={{ color: 'var(--gold)' }}>4.8</span>
+            <span className="text-[11px] opacity-40">· 42 avis</span>
+          </div>
+
+          {/* Price */}
+          {minPrice !== null && (
+            <div>
+              <div className="flex items-baseline gap-2">
+                <span className="font-bold text-base">{formatPrice(minPrice)}</span>
+                {comparePrice && (
+                  <span className="text-xs line-through opacity-35">{formatPrice(comparePrice)}</span>
+                )}
+              </div>
+              {scalapayInstalment && (
+                <p className="text-[11px] mt-0.5 opacity-45">
+                  ou 4× {scalapayInstalment}&nbsp;€ avec Scalapay
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </Link>

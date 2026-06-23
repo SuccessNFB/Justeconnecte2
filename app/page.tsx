@@ -1,127 +1,258 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase-server'
 import ProductCard from '@/components/ProductCard'
-import BrandLogoStrip from '@/components/BrandLogoStrip'
-import { Shield, Award, Headphones } from 'lucide-react'
+import { ShieldCheck, Award, Truck, HeadphonesIcon, CheckCircle } from 'lucide-react'
 import type { Brand, Product, ProductVariant, ProductZonePrice } from '@/lib/types'
+import { DEMO_BRANDS, DEMO_PRODUCTS } from '@/lib/demo-data'
 
 async function getData() {
-  const supabase = createClient()
-  const [brandsRes, newRes, bestRes] = await Promise.all([
-    supabase.from('brands').select('*').order('sort_order'),
-    supabase.from('products').select(`*, brands(*), product_variants(*, product_zone_prices(*))`).eq('is_new', true).eq('is_active', true).limit(4),
-    supabase.from('products').select(`*, brands(*), product_variants(*, product_zone_prices(*))`).eq('is_bestseller', true).eq('is_active', true).limit(4),
-  ])
-  return {
-    brands: (brandsRes.data ?? []) as Brand[],
-    newProducts: (newRes.data ?? []) as (Product & { brands: Brand; product_variants: (ProductVariant & { product_zone_prices: ProductZonePrice[] })[] })[],
-    bestProducts: (bestRes.data ?? []) as (Product & { brands: Brand; product_variants: (ProductVariant & { product_zone_prices: ProductZonePrice[] })[] })[],
+  try {
+    const supabase = createClient()
+    const [brandsRes, newRes, bestRes] = await Promise.all([
+      supabase.from('brands').select('*').order('sort_order'),
+      supabase.from('products').select(`*, brands(*), product_variants(*, product_zone_prices(*))`).eq('is_new', true).eq('is_active', true).limit(4),
+      supabase.from('products').select(`*, brands(*), product_variants(*, product_zone_prices(*))`).eq('is_bestseller', true).eq('is_active', true).limit(4),
+    ])
+    return {
+      brands: (brandsRes.data ?? []) as Brand[],
+      newProducts: (newRes.data ?? []) as (Product & { brands: Brand; product_variants: (ProductVariant & { product_zone_prices: ProductZonePrice[] })[] })[],
+      bestProducts: (bestRes.data ?? []) as (Product & { brands: Brand; product_variants: (ProductVariant & { product_zone_prices: ProductZonePrice[] })[] })[],
+    }
+  } catch {
+    return {
+      brands: DEMO_BRANDS,
+      newProducts: DEMO_PRODUCTS.filter(p => p.is_new),
+      bestProducts: DEMO_PRODUCTS.filter(p => p.is_bestseller),
+    }
   }
 }
 
-const WHY_US = [
-  { icon: Award,       title: 'Certifié & Testé',   body: 'Chaque appareil passe 72 points de contrôle avant expédition. Grade A ou B uniquement.' },
-  { icon: Shield,      title: 'Garantie 12 mois',   body: 'Tous nos produits bénéficient d\'une garantie commerciale d\'un an, pièces et main-d\'œuvre.' },
-  { icon: Headphones,  title: 'Support local',       body: 'Une équipe francophone basée aux Antilles, disponible par chat, email et téléphone.' },
+const TRUST_CARDS = [
+  { icon: ShieldCheck, title: 'Produits 100 % authentiques',  body: 'Sélectionnés directement chez les distributeurs officiels.' },
+  { icon: Award,       title: 'Garantie constructeur',            body: 'Tous nos appareils bénéficient de la garantie officielle.' },
+  { icon: Truck,       title: 'Livraison express',                body: 'Guadeloupe, Martinique, Guyane. Délai estimé à la commande.' },
+  { icon: HeadphonesIcon, title: 'Support réactif',              body: 'WhatsApp, email ou téléphone. Réponse sous 2 heures.' },
 ]
+
+const PAYMENT_LOGOS = ['Visa', 'Mastercard', 'Apple Pay', 'Google Pay', 'Scalapay', 'Revolut']
+
+function PhoneHeroIllustration() {
+  return (
+    <div className="relative w-full max-w-sm mx-auto">
+      {/* Back phone (Pixel) */}
+      <div className="absolute right-0 top-4 w-44 opacity-90">
+        <svg viewBox="0 0 140 260" fill="none" className="w-full drop-shadow-xl">
+          <rect x="10" y="4" width="120" height="252" rx="22" fill="#1a1a1a"/>
+          <rect x="14" y="8" width="112" height="244" rx="19" fill="#222"/>
+          <rect x="18" y="22" width="104" height="208" rx="10" fill="#0a0a0a"/>
+          <rect x="10" y="90" width="120" height="40" rx="0" fill="#2a2a2a"/>
+          <circle cx="42" cy="110" r="14" fill="#111"/>
+          <circle cx="42" cy="110" r="9" fill="#0a0a0a"/>
+          <circle cx="78" cy="110" r="10" fill="#111"/>
+          <rect x="50" y="236" width="40" height="5" rx="2.5" fill="#333"/>
+        </svg>
+      </div>
+      {/* Front phone (iPhone) */}
+      <div className="relative z-10 w-52 ml-0">
+        <svg viewBox="0 0 160 280" fill="none" className="w-full drop-shadow-2xl">
+          <rect x="6" y="4" width="148" height="272" rx="26" fill="#c8b89a"/>
+          <rect x="10" y="8" width="140" height="264" rx="23" fill="#d4c4a8"/>
+          <rect x="14" y="24" width="132" height="226" rx="14" fill="#e8e0d0" opacity="0.85"/>
+          <rect x="60" y="28" width="40" height="12" rx="6" fill="#b8a888"/>
+          <rect x="20" y="32" width="44" height="44" rx="12" fill="#b8a888" opacity="0.5"/>
+          <circle cx="31" cy="47" r="9" fill="#1a1a1a" opacity="0.7"/>
+          <circle cx="31" cy="47" r="5.5" fill="#222" opacity="0.8"/>
+          <circle cx="51" cy="47" r="9" fill="#1a1a1a" opacity="0.7"/>
+          <circle cx="51" cy="47" r="5.5" fill="#222" opacity="0.8"/>
+          <circle cx="41" cy="66" r="4" fill="#1a1a1a" opacity="0.4"/>
+          <rect x="60" y="255" width="40" height="5" rx="2.5" fill="#b8a888" opacity="0.6"/>
+        </svg>
+      </div>
+    </div>
+  )
+}
 
 export default async function HomePage() {
   const { brands, newProducts, bestProducts } = await getData()
 
   return (
     <>
-      {/* ── HERO ── */}
-      <section className="py-24 sm:py-32">
-        <div className="jc-container text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-6 animate-float"
-            style={{ border: '1.5px solid var(--border)', background: 'var(--surface)' }}>
-            <span className="w-2 h-2 rounded-full" style={{ background: 'var(--success)' }} />
-            ✓ Certifié remis à neuf — Garantie 12 mois
-          </div>
+      {/* ══ 1. HERO ══ */}
+      <section className="py-16 sm:py-24" style={{ background: 'var(--surface)' }}>
+        <div className="jc-container">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-0 items-center">
+            {/* Text */}
+            <div className="animate-fade-up">
+              <div className="inline-flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-full mb-8"
+                style={{ border: '1px solid var(--border-strong)', color: 'var(--gold)' }}>
+                <span className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--gold)' }} />
+                Nouveau · iPhone 16 Pro disponible
+              </div>
 
-          <h1 className="font-bold text-5xl sm:text-6xl lg:text-7xl leading-tight tracking-tight mb-6 animate-fade-up">
-            Smartphones{' '}
-            <span className="jc-gold-text">reconditionnés</span>
-            <br />
-            pour les Antilles
-          </h1>
+              <h1 className="font-bold leading-[1.1] mb-5">
+                <span className="block" style={{ fontSize: 'clamp(2.6rem,6vw,4.4rem)' }}>La technologie,</span>
+                <span className="block jc-gold-text" style={{ fontSize: 'clamp(2.6rem,6vw,4.4rem)' }}>simplement.</span>
+              </h1>
 
-          <p className="text-base sm:text-lg max-w-2xl mx-auto mb-10 leading-relaxed animate-fade-up"
-            style={{ color: 'oklch(0.18 0.004 264 / 0.55)', animationDelay: '0.1s' }}>
-            Qualité premium, prix juste, livré chez vous en Martinique, Guadeloupe, Guyane &amp; Saint-Martin.
-          </p>
+              <p className="text-sm sm:text-base leading-relaxed mb-3 max-w-lg opacity-60">
+                Smartphones Apple, Samsung, Xiaomi et Google Pixel. Produits authentiques, livraison express en Guadeloupe, Martinique et Guyane.
+              </p>
 
-          <div className="flex flex-wrap justify-center gap-4 animate-fade-up" style={{ animationDelay: '0.2s' }}>
-            <Link href="/boutique" className="jc-btn-primary text-base px-8 py-4">
-              Découvrir la boutique
-            </Link>
-            <Link href="/boutique#marques" className="jc-btn-ghost text-base px-8 py-4">
-              Nos marques
-            </Link>
+              <p className="text-sm font-medium mb-8">
+                Livraison disponible en{' '}
+                <span className="font-bold" style={{ color: 'var(--gold)' }}>Guadeloupe / Martinique</span>
+              </p>
+
+              <div className="flex flex-wrap gap-3 mb-10">
+                <Link href="/boutique" className="jc-btn-dark text-base px-7 py-3">
+                  Découvrir la boutique →
+                </Link>
+                <button className="jc-btn-ghost text-base px-7 py-3">
+                  Paiement en 4× sans frais
+                </button>
+              </div>
+
+              {/* Mini trust */}
+              <div className="flex flex-wrap gap-5 text-xs opacity-45 font-medium">
+                <span className="flex items-center gap-1.5"><CheckCircle size={12} /> Authentiques</span>
+                <span className="flex items-center gap-1.5"><CheckCircle size={12} /> Garantie constructeur</span>
+                <span className="flex items-center gap-1.5"><CheckCircle size={12} /> Livraison express</span>
+              </div>
+            </div>
+
+            {/* Phone illustration */}
+            <div className="flex justify-center lg:justify-end">
+              <PhoneHeroIllustration />
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ── BRAND STRIP ── */}
-      <BrandLogoStrip brands={brands} />
+      {/* ══ 2. TRUSTPILOT + 4 CARDS ══ */}
+      <section className="py-16" style={{ background: 'var(--background)' }}>
+        <div className="jc-container">
+          {/* Trustpilot line */}
+          <div className="flex items-center gap-2 justify-center mb-10">
+            <span className="jc-stars text-sm">★★★★★</span>
+            <span className="text-sm font-semibold" style={{ color: 'var(--gold)' }}>4.8</span>
+            <span className="text-sm opacity-40">· 127 avis</span>
+            <span className="text-sm opacity-30 mx-1">—</span>
+            <span className="text-xs opacity-40">Avis vérifiés par Trustpilot</span>
+          </div>
 
-      {/* ── NOUVEAUTÉS ── */}
-      {newProducts.length > 0 && (
-        <section className="py-20">
-          <div className="jc-container">
-            <div className="flex items-end justify-between mb-10">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--gold-deep)' }}>Arrivages</p>
-                <h2 className="text-3xl font-bold">Nouveautés</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {TRUST_CARDS.map(({ icon: Icon, title, body }) => (
+              <div key={title} className="rounded-2xl p-5" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+                <div className="w-9 h-9 flex items-center justify-center rounded-xl mb-4"
+                  style={{ background: 'var(--gold-bg)' }}>
+                  <Icon size={18} style={{ color: 'var(--gold)' }} />
+                </div>
+                <h3 className="font-semibold text-sm mb-1.5">{title}</h3>
+                <p className="text-xs leading-relaxed opacity-50">{body}</p>
               </div>
-              <Link href="/boutique?tri=new" className="text-sm font-medium hover:opacity-70 transition-opacity">
-                Tout voir →
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ══ 3. NOUVEAUTÉS ══ */}
+      {newProducts.length > 0 && (
+        <section className="py-14" style={{ background: 'var(--surface)' }}>
+          <div className="jc-container">
+            <div className="flex items-end justify-between mb-8">
+              <div>
+                <p className="jc-overline mb-1">Nouveautés</p>
+                <h2 className="font-bold" style={{ fontSize: 'clamp(1.7rem,3.5vw,2.4rem)' }}>Les derniers modèles</h2>
+              </div>
+              <Link href="/boutique?tri=new"
+                className="text-sm font-medium opacity-40 hover:opacity-70 transition-opacity">
+                Tout voir
               </Link>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {newProducts.map(p => <ProductCard key={p.id} product={p} />)}
             </div>
           </div>
         </section>
       )}
 
-      {/* ── BESTSELLERS ── */}
-      {bestProducts.length > 0 && (
-        <section className="py-20" style={{ background: 'var(--surface)' }}>
-          <div className="jc-container">
-            <div className="flex items-end justify-between mb-10">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--gold-deep)' }}>Tendances</p>
-                <h2 className="text-3xl font-bold">Bestsellers</h2>
+      {/* ══ 4. NOTRE ENGAGEMENT ══ */}
+      <section className="py-16" style={{ background: 'var(--background)' }}>
+        <div className="jc-container">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            {/* Phone visual */}
+            <div className="flex justify-center">
+              <div className="relative w-80">
+                <div className="rounded-3xl overflow-hidden"
+                  style={{ background: 'linear-gradient(135deg,#f5f0e8,#ede5d4)' }}>
+                  <PhoneHeroIllustration />
+                </div>
               </div>
-              <Link href="/boutique?tri=bestseller" className="text-sm font-medium hover:opacity-70 transition-opacity">
-                Tout voir →
+            </div>
+
+            {/* Text */}
+            <div>
+              <p className="jc-overline mb-3">Notre engagement</p>
+              <h2 className="font-bold text-3xl sm:text-4xl mb-2">Juste Connecté</h2>
+              <p className="text-base mb-5 italic" style={{ color: 'var(--gold)' }}>la technologie, simplement</p>
+              <p className="text-sm leading-relaxed opacity-55 mb-7">
+                Chacun devrait pouvoir accéder à la technologie au prix le plus juste, quel que soit l'endroit où il vit.
+                Nous sélectionnons des smartphones authentiques chez les distributeurs officiels, et nous les livrons rapidement dans toute la zone Antilles Guyane.
+              </p>
+
+              <div className="grid grid-cols-2 gap-x-8 gap-y-3">
+                {[
+                  { icon: ShieldCheck,  label: 'Authentiques' },
+                  { icon: Award,       label: 'Garantie officielle' },
+                  { icon: Truck,       label: 'Livraison express' },
+                  { icon: HeadphonesIcon, label: 'Support 2 h' },
+                ].map(({ icon: Icon, label }) => (
+                  <div key={label} className="flex items-center gap-2.5 text-sm font-medium opacity-70">
+                    <Icon size={15} style={{ color: 'var(--gold)' }} /> {label}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ══ 5. BESTSELLERS ══ */}
+      {bestProducts.length > 0 && (
+        <section className="py-14" style={{ background: 'var(--surface)' }}>
+          <div className="jc-container">
+            <div className="flex items-end justify-between mb-8">
+              <div>
+                <p className="jc-overline mb-1">Ventes</p>
+                <h2 className="font-bold" style={{ fontSize: 'clamp(1.7rem,3.5vw,2.4rem)' }}>Plébiscités</h2>
+              </div>
+              <Link href="/boutique?tri=bestseller"
+                className="text-sm font-medium opacity-40 hover:opacity-70 transition-opacity">
+                Tout voir
               </Link>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {bestProducts.map(p => <ProductCard key={p.id} product={p} />)}
             </div>
           </div>
         </section>
       )}
 
-      {/* ── POURQUOI NOUS ── */}
-      <section className="py-20">
-        <div className="jc-container">
-          <div className="text-center mb-14">
-            <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--gold-deep)' }}>Notre engagement</p>
-            <h2 className="text-3xl font-bold">Pourquoi nous choisir ?</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {WHY_US.map(({ icon: Icon, title, body }) => (
-              <div key={title} className="jc-card p-8 text-center">
-                <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-5"
-                  style={{ background: 'oklch(0.745 0.085 78 / 0.12)' }}>
-                  <Icon size={24} style={{ color: 'var(--gold-deep)' }} />
-                </div>
-                <h3 className="font-bold text-lg mb-2">{title}</h3>
-                <p className="text-sm leading-relaxed" style={{ color: 'oklch(0.18 0.004 264 / 0.55)' }}>{body}</p>
-              </div>
+      {/* ══ 6. SCALAPAY ══ */}
+      <section className="py-16" style={{ background: 'var(--background)' }}>
+        <div className="jc-container text-center">
+          <p className="jc-overline mb-3">Paiement</p>
+          <h2 className="font-bold text-3xl sm:text-4xl mb-3">Payez en 4 fois sans frais avec Scalapay</h2>
+          <p className="text-sm opacity-45 mb-8">
+            Exemple pour un iPhone 16 Pro à 1 299 € : 4 versements de 324,75 €. Sans intérêts.
+          </p>
+          <div className="flex flex-wrap justify-center gap-3">
+            {PAYMENT_LOGOS.map(p => (
+              <span key={p}
+                className="text-xs font-semibold px-4 py-2 rounded-full border"
+                style={{ borderColor: 'var(--border-strong)', opacity: 0.65 }}>
+                {p}
+              </span>
             ))}
           </div>
         </div>

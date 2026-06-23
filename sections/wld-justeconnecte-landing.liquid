@@ -1,0 +1,875 @@
+{% assign slug = 'justeconnecte' %}
+{% assign sid = section.id %}
+{% assign prod = section.settings.product %}
+
+{% if prod == blank %}
+  <div id="vel-no-product-notice" style="background:#fff3cd;border:1px solid #ffc107;color:#856404;padding:16px 24px;text-align:center;font-family:sans-serif;">
+    ⚠️ <strong>WLD — JusteConnecté Landing :</strong> Aucun produit sélectionné. Allez dans l'éditeur de thème → Settings → Produit pour assigner votre produit.
+  </div>
+{% endif %}
+
+<div id="wld-{{ slug }}-{{ sid }}">
+
+  {%- comment -%} ═══ 1. HERO ═══ {%- endcomment -%}
+  <section class="wldjc-hero">
+    <div class="wldjc-hero__inner wldjc-container">
+      <div class="wldjc-hero__text">
+        {% if section.settings.badge_text != blank %}
+          <span class="wldjc-badge">{{ section.settings.badge_text }}</span>
+        {% endif %}
+        <h1 class="wldjc-h1">{{ section.settings.hero_title }}</h1>
+        <p class="wldjc-hero__sub">{{ section.settings.hero_subtitle }}</p>
+
+        <div class="wldjc-stars" aria-label="{{ section.settings.review_count }} avis">
+          <span class="wldjc-stars__icons">★★★★★</span>
+          <span class="wldjc-stars__label">{{ section.settings.hero_rating }} — {{ section.settings.review_count }}</span>
+        </div>
+
+        {%- comment -%} Hero bundle selector {%- endcomment -%}
+        <div class="wldjc-bundles" data-zone="hero">
+          {% for block in section.blocks %}
+            {% if block.type == 'bundle' %}
+              <button
+                class="wldjc-bundle-btn{% if forloop.first %} active{% endif %}"
+                data-variant="{{ block.settings.variant_id }}"
+                data-price="{{ block.settings.price }}"
+                data-old-price="{{ block.settings.old_price }}"
+                data-quantity="{{ block.settings.quantity }}"
+                data-zone="hero"
+                {{ block.shopify_attributes }}
+              >
+                {% if block.settings.popular %}<span class="wldjc-bundle-popular">{{ section.settings.popular_label }}</span>{% endif %}
+                <strong>{{ block.settings.label }}</strong>
+                <span class="wldjc-bundle-qty">{{ block.settings.quantity_label }}</span>
+                <span class="wldjc-bundle-price">{{ block.settings.price }}</span>
+                {% if block.settings.old_price != blank %}
+                  <s class="wldjc-bundle-old">{{ block.settings.old_price }}</s>
+                {% endif %}
+              </button>
+            {% endif %}
+          {% endfor %}
+        </div>
+
+        <button class="wldjc-cta wldjc-cta--hero js-add-to-cart" data-zone="hero">
+          {{ section.settings.cta_hero }}
+        </button>
+        <p class="wldjc-guarantee-line">🔒 {{ section.settings.guarantee_short }}</p>
+      </div>
+
+      <div class="wldjc-hero__media">
+        {% if section.settings.hero_image != blank %}
+          {{ section.settings.hero_image | image_url: width: 900 | image_tag: loading: 'eager', alt: section.settings.hero_title, class: 'wldjc-hero__img' }}
+        {% else %}
+          <div class="wldjc-hero__img-placeholder">{{ 'product-1' | placeholder_svg_tag: 'wldjc-placeholder-svg' }}</div>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
+  {%- comment -%} ═══ 2. TRUST STRIP ═══ {%- endcomment -%}
+  <section class="wldjc-trust-strip">
+    <div class="wldjc-container wldjc-trust-strip__inner">
+      <div class="wldjc-trust-strip__item">
+        <span class="wldjc-trust-strip__icon">🚚</span>
+        <span>{{ section.settings.trust_1 }}</span>
+      </div>
+      <div class="wldjc-trust-strip__item">
+        <span class="wldjc-trust-strip__icon">🔄</span>
+        <span>{{ section.settings.trust_2 }}</span>
+      </div>
+      <div class="wldjc-trust-strip__item">
+        <span class="wldjc-trust-strip__icon">🛡️</span>
+        <span>{{ section.settings.trust_3 }}</span>
+      </div>
+      <div class="wldjc-trust-strip__item">
+        <span class="wldjc-trust-strip__icon">⭐</span>
+        <span>{{ section.settings.trust_4 }}</span>
+      </div>
+    </div>
+  </section>
+
+  {%- comment -%} ═══ 3. PROBLÈME → SOLUTION ═══ {%- endcomment -%}
+  <section class="wldjc-problem">
+    <div class="wldjc-container wldjc-problem__inner">
+      <div class="wldjc-problem__text">
+        <p class="wldjc-overline">{{ section.settings.problem_overline }}</p>
+        <h2 class="wldjc-h2">{{ section.settings.problem_title }}</h2>
+        <p class="wldjc-body">{{ section.settings.problem_body }}</p>
+        <h3 class="wldjc-h3 wldjc-solution-title">{{ section.settings.solution_title }}</h3>
+        <p class="wldjc-body">{{ section.settings.solution_body }}</p>
+      </div>
+      <div class="wldjc-problem__media">
+        {% if section.settings.problem_image != blank %}
+          {{ section.settings.problem_image | image_url: width: 700 | image_tag: loading: 'lazy', alt: section.settings.problem_title, class: 'wldjc-rounded' }}
+        {% else %}
+          <div class="wldjc-placeholder-block">{{ 'lifestyle-1' | placeholder_svg_tag: 'wldjc-placeholder-svg' }}</div>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
+  {%- comment -%} ═══ 4. BÉNÉFICES ═══ {%- endcomment -%}
+  <section class="wldjc-benefits">
+    <div class="wldjc-container">
+      <p class="wldjc-overline wldjc-center">{{ section.settings.benefits_overline }}</p>
+      <h2 class="wldjc-h2 wldjc-center">{{ section.settings.benefits_title }}</h2>
+      <div class="wldjc-benefits__grid">
+        {% for i in (1..6) %}
+          {% assign icon_key = 'benefit_' | append: i | append: '_icon' %}
+          {% assign title_key = 'benefit_' | append: i | append: '_title' %}
+          {% assign body_key = 'benefit_' | append: i | append: '_body' %}
+          {% if section.settings[title_key] != blank %}
+            <div class="wldjc-benefit-card">
+              <div class="wldjc-benefit-card__icon">{{ section.settings[icon_key] }}</div>
+              <h4 class="wldjc-benefit-card__title">{{ section.settings[title_key] }}</h4>
+              <p class="wldjc-benefit-card__body">{{ section.settings[body_key] }}</p>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  {%- comment -%} ═══ 5. FEATURES / FORMULE ═══ {%- endcomment -%}
+  <section class="wldjc-features">
+    <div class="wldjc-container wldjc-features__inner">
+      <div class="wldjc-features__media">
+        {% if section.settings.features_image != blank %}
+          {{ section.settings.features_image | image_url: width: 700 | image_tag: loading: 'lazy', alt: section.settings.features_title, class: 'wldjc-rounded' }}
+        {% else %}
+          <div class="wldjc-placeholder-block">{{ 'product-2' | placeholder_svg_tag: 'wldjc-placeholder-svg' }}</div>
+        {% endif %}
+      </div>
+      <div class="wldjc-features__text">
+        <p class="wldjc-overline">{{ section.settings.features_overline }}</p>
+        <h2 class="wldjc-h2">{{ section.settings.features_title }}</h2>
+        <ul class="wldjc-checklist">
+          {% for i in (1..6) %}
+            {% assign feat_key = 'feature_' | append: i %}
+            {% if section.settings[feat_key] != blank %}
+              <li class="wldjc-checklist__item">
+                <span class="wldjc-checklist__check">✓</span>
+                {{ section.settings[feat_key] }}
+              </li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  {%- comment -%} ═══ 6. COMPARAISON ═══ {%- endcomment -%}
+  <section class="wldjc-comparison">
+    <div class="wldjc-container">
+      <h2 class="wldjc-h2 wldjc-center">{{ section.settings.comparison_title }}</h2>
+      <div class="wldjc-comparison__table-wrap">
+        <table class="wldjc-comparison__table">
+          <thead>
+            <tr>
+              <th></th>
+              <th class="wldjc-comparison__ours">{{ section.settings.comparison_col_ours }}</th>
+              <th class="wldjc-comparison__others">{{ section.settings.comparison_col_others }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for i in (1..7) %}
+              {% assign row_key = 'comparison_row_' | append: i %}
+              {% assign our_key = 'comparison_ours_' | append: i %}
+              {% assign other_key = 'comparison_other_' | append: i %}
+              {% if section.settings[row_key] != blank %}
+                <tr>
+                  <td class="wldjc-comparison__feature">{{ section.settings[row_key] }}</td>
+                  <td class="wldjc-comparison__ours wldjc-check">{{ section.settings[our_key] | default: '✓' }}</td>
+                  <td class="wldjc-comparison__others wldjc-cross">{{ section.settings[other_key] | default: '✗' }}</td>
+                </tr>
+              {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  {%- comment -%} ═══ 7. TÉMOIGNAGES ═══ {%- endcomment -%}
+  <section class="wldjc-reviews">
+    <div class="wldjc-container">
+      <p class="wldjc-overline wldjc-center">{{ section.settings.reviews_overline }}</p>
+      <h2 class="wldjc-h2 wldjc-center">{{ section.settings.reviews_title }}</h2>
+      <div class="wldjc-reviews__grid">
+        {% for block in section.blocks %}
+          {% if block.type == 'review' %}
+            <div class="wldjc-review-card" {{ block.shopify_attributes }}>
+              <div class="wldjc-review-card__stars">★★★★★</div>
+              <p class="wldjc-review-card__body">"{{ block.settings.review_text }}"</p>
+              <div class="wldjc-review-card__author">
+                {% if block.settings.review_avatar != blank %}
+                  {{ block.settings.review_avatar | image_url: width: 60 | image_tag: loading: 'lazy', alt: block.settings.review_name, class: 'wldjc-review-card__avatar' }}
+                {% else %}
+                  <div class="wldjc-review-card__avatar-placeholder">{{ block.settings.review_name | slice: 0 }}</div>
+                {% endif %}
+                <div>
+                  <strong>{{ block.settings.review_name }}</strong>
+                  <span class="wldjc-review-card__meta">{{ block.settings.review_meta }}</span>
+                </div>
+              </div>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  {%- comment -%} ═══ 8. BUY BOX ═══ {%- endcomment -%}
+  <section class="wldjc-buybox" id="wldjc-buybox">
+    <div class="wldjc-container wldjc-buybox__inner">
+      <div class="wldjc-buybox__media">
+        {% if section.settings.buybox_image != blank %}
+          {{ section.settings.buybox_image | image_url: width: 700 | image_tag: loading: 'lazy', alt: section.settings.buybox_title, class: 'wldjc-rounded' }}
+        {% elsif section.settings.hero_image != blank %}
+          {{ section.settings.hero_image | image_url: width: 700 | image_tag: loading: 'lazy', alt: section.settings.buybox_title, class: 'wldjc-rounded' }}
+        {% else %}
+          <div class="wldjc-placeholder-block">{{ 'product-3' | placeholder_svg_tag: 'wldjc-placeholder-svg' }}</div>
+        {% endif %}
+      </div>
+      <div class="wldjc-buybox__text">
+        <h2 class="wldjc-h2">{{ section.settings.buybox_title }}</h2>
+        <p class="wldjc-body">{{ section.settings.buybox_subtitle }}</p>
+
+        <div class="wldjc-bundles" data-zone="buybox">
+          {% for block in section.blocks %}
+            {% if block.type == 'bundle' %}
+              <button
+                class="wldjc-bundle-btn{% if forloop.first %} active{% endif %}"
+                data-variant="{{ block.settings.variant_id }}"
+                data-price="{{ block.settings.price }}"
+                data-old-price="{{ block.settings.old_price }}"
+                data-quantity="{{ block.settings.quantity }}"
+                data-zone="buybox"
+                {{ block.shopify_attributes }}
+              >
+                {% if block.settings.popular %}<span class="wldjc-bundle-popular">{{ section.settings.popular_label }}</span>{% endif %}
+                <strong>{{ block.settings.label }}</strong>
+                <span class="wldjc-bundle-qty">{{ block.settings.quantity_label }}</span>
+                <span class="wldjc-bundle-price">{{ block.settings.price }}</span>
+                {% if block.settings.old_price != blank %}
+                  <s class="wldjc-bundle-old">{{ block.settings.old_price }}</s>
+                {% endif %}
+              </button>
+            {% endif %}
+          {% endfor %}
+        </div>
+
+        <div class="wldjc-price-display">
+          <span class="wldjc-price-display__current js-current-price">{{ section.settings.default_price }}</span>
+          <span class="wldjc-price-display__old js-old-price">{{ section.settings.default_old_price }}</span>
+          <span class="wldjc-price-display__saving js-saving"></span>
+        </div>
+
+        <form action="/cart/add" method="post" class="wldjc-cart-form">
+          <input type="hidden" name="id" class="js-variant-id" value="">
+          <input type="hidden" name="quantity" class="js-variant-qty" value="1">
+          <button type="submit" class="wldjc-cta wldjc-cta--buybox js-add-to-cart" data-zone="buybox">
+            {{ section.settings.cta_buybox }}
+          </button>
+        </form>
+
+        <ul class="wldjc-buybox__trust">
+          <li>🔒 {{ section.settings.buybox_trust_1 }}</li>
+          <li>📦 {{ section.settings.buybox_trust_2 }}</li>
+          <li>🔄 {{ section.settings.buybox_trust_3 }}</li>
+        </ul>
+
+        <div class="wldjc-payment-icons">
+          <span>Visa</span><span>Mastercard</span><span>Amex</span><span>PayPal</span><span>Apple Pay</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {%- comment -%} ═══ 9. FAQ ═══ {%- endcomment -%}
+  <section class="wldjc-faq">
+    <div class="wldjc-container">
+      <p class="wldjc-overline wldjc-center">{{ section.settings.faq_overline }}</p>
+      <h2 class="wldjc-h2 wldjc-center">{{ section.settings.faq_title }}</h2>
+      <div class="wldjc-faq__list">
+        {% for block in section.blocks %}
+          {% if block.type == 'faq' %}
+            <div class="wldjc-faq__item" {{ block.shopify_attributes }}>
+              <button class="wldjc-faq__q js-faq-toggle" aria-expanded="false">
+                {{ block.settings.question }}
+                <span class="wldjc-faq__icon" aria-hidden="true">+</span>
+              </button>
+              <div class="wldjc-faq__a" hidden>
+                {{ block.settings.answer }}
+              </div>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  {%- comment -%} ═══ 10. CTA FINAL ═══ {%- endcomment -%}
+  <section class="wldjc-final-cta">
+    <div class="wldjc-container wldjc-center">
+      <h2 class="wldjc-h2">{{ section.settings.final_cta_title }}</h2>
+      <p class="wldjc-body">{{ section.settings.final_cta_body }}</p>
+      <a href="#wldjc-buybox" class="wldjc-cta wldjc-cta--final">{{ section.settings.final_cta_btn }}</a>
+    </div>
+  </section>
+
+</div>
+
+{%- comment -%} ═══ CSS ═══ {%- endcomment -%}
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600;700&display=swap');
+
+  #wld-{{ slug }}-{{ sid }} {
+    --jc-primary:    {{ section.settings.color_primary }};
+    --jc-secondary:  {{ section.settings.color_secondary }};
+    --jc-bg:         {{ section.settings.color_bg }};
+    --jc-surface:    {{ section.settings.color_surface }};
+    --jc-text:       {{ section.settings.color_text }};
+    --jc-text-muted: {{ section.settings.color_muted }};
+    --jc-border:     {{ section.settings.color_border }};
+    --jc-radius:     12px;
+    --jc-shadow:     0 4px 24px rgba(0,0,0,.08);
+    font-family: 'Inter', sans-serif;
+    color: var(--jc-text);
+    background: var(--jc-bg);
+    box-sizing: border-box;
+  }
+  #wld-{{ slug }}-{{ sid }} *, #wld-{{ slug }}-{{ sid }} *::before, #wld-{{ slug }}-{{ sid }} *::after { box-sizing: inherit; }
+
+  /* Layout */
+  #wld-{{ slug }}-{{ sid }} .wldjc-container { max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-center { text-align: center; }
+
+  /* Typography */
+  #wld-{{ slug }}-{{ sid }} .wldjc-h1 { font-family: 'DM Serif Display', serif; font-size: clamp(2rem, 5vw, 3.4rem); line-height: 1.15; color: var(--jc-text); margin: 0 0 .75em; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-h2 { font-family: 'DM Serif Display', serif; font-size: clamp(1.6rem, 3.5vw, 2.6rem); line-height: 1.2; color: var(--jc-text); margin: 0 0 .6em; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-h3 { font-family: 'DM Serif Display', serif; font-size: clamp(1.2rem, 2.5vw, 1.8rem); color: var(--jc-text); margin: 1em 0 .4em; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-body { font-size: 1.05rem; line-height: 1.7; color: var(--jc-text-muted); margin: 0 0 1em; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-overline { font-size: .8rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--jc-primary); margin: 0 0 .5em; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-rounded { border-radius: var(--jc-radius); width: 100%; height: auto; display: block; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-placeholder-block svg { width: 100%; height: auto; border-radius: var(--jc-radius); }
+
+  /* Badge */
+  #wld-{{ slug }}-{{ sid }} .wldjc-badge { display: inline-block; background: var(--jc-primary); color: #fff; font-size: .75rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: 4px 14px; border-radius: 999px; margin-bottom: 1rem; }
+
+  /* Stars */
+  #wld-{{ slug }}-{{ sid }} .wldjc-stars { display: flex; align-items: center; gap: 8px; margin-bottom: 1.25rem; flex-wrap: wrap; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-stars__icons { color: #f59e0b; font-size: 1.1rem; letter-spacing: 2px; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-stars__label { font-size: .9rem; color: var(--jc-text-muted); }
+
+  /* CTA Buttons */
+  #wld-{{ slug }}-{{ sid }} .wldjc-cta { display: inline-block; background: var(--jc-primary); color: #fff; font-weight: 700; font-size: 1.1rem; padding: 16px 36px; border-radius: var(--jc-radius); border: none; cursor: pointer; text-decoration: none; transition: opacity .2s, transform .15s; text-align: center; width: 100%; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-cta:hover { opacity: .9; transform: translateY(-2px); }
+  #wld-{{ slug }}-{{ sid }} .wldjc-guarantee-line { font-size: .85rem; color: var(--jc-text-muted); margin-top: .75rem; }
+
+  /* ─── HERO ─── */
+  #wld-{{ slug }}-{{ sid }} .wldjc-hero { padding: 80px 0 60px; background: var(--jc-surface); }
+  #wld-{{ slug }}-{{ sid }} .wldjc-hero__inner { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-hero__img { width: 100%; height: auto; border-radius: var(--jc-radius); box-shadow: var(--jc-shadow); }
+  #wld-{{ slug }}-{{ sid }} .wldjc-hero__img-placeholder svg { width: 100%; height: auto; border-radius: var(--jc-radius); }
+  #wld-{{ slug }}-{{ sid }} .wldjc-hero__sub { font-size: 1.15rem; line-height: 1.65; color: var(--jc-text-muted); margin-bottom: 1.5rem; }
+
+  /* ─── BUNDLE SELECTOR ─── */
+  #wld-{{ slug }}-{{ sid }} .wldjc-bundles { display: flex; flex-direction: column; gap: 10px; margin-bottom: 1.5rem; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-bundle-btn { position: relative; display: flex; align-items: center; gap: 12px; background: var(--jc-bg); border: 2px solid var(--jc-border); border-radius: var(--jc-radius); padding: 14px 18px; cursor: pointer; text-align: left; transition: border-color .2s, box-shadow .2s; font-family: inherit; flex-wrap: wrap; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-bundle-btn.active { border-color: var(--jc-primary); box-shadow: 0 0 0 3px {{ section.settings.color_primary | color_modify: 'alpha', .15 }}; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-bundle-btn strong { font-weight: 700; font-size: 1rem; color: var(--jc-text); flex: 1; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-bundle-qty { font-size: .85rem; color: var(--jc-text-muted); }
+  #wld-{{ slug }}-{{ sid }} .wldjc-bundle-price { font-weight: 700; color: var(--jc-primary); font-size: 1.05rem; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-bundle-old { font-size: .85rem; color: var(--jc-text-muted); }
+  #wld-{{ slug }}-{{ sid }} .wldjc-bundle-popular { position: absolute; top: -11px; right: 14px; background: var(--jc-primary); color: #fff; font-size: .7rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 3px 10px; border-radius: 999px; }
+
+  /* ─── TRUST STRIP ─── */
+  #wld-{{ slug }}-{{ sid }} .wldjc-trust-strip { background: var(--jc-primary); padding: 20px 0; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-trust-strip__inner { display: flex; flex-wrap: wrap; justify-content: center; gap: 28px; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-trust-strip__item { display: flex; align-items: center; gap: 8px; color: #fff; font-weight: 600; font-size: .9rem; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-trust-strip__icon { font-size: 1.2rem; }
+
+  /* ─── PROBLÈME / SOLUTION ─── */
+  #wld-{{ slug }}-{{ sid }} .wldjc-problem { padding: 80px 0; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-problem__inner { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-solution-title { color: var(--jc-primary); }
+
+  /* ─── BÉNÉFICES ─── */
+  #wld-{{ slug }}-{{ sid }} .wldjc-benefits { padding: 80px 0; background: var(--jc-surface); }
+  #wld-{{ slug }}-{{ sid }} .wldjc-benefits__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; margin-top: 3rem; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-benefit-card { background: var(--jc-bg); border: 1px solid var(--jc-border); border-radius: var(--jc-radius); padding: 28px 24px; text-align: center; transition: box-shadow .2s; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-benefit-card:hover { box-shadow: var(--jc-shadow); }
+  #wld-{{ slug }}-{{ sid }} .wldjc-benefit-card__icon { font-size: 2.2rem; margin-bottom: .75rem; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-benefit-card__title { font-weight: 700; font-size: 1.05rem; margin: 0 0 .5rem; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-benefit-card__body { font-size: .9rem; color: var(--jc-text-muted); margin: 0; }
+
+  /* ─── FEATURES ─── */
+  #wld-{{ slug }}-{{ sid }} .wldjc-features { padding: 80px 0; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-features__inner { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-checklist { list-style: none; margin: 1.5rem 0 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-checklist__item { display: flex; gap: 12px; align-items: flex-start; font-size: 1rem; line-height: 1.5; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-checklist__check { flex-shrink: 0; width: 24px; height: 24px; background: var(--jc-primary); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .85rem; font-weight: 700; }
+
+  /* ─── COMPARAISON ─── */
+  #wld-{{ slug }}-{{ sid }} .wldjc-comparison { padding: 80px 0; background: var(--jc-surface); }
+  #wld-{{ slug }}-{{ sid }} .wldjc-comparison__table-wrap { overflow-x: auto; margin-top: 2.5rem; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-comparison__table { width: 100%; border-collapse: collapse; font-size: .95rem; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-comparison__table th, #wld-{{ slug }}-{{ sid }} .wldjc-comparison__table td { padding: 14px 20px; border-bottom: 1px solid var(--jc-border); text-align: center; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-comparison__table th { font-weight: 700; font-size: 1rem; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-comparison__table .wldjc-comparison__feature { text-align: left; font-weight: 500; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-comparison__table .wldjc-comparison__ours { background: {{ section.settings.color_primary | color_modify: 'alpha', .07 }}; color: var(--jc-primary); }
+  #wld-{{ slug }}-{{ sid }} .wldjc-check { color: #16a34a; font-weight: 700; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-cross { color: #dc2626; }
+
+  /* ─── REVIEWS ─── */
+  #wld-{{ slug }}-{{ sid }} .wldjc-reviews { padding: 80px 0; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-reviews__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 3rem; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-review-card { background: var(--jc-surface); border: 1px solid var(--jc-border); border-radius: var(--jc-radius); padding: 24px; display: flex; flex-direction: column; gap: 14px; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-review-card__stars { color: #f59e0b; font-size: 1rem; letter-spacing: 2px; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-review-card__body { font-size: .95rem; line-height: 1.6; color: var(--jc-text); font-style: italic; flex: 1; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-review-card__author { display: flex; align-items: center; gap: 12px; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-review-card__avatar { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-review-card__avatar-placeholder { width: 44px; height: 44px; border-radius: 50%; background: var(--jc-primary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem; flex-shrink: 0; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-review-card__author strong { display: block; font-size: .95rem; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-review-card__meta { font-size: .8rem; color: var(--jc-text-muted); }
+
+  /* ─── BUY BOX ─── */
+  #wld-{{ slug }}-{{ sid }} .wldjc-buybox { padding: 80px 0; background: var(--jc-surface); }
+  #wld-{{ slug }}-{{ sid }} .wldjc-buybox__inner { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: start; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-price-display { display: flex; align-items: baseline; gap: 12px; margin: 1rem 0 1.25rem; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-price-display__current { font-family: 'DM Serif Display', serif; font-size: 2rem; color: var(--jc-primary); }
+  #wld-{{ slug }}-{{ sid }} .wldjc-price-display__old { font-size: 1.2rem; color: var(--jc-text-muted); text-decoration: line-through; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-price-display__saving { font-size: .9rem; font-weight: 700; color: #16a34a; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-cart-form { margin-bottom: 1rem; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-buybox__trust { list-style: none; margin: 1rem 0 1.25rem; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: .9rem; color: var(--jc-text-muted); }
+  #wld-{{ slug }}-{{ sid }} .wldjc-payment-icons { display: flex; gap: 10px; flex-wrap: wrap; font-size: .75rem; font-weight: 600; color: var(--jc-text-muted); }
+  #wld-{{ slug }}-{{ sid }} .wldjc-payment-icons span { border: 1px solid var(--jc-border); border-radius: 4px; padding: 3px 8px; }
+
+  /* ─── FAQ ─── */
+  #wld-{{ slug }}-{{ sid }} .wldjc-faq { padding: 80px 0; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-faq__list { max-width: 760px; margin: 2.5rem auto 0; display: flex; flex-direction: column; gap: 8px; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-faq__item { border: 1px solid var(--jc-border); border-radius: var(--jc-radius); overflow: hidden; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-faq__q { width: 100%; background: var(--jc-surface); border: none; padding: 18px 24px; font-family: inherit; font-size: 1rem; font-weight: 600; color: var(--jc-text); display: flex; justify-content: space-between; align-items: center; cursor: pointer; gap: 12px; text-align: left; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-faq__q[aria-expanded="true"] { background: {{ section.settings.color_primary | color_modify: 'alpha', .07 }}; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-faq__icon { font-size: 1.4rem; font-weight: 300; flex-shrink: 0; transition: transform .2s; color: var(--jc-primary); }
+  #wld-{{ slug }}-{{ sid }} .wldjc-faq__q[aria-expanded="true"] .wldjc-faq__icon { transform: rotate(45deg); }
+  #wld-{{ slug }}-{{ sid }} .wldjc-faq__a { padding: 0 24px 18px; font-size: .95rem; line-height: 1.7; color: var(--jc-text-muted); }
+
+  /* ─── FINAL CTA ─── */
+  #wld-{{ slug }}-{{ sid }} .wldjc-final-cta { padding: 80px 0; background: var(--jc-primary); }
+  #wld-{{ slug }}-{{ sid }} .wldjc-final-cta .wldjc-h2 { color: #fff; }
+  #wld-{{ slug }}-{{ sid }} .wldjc-final-cta .wldjc-body { color: rgba(255,255,255,.8); }
+  #wld-{{ slug }}-{{ sid }} .wldjc-cta--final { background: #fff; color: var(--jc-primary); margin-top: 1.5rem; display: inline-block; width: auto; }
+
+  /* ─── RESPONSIVE 900px ─── */
+  @media (max-width: 900px) {
+    #wld-{{ slug }}-{{ sid }} .wldjc-hero__inner,
+    #wld-{{ slug }}-{{ sid }} .wldjc-problem__inner,
+    #wld-{{ slug }}-{{ sid }} .wldjc-features__inner,
+    #wld-{{ slug }}-{{ sid }} .wldjc-buybox__inner { grid-template-columns: 1fr; }
+    #wld-{{ slug }}-{{ sid }} .wldjc-hero__media { order: -1; }
+    #wld-{{ slug }}-{{ sid }} .wldjc-benefits__grid { grid-template-columns: repeat(2, 1fr); }
+    #wld-{{ slug }}-{{ sid }} .wldjc-reviews__grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* ─── RESPONSIVE 540px ─── */
+  @media (max-width: 540px) {
+    #wld-{{ slug }}-{{ sid }} .wldjc-hero { padding: 48px 0 40px; }
+    #wld-{{ slug }}-{{ sid }} .wldjc-benefits__grid { grid-template-columns: 1fr; }
+    #wld-{{ slug }}-{{ sid }} .wldjc-reviews__grid { grid-template-columns: 1fr; }
+    #wld-{{ slug }}-{{ sid }} .wldjc-trust-strip__inner { flex-direction: column; gap: 14px; }
+    #wld-{{ slug }}-{{ sid }} .wldjc-comparison__table th, #wld-{{ slug }}-{{ sid }} .wldjc-comparison__table td { padding: 10px 12px; font-size: .82rem; }
+  }
+</style>
+
+{%- comment -%} ═══ JAVASCRIPT ═══ {%- endcomment -%}
+<script>
+(function() {
+  'use strict';
+
+  function initWldJc(scope) {
+    var sid = '{{ sid }}';
+    var root = scope || document.getElementById('wld-justeconnecte-' + sid);
+    if (!root) return;
+
+    /* ── Bundle selector ── */
+    var allBtnGroups = root.querySelectorAll('.wldjc-bundles');
+    allBtnGroups.forEach(function(group) {
+      var zone = group.dataset.zone;
+      var btns = group.querySelectorAll('.wldjc-bundle-btn');
+
+      btns.forEach(function(btn, idx) {
+        btn.addEventListener('click', function() {
+          /* Sync active state across both zones */
+          allBtnGroups.forEach(function(g) {
+            g.querySelectorAll('.wldjc-bundle-btn').forEach(function(b, i) {
+              b.classList.toggle('active', i === idx);
+            });
+          });
+
+          /* Update variant hidden input + price display */
+          var variantId  = btn.dataset.variant  || '';
+          var price      = btn.dataset.price     || '';
+          var oldPrice   = btn.dataset.oldPrice  || '';
+          var qty        = btn.dataset.quantity  || '1';
+
+          root.querySelectorAll('.js-variant-id').forEach(function(el) { el.value = variantId; });
+          root.querySelectorAll('.js-variant-qty').forEach(function(el) { el.value = qty; });
+          root.querySelectorAll('.js-current-price').forEach(function(el) { el.textContent = price; });
+          root.querySelectorAll('.js-old-price').forEach(function(el) { el.textContent = oldPrice; el.style.display = oldPrice ? '' : 'none'; });
+          root.querySelectorAll('.js-saving').forEach(function(el) { el.textContent = ''; });
+        });
+      });
+
+      /* Init first bundle on load */
+      if (btns.length) {
+        var first = btns[0];
+        root.querySelectorAll('.js-variant-id').forEach(function(el) { el.value = first.dataset.variant || ''; });
+        root.querySelectorAll('.js-variant-qty').forEach(function(el) { el.value = first.dataset.quantity || '1'; });
+      }
+    });
+
+    /* ── Scroll-to-buybox on hero CTA ── */
+    root.querySelectorAll('.js-add-to-cart[data-zone="hero"]').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        var box = root.querySelector('#wldjc-buybox');
+        if (box) box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+
+    /* ── FAQ accordion ── */
+    root.querySelectorAll('.js-faq-toggle').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var expanded = btn.getAttribute('aria-expanded') === 'true';
+        var answer   = btn.nextElementSibling;
+        btn.setAttribute('aria-expanded', !expanded);
+        if (!expanded) { answer.removeAttribute('hidden'); }
+        else           { answer.setAttribute('hidden', ''); }
+      });
+    });
+  }
+
+  /* Init on DOMContentLoaded */
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { initWldJc(); });
+  } else {
+    initWldJc();
+  }
+
+  /* Re-init on Shopify section reload */
+  document.addEventListener('shopify:section:load', function(e) {
+    var scope = e.target.querySelector('#wld-justeconnecte-{{ sid }}');
+    if (scope) initWldJc(scope);
+  });
+})();
+</script>
+
+{% schema %}
+{
+  "name": "WLD — JusteConnecté Landing",
+  "tag": "div",
+  "enabled_on": {
+    "templates": ["page", "index", "product"]
+  },
+  "settings": [
+
+    { "type": "header", "content": "🛍️ Produit" },
+    { "type": "product", "id": "product", "label": "Produit Shopify" },
+
+    { "type": "header", "content": "🎨 Couleurs" },
+    { "type": "color", "id": "color_primary",   "label": "Couleur principale",  "default": "#1a3c6e" },
+    { "type": "color", "id": "color_secondary", "label": "Couleur secondaire",  "default": "#e8b84b" },
+    { "type": "color", "id": "color_bg",        "label": "Fond",                "default": "#ffffff" },
+    { "type": "color", "id": "color_surface",   "label": "Surface / cartes",    "default": "#f5f7fa" },
+    { "type": "color", "id": "color_text",      "label": "Texte principal",     "default": "#0f1f36" },
+    { "type": "color", "id": "color_muted",     "label": "Texte secondaire",    "default": "#6b7280" },
+    { "type": "color", "id": "color_border",    "label": "Bordures",            "default": "#e5e7eb" },
+
+    { "type": "header", "content": "🦸 Hero" },
+    { "type": "text",  "id": "badge_text",    "label": "Badge texte",     "default": "🌟 Nouveau" },
+    { "type": "text",  "id": "hero_title",    "label": "Titre principal", "default": "Restez connecté à ce qui compte vraiment" },
+    { "type": "textarea", "id": "hero_subtitle", "label": "Sous-titre",  "default": "JusteConnecté vous permet de garder le lien avec vos proches, sans distractions, sans effort — juste l'essentiel." },
+    { "type": "text",  "id": "hero_rating",   "label": "Note (ex. 4.9/5)", "default": "4.9/5" },
+    { "type": "text",  "id": "review_count",  "label": "Nombre d'avis",  "default": "+ de 2 400 avis clients" },
+    { "type": "image_picker", "id": "hero_image", "label": "Image hero" },
+    { "type": "text",  "id": "cta_hero",      "label": "CTA bouton hero", "default": "🛒 Commander maintenant — Livraison offerte" },
+    { "type": "text",  "id": "guarantee_short","label": "Garantie courte","default": "Paiement 100% sécurisé · Satisfait ou remboursé 30 jours" },
+    { "type": "text",  "id": "popular_label", "label": "Label populaire", "default": "⭐ BEST-SELLER" },
+
+    { "type": "header", "content": "🚚 Trust Strip" },
+    { "type": "text", "id": "trust_1", "label": "Trust 1", "default": "Livraison offerte dès 49 €" },
+    { "type": "text", "id": "trust_2", "label": "Trust 2", "default": "Retours gratuits 30 jours" },
+    { "type": "text", "id": "trust_3", "label": "Trust 3", "default": "Garantie satisfait ou remboursé" },
+    { "type": "text", "id": "trust_4", "label": "Trust 4", "default": "+ 2 400 clients satisfaits" },
+
+    { "type": "header", "content": "😩 Problème → Solution" },
+    { "type": "text",     "id": "problem_overline", "label": "Sur-titre", "default": "Le problème" },
+    { "type": "text",     "id": "problem_title",    "label": "Titre",     "default": "Vous sentez que vous perdez le contact avec ceux que vous aimez ?" },
+    { "type": "textarea", "id": "problem_body",     "label": "Corps",     "default": "Notifications sans fin, écrans envahissants, messages sans réponse… Il est de plus en plus difficile de maintenir des liens authentiques dans un monde hyper-connecté." },
+    { "type": "text",     "id": "solution_title",   "label": "Titre solution", "default": "La solution JusteConnecté" },
+    { "type": "textarea", "id": "solution_body",    "label": "Corps solution", "default": "Notre approche supprime le bruit pour ne garder que l'essentiel : partager des moments simples, des pensées sincères, des souvenirs durables — sans effort." },
+    { "type": "image_picker", "id": "problem_image", "label": "Image problème/solution" },
+
+    { "type": "header", "content": "✨ Bénéfices" },
+    { "type": "text", "id": "benefits_overline", "label": "Sur-titre", "default": "Pourquoi choisir JusteConnecté" },
+    { "type": "text", "id": "benefits_title",    "label": "Titre",     "default": "6 raisons qui font la différence" },
+    { "type": "text", "id": "benefit_1_icon",  "label": "Icône 1", "default": "🔒" },
+    { "type": "text", "id": "benefit_1_title", "label": "Titre 1", "default": "Vie privée protégée" },
+    { "type": "text", "id": "benefit_1_body",  "label": "Texte 1", "default": "Vos données ne sont jamais revendues ni exploitées à des fins publicitaires." },
+    { "type": "text", "id": "benefit_2_icon",  "label": "Icône 2", "default": "⚡" },
+    { "type": "text", "id": "benefit_2_title", "label": "Titre 2", "default": "Configuration en 2 minutes" },
+    { "type": "text", "id": "benefit_2_body",  "label": "Texte 2", "default": "Aucune compétence technique requise — prêt à l'emploi dès réception." },
+    { "type": "text", "id": "benefit_3_icon",  "label": "Icône 3", "default": "💬" },
+    { "type": "text", "id": "benefit_3_title", "label": "Titre 3", "default": "Messagerie sans distraction" },
+    { "type": "text", "id": "benefit_3_body",  "label": "Texte 3", "default": "Seuls vos proches ont accès à votre espace. Pas de pub, pas d'inconnus." },
+    { "type": "text", "id": "benefit_4_icon",  "label": "Icône 4", "default": "🎁" },
+    { "type": "text", "id": "benefit_4_title", "label": "Titre 4", "default": "Cadeaux mémorables" },
+    { "type": "text", "id": "benefit_4_body",  "label": "Texte 4", "default": "Envoyez des cartes, des photos ou des voix enregistrées — des souvenirs qui durent." },
+    { "type": "text", "id": "benefit_5_icon",  "label": "Icône 5", "default": "🌍" },
+    { "type": "text", "id": "benefit_5_title", "label": "Titre 5", "default": "Fonctionne partout" },
+    { "type": "text", "id": "benefit_5_body",  "label": "Texte 5", "default": "Compatible iOS, Android et navigateur — pas de contrainte de plateforme." },
+    { "type": "text", "id": "benefit_6_icon",  "label": "Icône 6", "default": "💚" },
+    { "type": "text", "id": "benefit_6_title", "label": "Titre 6", "default": "Engagement solidaire" },
+    { "type": "text", "id": "benefit_6_body",  "label": "Texte 6", "default": "1 € reversé à des associations de lutte contre l'isolement pour chaque commande." },
+
+    { "type": "header", "content": "🔬 Caractéristiques" },
+    { "type": "text", "id": "features_overline", "label": "Sur-titre", "default": "Ce qui est inclus" },
+    { "type": "text", "id": "features_title",    "label": "Titre",     "default": "Tout ce dont vous avez besoin pour rester connecté" },
+    { "type": "image_picker", "id": "features_image", "label": "Image caractéristiques" },
+    { "type": "text", "id": "feature_1", "label": "Caractéristique 1", "default": "Messagerie chiffrée de bout en bout" },
+    { "type": "text", "id": "feature_2", "label": "Caractéristique 2", "default": "Partage de photos et albums privés" },
+    { "type": "text", "id": "feature_3", "label": "Caractéristique 3", "default": "Rappels d'anniversaires et moments importants" },
+    { "type": "text", "id": "feature_4", "label": "Caractéristique 4", "default": "Appels vidéo en groupe jusqu'à 12 personnes" },
+    { "type": "text", "id": "feature_5", "label": "Caractéristique 5", "default": "Mode hors-ligne pour zones sans connexion" },
+    { "type": "text", "id": "feature_6", "label": "Caractéristique 6", "default": "Support client humain 7j/7 en français" },
+
+    { "type": "header", "content": "⚖️ Comparaison" },
+    { "type": "text", "id": "comparison_title",       "label": "Titre",          "default": "JusteConnecté vs. les autres" },
+    { "type": "text", "id": "comparison_col_ours",    "label": "Colonne nous",   "default": "JusteConnecté" },
+    { "type": "text", "id": "comparison_col_others",  "label": "Colonne autres", "default": "Réseaux sociaux classiques" },
+    { "type": "text", "id": "comparison_row_1",       "label": "Critère 1",      "default": "Zéro publicité" },
+    { "type": "text", "id": "comparison_ours_1",      "label": "Notre réponse 1","default": "✓ Toujours" },
+    { "type": "text", "id": "comparison_other_1",     "label": "Autre réponse 1","default": "✗ Jamais" },
+    { "type": "text", "id": "comparison_row_2",       "label": "Critère 2",      "default": "Données privées" },
+    { "type": "text", "id": "comparison_ours_2",      "label": "Notre réponse 2","default": "✓ Protégées" },
+    { "type": "text", "id": "comparison_other_2",     "label": "Autre réponse 2","default": "✗ Vendues" },
+    { "type": "text", "id": "comparison_row_3",       "label": "Critère 3",      "default": "Cercle fermé (proches uniquement)" },
+    { "type": "text", "id": "comparison_ours_3",      "label": "Notre réponse 3","default": "✓ Oui" },
+    { "type": "text", "id": "comparison_other_3",     "label": "Autre réponse 3","default": "✗ Non" },
+    { "type": "text", "id": "comparison_row_4",       "label": "Critère 4",      "default": "Support humain en français" },
+    { "type": "text", "id": "comparison_ours_4",      "label": "Notre réponse 4","default": "✓ 7j/7" },
+    { "type": "text", "id": "comparison_other_4",     "label": "Autre réponse 4","default": "✗ Bot uniquement" },
+    { "type": "text", "id": "comparison_row_5",       "label": "Critère 5",      "default": "Algorithme chronologique" },
+    { "type": "text", "id": "comparison_ours_5",      "label": "Notre réponse 5","default": "✓ Toujours" },
+    { "type": "text", "id": "comparison_other_5",     "label": "Autre réponse 5","default": "✗ Caché par l'algo" },
+
+    { "type": "header", "content": "💬 Avis clients" },
+    { "type": "text", "id": "reviews_overline", "label": "Sur-titre", "default": "Ce qu'ils en disent" },
+    { "type": "text", "id": "reviews_title",    "label": "Titre",     "default": "Ils ont retrouvé le lien avec leurs proches" },
+
+    { "type": "header", "content": "🛒 Buy Box" },
+    { "type": "text",     "id": "buybox_title",    "label": "Titre",      "default": "Choisissez votre formule JusteConnecté" },
+    { "type": "textarea", "id": "buybox_subtitle", "label": "Sous-titre", "default": "Satisfait ou remboursé pendant 30 jours. Sans questions." },
+    { "type": "image_picker", "id": "buybox_image", "label": "Image buy box (optionnel — utilise le hero si vide)" },
+    { "type": "text", "id": "default_price",     "label": "Prix par défaut affiché", "default": "29,90 €" },
+    { "type": "text", "id": "default_old_price", "label": "Ancien prix par défaut",  "default": "49,90 €" },
+    { "type": "text", "id": "cta_buybox",        "label": "CTA bouton buy box",      "default": "🛒 Ajouter au panier — Livraison offerte" },
+    { "type": "text", "id": "buybox_trust_1",    "label": "Trust 1",  "default": "Paiement 100% sécurisé" },
+    { "type": "text", "id": "buybox_trust_2",    "label": "Trust 2",  "default": "Livraison en 2–4 jours ouvrés" },
+    { "type": "text", "id": "buybox_trust_3",    "label": "Trust 3",  "default": "Retours gratuits sous 30 jours" },
+
+    { "type": "header", "content": "❓ FAQ" },
+    { "type": "text", "id": "faq_overline", "label": "Sur-titre", "default": "Questions fréquentes" },
+    { "type": "text", "id": "faq_title",    "label": "Titre",     "default": "Tout ce que vous voulez savoir" },
+
+    { "type": "header", "content": "🏁 CTA Final" },
+    { "type": "text",     "id": "final_cta_title", "label": "Titre",       "default": "Prêt à renouer avec vos proches ?" },
+    { "type": "textarea","id": "final_cta_body",  "label": "Corps",       "default": "Rejoignez plus de 2 400 familles qui ont choisi JusteConnecté pour tisser des liens qui durent." },
+    { "type": "text",    "id": "final_cta_btn",   "label": "Bouton CTA",  "default": "Commander maintenant" }
+  ],
+
+  "blocks": [
+    {
+      "type": "bundle",
+      "name": "Option d'achat",
+      "limit": 4,
+      "settings": [
+        { "type": "text",     "id": "label",         "label": "Nom du bundle",    "default": "Essentiel" },
+        { "type": "text",     "id": "quantity_label", "label": "Description qté", "default": "1 accès — 1 an" },
+        { "type": "text",     "id": "price",         "label": "Prix affiché",     "default": "29,90 €" },
+        { "type": "text",     "id": "old_price",     "label": "Ancien prix",      "default": "49,90 €" },
+        { "type": "text",     "id": "quantity",      "label": "Quantité",         "default": "1" },
+        { "type": "text",     "id": "variant_id",    "label": "ID variante Shopify", "default": "" },
+        { "type": "checkbox", "id": "popular",       "label": "Afficher badge populaire ?", "default": false }
+      ]
+    },
+    {
+      "type": "review",
+      "name": "Avis client",
+      "limit": 8,
+      "settings": [
+        { "type": "image_picker", "id": "review_avatar", "label": "Photo du client" },
+        { "type": "text",     "id": "review_name", "label": "Prénom Nom",   "default": "Sophie M." },
+        { "type": "text",     "id": "review_meta", "label": "Contexte",     "default": "Cliente depuis 8 mois · Lyon" },
+        { "type": "textarea", "id": "review_text", "label": "Témoignage",   "default": "Depuis JusteConnecté, j'appelle ma mère tous les dimanches sans même y penser — l'app me rappelle et facilite tout. Un vrai bonheur !" }
+      ]
+    },
+    {
+      "type": "faq",
+      "name": "Question FAQ",
+      "limit": 12,
+      "settings": [
+        { "type": "text",     "id": "question", "label": "Question", "default": "Est-ce que JusteConnecté fonctionne sans abonnement ?" },
+        { "type": "textarea", "id": "answer",   "label": "Réponse",  "default": "Oui ! Vous payez une seule fois et profitez d'un accès à vie pour les fonctions de base. Les formules premium sont disponibles en option annuelle." }
+      ]
+    }
+  ],
+
+  "presets": [
+    {
+      "name": "WLD — JusteConnecté Landing",
+      "blocks": [
+        {
+          "type": "bundle",
+          "settings": {
+            "label": "Essentiel",
+            "quantity_label": "1 accès — 1 an",
+            "price": "29,90 €",
+            "old_price": "49,90 €",
+            "quantity": "1",
+            "popular": false
+          }
+        },
+        {
+          "type": "bundle",
+          "settings": {
+            "label": "Famille",
+            "quantity_label": "5 accès — 1 an",
+            "price": "59,90 €",
+            "old_price": "99,90 €",
+            "quantity": "1",
+            "popular": true
+          }
+        },
+        {
+          "type": "bundle",
+          "settings": {
+            "label": "Éternité",
+            "quantity_label": "5 accès — à vie",
+            "price": "99,90 €",
+            "old_price": "199,90 €",
+            "quantity": "1",
+            "popular": false
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "review_name": "Sophie M.",
+            "review_meta": "Cliente depuis 8 mois · Lyon",
+            "review_text": "Depuis JusteConnecté, j'appelle ma mère tous les dimanches sans même y penser. L'app me rappelle et facilite tout. Un vrai bonheur !"
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "review_name": "Pierre & Hélène D.",
+            "review_meta": "Couple · Bordeaux",
+            "review_text": "On partage des photos de nos petits-enfants chaque semaine dans notre espace privé. Nos enfants adorent aussi — toute la famille est sur JusteConnecté."
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "review_name": "Karim B.",
+            "review_meta": "Client depuis 14 mois · Paris",
+            "review_text": "J'ai offert la formule Famille pour Noël. Mes parents ont réussi à l'installer seuls en 5 minutes. Vraiment pensé pour tout le monde."
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "review_name": "Lucie T.",
+            "review_meta": "Cliente · Nantes",
+            "review_text": "Fini de me noyer dans les groupes WhatsApp. Avec JusteConnecté, je sais que chaque message compte et vient de quelqu'un qui m'est cher."
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "review_name": "Marc & Isabelle F.",
+            "review_meta": "Famille recomposée · Toulouse",
+            "review_text": "Le service client est exceptionnel — réponse en moins de 2h un dimanche soir. On ne s'y attendait pas du tout. Merci !"
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "review_name": "Amandine C.",
+            "review_meta": "Cliente · Lille",
+            "review_text": "Ma grand-mère de 82 ans utilise JusteConnecté toute seule. C'est dire à quel point c'est simple. Le meilleur investissement de l'année."
+          }
+        },
+        {
+          "type": "faq",
+          "settings": {
+            "question": "JusteConnecté est-il compatible avec tous les téléphones ?",
+            "answer": "Oui, JusteConnecté fonctionne sur iOS (iPhone), Android, et directement dans votre navigateur web (Chrome, Safari, Firefox). Aucun téléchargement obligatoire pour la version navigateur."
+          }
+        },
+        {
+          "type": "faq",
+          "settings": {
+            "question": "Mes données sont-elles en sécurité ?",
+            "answer": "Absolument. Toutes vos communications sont chiffrées de bout en bout. Vos données ne sont jamais revendues, jamais utilisées pour de la publicité. Nos serveurs sont hébergés en France et conformes au RGPD."
+          }
+        },
+        {
+          "type": "faq",
+          "settings": {
+            "question": "Combien de personnes peuvent rejoindre mon espace ?",
+            "answer": "La formule Essentiel inclut 1 accès administrateur + 4 membres invités gratuits. La formule Famille inclut 5 accès premium. La formule Éternité offre 5 accès à vie sans limitation."
+          }
+        },
+        {
+          "type": "faq",
+          "settings": {
+            "question": "Puis-je annuler ou changer de formule ?",
+            "answer": "Vous pouvez passer à une formule supérieure à tout moment avec un prorata calculé automatiquement. Pour les formules annuelles, un remboursement intégral est possible dans les 30 jours suivant l'achat."
+          }
+        },
+        {
+          "type": "faq",
+          "settings": {
+            "question": "Y a-t-il une version d'essai gratuite ?",
+            "answer": "Oui ! Vous bénéficiez de 14 jours d'essai gratuit sur la formule Famille, sans carte bancaire requise. Aucun engagement."
+          }
+        },
+        {
+          "type": "faq",
+          "settings": {
+            "question": "Comment contacter le support ?",
+            "answer": "Notre équipe est disponible 7j/7 par chat, email (bonjour@justeconnecte.fr) et téléphone du lundi au vendredi de 9h à 18h. Délai de réponse moyen : moins de 2 heures."
+          }
+        },
+        {
+          "type": "faq",
+          "settings": {
+            "question": "JusteConnecté convient-il aux personnes âgées peu à l'aise avec la technologie ?",
+            "answer": "C'est même pour elles que nous l'avons conçu ! Interface épurée, boutons grands, textes lisibles, tutoriel vidéo inclus. Des milliers de seniors l'utilisent avec bonheur."
+          }
+        },
+        {
+          "type": "faq",
+          "settings": {
+            "question": "Puis-je offrir JusteConnecté en cadeau ?",
+            "answer": "Absolument. Lors du paiement, cochez « Offrir en cadeau » pour recevoir un bon cadeau par email avec un code d'activation. Parfait pour Noël, les anniversaires et la fête des mères."
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

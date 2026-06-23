@@ -1,0 +1,88 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: oklch(0.965 0.002 247);
+  --foreground: oklch(0.18 0.004 264);
+  --surface: oklch(1 0 0);
+  --surface-soft: oklch(0.985 0.002 247);
+  --primary: oklch(0.18 0.004 264);
+  --gold: oklch(0.745 0.085 78);
+  --gold-light: oklch(0.83 0.09 86);
+  --gold-deep: oklch(0.595 0.11 70);
+  --success: oklch(0.72 0.18 145);
+  --warning: oklch(0.78 0.16 60);
+  --destructive: oklch(0.62 0.22 27);
+  --border: oklch(0.18 0.004 264 / 0.08);
+  --gradient-gold: linear-gradient(135deg, oklch(0.595 0.11 70), oklch(0.745 0.085 78), oklch(0.83 0.09 86));
+}
+
+@layer base {
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@layer components {
+  .jc-container {
+    @apply max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .jc-btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm text-white transition-all duration-200;
+    background: var(--gradient-gold);
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px oklch(0.745 0.085 78 / 0.35);
+    }
+    &:active { transform: translateY(0); }
+    &:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  }
+
+  .jc-btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-200;
+    border: 1.5px solid var(--border);
+    color: var(--foreground);
+    background: transparent;
+    &:hover {
+      border-color: var(--gold);
+      color: var(--gold-deep);
+    }
+  }
+
+  .jc-card {
+    @apply rounded-2xl transition-all duration-200;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 4px oklch(0.18 0.004 264 / 0.04);
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px oklch(0.18 0.004 264 / 0.10);
+    }
+  }
+
+  .jc-input {
+    @apply w-full px-4 py-2.5 rounded-xl text-sm outline-none transition-all duration-200;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    color: var(--foreground);
+    &:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px oklch(0.745 0.085 78 / 0.15);
+    }
+    &::placeholder { color: oklch(0.18 0.004 264 / 0.35); }
+  }
+
+  .jc-gold-text {
+    background: var(--gradient-gold);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}

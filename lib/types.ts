@@ -14,6 +14,15 @@ export interface SiteContent {
   type: string
 }
 
+export interface SiteSection {
+  id: string
+  page: string
+  type: string
+  sort_order: number
+  is_active: boolean
+  config: Record<string, any>
+}
+
 export interface Zone {
   id: string
   name: string

@@ -18,24 +18,30 @@ async function getData(params: SearchParams) {
     const [brandsRes, categoriesRes, productsRes] = await Promise.all([
       supabase.from('brands').select('*').order('sort_order'),
       supabase.from('categories').select('*').order('sort_order'),
-      supabase.from('products').select(`*, brands(*), category:categories(*), product_variants(*, product_zone_prices(*))`).eq('is_active', true).order('created_at', { ascending: false }),
+      supabase.from('products').select(`*, brands(*), product_variants(*, product_zone_prices(*))`).eq('is_active', true).order('created_at', { ascending: false }),
     ])
+
+    if (brandsRes.error || productsRes.error) throw new Error('db')
+
+    const categories = (categoriesRes.data ?? []) as Category[]
 
     let products = (productsRes.data ?? []) as (Product & {
       brands: Brand
-      category: Category | null
       product_variants: (ProductVariant & { product_zone_prices: ProductZonePrice[] })[]
     })[]
 
     if (params.marque) products = products.filter(p => p.brands?.slug === params.marque)
-    if (params.categorie) products = products.filter(p => p.category?.slug === params.categorie)
+    if (params.categorie) {
+      const cat = categories.find(c => c.slug === params.categorie)
+      if (cat) products = products.filter(p => p.category_id === cat.id)
+    }
     if (params.stockage) products = products.filter(p => p.product_variants?.some(v => v.storage === params.stockage))
     if (params.tri === 'new') products = products.filter(p => p.is_new)
     if (params.tri === 'bestseller') products = products.filter(p => p.is_bestseller)
 
     return {
       brands: (brandsRes.data ?? []) as Brand[],
-      categories: (categoriesRes.data ?? []) as Category[],
+      categories,
       products,
     }
   } catch {

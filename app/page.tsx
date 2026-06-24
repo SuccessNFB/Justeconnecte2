@@ -32,6 +32,8 @@ async function getData() {
       supabase.from('products').select(`*, brands(*), product_variants(*, product_zone_prices(*))`).eq('is_new', true).eq('is_active', true).limit(4),
       supabase.from('products').select(`*, brands(*), product_variants(*, product_zone_prices(*))`).eq('is_bestseller', true).eq('is_active', true).limit(4),
     ])
+    if (newRes.error || bestRes.error) throw new Error('db')
+
     return {
       sections:     (sectionsRes.data ?? []) as SiteSection[],
       brands:       (brandsRes.data ?? []) as Brand[],

@@ -4,11 +4,8 @@ import { useZone } from '@/contexts/ZoneContext'
 import type { Zone } from '@/lib/types'
 
 const ZONES: Omit<Zone, 'id' | 'tax_rate' | 'sort_order'>[] = [
-  { name: 'martinique',       label: 'Martinique 🇲🇶' },
-  { name: 'guadeloupe',       label: 'Guadeloupe 🇬🇵' },
-  { name: 'guyane',           label: 'Guyane 🇬🇫' },
-  { name: 'saint-martin',     label: 'Saint-Martin 🇸🇽' },
-  { name: 'saint-barthelemy', label: 'Saint-Barthélemy' },
+  { name: 'martinique-guadeloupe', label: 'Martinique / Guadeloupe' },
+  { name: 'guyane',                label: 'Guyane' },
 ]
 
 export default function ZoneSelector() {
@@ -50,7 +47,7 @@ export default function ZoneSelector() {
                 background: 'var(--surface-soft)',
               }}
             >
-              {z.label}
+              {z.name === 'martinique-guadeloupe' ? '🇲🇶🇬🇵' : '🇬🇫'} {z.label}
             </button>
           ))}
         </div>

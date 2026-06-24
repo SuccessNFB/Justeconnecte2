@@ -1,10 +1,7 @@
 -- ── ZONES ─────────────────────────────────────────────────────────────────────
 INSERT INTO public.zones (name, label, tax_rate, sort_order) VALUES
-  ('martinique',      'Martinique',       0.085, 1),
-  ('guadeloupe',      'Guadeloupe',       0.085, 2),
-  ('guyane',          'Guyane',           0.085, 3),
-  ('saint-martin',    'Saint-Martin',     0,     4),
-  ('saint-barthelemy','Saint-Barthélemy', 0,     5);
+  ('martinique-guadeloupe', 'Martinique / Guadeloupe', 0.085, 1),
+  ('guyane',                'Guyane',                  0.085, 2);
 
 -- ── MARQUES ──────────────────────────────────────────────────────────────────
 INSERT INTO public.brands (name, slug, sort_order) VALUES
@@ -132,24 +129,16 @@ SELECT p.id, 'Lemongrass', '#b5c99a', '256 GB', 'GP7-LEM-256', 2, 3 FROM public.
 -- iPhone 13 / Minuit 128 GB
 INSERT INTO public.product_zone_prices (variant_id, zone_id, price, compare_at_price)
 SELECT v.id, z.id,
-  CASE z.name
-    WHEN 'martinique' THEN 529.00 WHEN 'guadeloupe' THEN 529.00
-    WHEN 'guyane'     THEN 539.00 WHEN 'saint-martin' THEN 519.00
-    ELSE 519.00 END,
-  CASE z.name
-    WHEN 'martinique' THEN 699.00 WHEN 'guadeloupe' THEN 699.00
-    WHEN 'guyane'     THEN 709.00 ELSE 689.00 END
+  CASE z.name WHEN 'guyane' THEN 539.00 ELSE 529.00 END,
+  CASE z.name WHEN 'guyane' THEN 709.00 ELSE 699.00 END
 FROM public.product_variants v, public.zones z
 WHERE v.sku = 'IP13-MID-128';
 
 -- iPhone 13 / Minuit 256 GB
 INSERT INTO public.product_zone_prices (variant_id, zone_id, price, compare_at_price)
 SELECT v.id, z.id,
-  CASE z.name
-    WHEN 'martinique' THEN 619.00 WHEN 'guadeloupe' THEN 619.00
-    WHEN 'guyane'     THEN 629.00 WHEN 'saint-martin' THEN 609.00
-    ELSE 609.00 END,
-  CASE z.name WHEN 'martinique' THEN 799.00 WHEN 'guadeloupe' THEN 799.00 ELSE 789.00 END
+  CASE z.name WHEN 'guyane' THEN 629.00 ELSE 619.00 END,
+  CASE z.name WHEN 'guyane' THEN 809.00 ELSE 799.00 END
 FROM public.product_variants v, public.zones z WHERE v.sku = 'IP13-MID-256';
 
 -- iPhone 13 / Lumière stellaire 128 GB

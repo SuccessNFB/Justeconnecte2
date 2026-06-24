@@ -5,8 +5,8 @@ import { useCart } from '@/contexts/CartContext'
 import { useZone } from '@/contexts/ZoneContext'
 
 const ZONE_FLAGS: Record<string, string> = {
-  martinique: '🇲🇶', guadeloupe: '🇬🇵', guyane: '🇬🇫',
-  'saint-martin': '🇸🇽', 'saint-barthelemy': '',
+  'martinique-guadeloupe': '🇲🇶🇬🇵',
+  'guyane': '🇬🇫',
 }
 
 export default function Header() {
@@ -14,7 +14,7 @@ export default function Header() {
   const { zone, setShowSelector } = useZone()
 
   const zoneLabel = zone
-    ? `${ZONE_FLAGS[zone.name] ?? ''} ${zone.label.replace(/\s🇲🇶|🇬🇵|🇬🇫|🇸🇽/g, '').trim()}`
+    ? `${ZONE_FLAGS[zone.name] ?? ''} ${zone.label}`
     : 'Choisir une zone'
 
   return (

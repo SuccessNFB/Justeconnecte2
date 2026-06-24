@@ -3,25 +3,44 @@ import { NextResponse } from 'next/server'
 
 // Temporary one-shot migration route — remove after execution
 // GET /api/run-migration?key=<service_role_jwt>
+// GET /api/run-migration?key=<service_role_jwt>&pat=<supabase_pat>
+export const dynamic = 'force-dynamic'
 
-const PROJECT_REF  = 'qyvhkpyshkvogdcsbzst'
-const REST_API_URL = `https://${PROJECT_REF}.supabase.co/rest/v1`
-const ANON_KEY     = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF5dmhrcHlzaGt2b2dkY3NienN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMTMwNDksImV4cCI6MjA5NDc4OTA0OX0.gOAeriIVthSAyb8ShldkdshdaRkh8uL18flMxKY6HVs'
+const PROJECT_REF    = 'qyvhkpyshkvogdcsbzst'
+const REST_API_URL   = `https://${PROJECT_REF}.supabase.co/rest/v1`
+const MGMT_API_URL   = `https://api.supabase.com/v1/projects/${PROJECT_REF}/database/query`
+const ANON_KEY       = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF5dmhrcHlzaGt2b2dkY3NienN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMTMwNDksImV4cCI6MjA5NDc4OTA0OX0.gOAeriIVthSAyb8ShldkdshdaRkh8uL18flMxKY6HVs'
 
-async function execSQL(sql: string, serviceKey: string) {
-  const res = await fetch(`${REST_API_URL}/sql`, {
-    method:  'POST',
+// Try Supabase Management API (requires PAT: sbp_...)
+async function execSQLviaManagementAPI(sql: string, pat: string) {
+  const res = await fetch(MGMT_API_URL, {
+    method: 'POST',
     headers: {
-      apikey:          serviceKey,
-      Authorization:   `Bearer ${serviceKey}`,
-      'Content-Type':  'text/plain',
-      Prefer:          'params=single-object',
+      Authorization:  `Bearer ${pat}`,
+      'Content-Type': 'application/json',
     },
-    body: sql,
+    body: JSON.stringify({ query: sql }),
   })
   const text = await res.text()
   const ok = res.ok || text.includes('already exists') || text.includes('does not exist')
-  return { ok, status: res.status, text: text.slice(0, 400), error: ok ? undefined : text.slice(0, 400) }
+  return { ok, status: res.status, text: text.slice(0, 400), error: ok ? undefined : text.slice(0, 400), method: 'mgmt-api' }
+}
+
+// Fallback: try PostgREST /sql endpoint (service role JWT — often disabled)
+async function execSQL(sql: string, serviceKey: string) {
+  for (const ct of ['application/sql', 'text/plain']) {
+    const res = await fetch(`${REST_API_URL}/sql`, {
+      method:  'POST',
+      headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}`, 'Content-Type': ct },
+      body: sql,
+    })
+    const text = await res.text()
+    if (!text.includes('PGRST102')) {
+      const ok = res.ok || text.includes('already exists') || text.includes('does not exist')
+      return { ok, status: res.status, text: text.slice(0, 400), error: ok ? undefined : text.slice(0, 400), method: `postgrest-${ct}` }
+    }
+  }
+  return { ok: false, status: 400, text: 'PGRST102 on all content-types', error: 'PostgREST /sql endpoint not available', method: 'postgrest' }
 }
 
 const MIGRATION_STEPS: [string, string][] = [
@@ -65,14 +84,13 @@ const MIGRATION_STEPS: [string, string][] = [
 ]
 
 export async function GET(req: NextRequest) {
-  const serviceKey = req.nextUrl.searchParams.get('key')
-    ?? process.env.SUPABASE_SERVICE_ROLE_KEY
+  const serviceKey = req.nextUrl.searchParams.get('key') ?? process.env.SUPABASE_SERVICE_ROLE_KEY
+  const pat        = req.nextUrl.searchParams.get('pat') ?? process.env.SUPABASE_PAT
 
   if (!serviceKey) {
     return NextResponse.json({
-      ok: false,
-      reason: 'missing_key',
-      hint: 'Pass ?key=<service_role_jwt>',
+      ok: false, reason: 'missing_key',
+      hint: 'Pass ?key=<service_role_jwt> and optionally &pat=<sbp_...>',
     }, { status: 400 })
   }
 
@@ -84,14 +102,24 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ ok: true, alreadyExists: true, message: 'Table analytics_events already exists' })
   }
 
-  // Run migration steps via PostgREST /sql endpoint (service role JWT required)
-  const results: Record<string, { ok: boolean; status: number; text?: string; error?: string }> = {}
+  const results: Record<string, { ok: boolean; status: number; text?: string; error?: string; method?: string }> = {}
 
   for (const [label, sql] of MIGRATION_STEPS) {
-    results[label] = await execSQL(sql.trim(), serviceKey)
+    // Try Management API first (needs PAT), then PostgREST /sql
+    if (pat) {
+      results[label] = await execSQLviaManagementAPI(sql.trim(), pat)
+    } else {
+      results[label] = await execSQL(sql.trim(), serviceKey)
+    }
     if (!results[label].ok) break
   }
 
   const allOk = Object.values(results).every(r => r.ok)
+  if (!allOk && !pat) {
+    return NextResponse.json({
+      ok: false, results,
+      hint: 'PostgREST /sql unavailable. Re-run with &pat=<sbp_...> (Supabase Personal Access Token from dashboard.supabase.com/account/tokens), OR apply supabase/migrations/004_analytics.sql manually in the Supabase SQL Editor.',
+    }, { status: 500 })
+  }
   return NextResponse.json({ ok: allOk, results }, { status: allOk ? 200 : 500 })
 }

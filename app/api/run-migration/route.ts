@@ -104,22 +104,27 @@ export async function GET(req: NextRequest) {
 
   const results: Record<string, { ok: boolean; status: number; text?: string; error?: string; method?: string }> = {}
 
+  // Priority: ?pat param > serviceKey (works if sb_secret_ format) > PostgREST /sql
+  const mgmtToken = pat ?? serviceKey
+
   for (const [label, sql] of MIGRATION_STEPS) {
-    // Try Management API first (needs PAT), then PostgREST /sql
-    if (pat) {
-      results[label] = await execSQLviaManagementAPI(sql.trim(), pat)
+    // Try Management API first (PAT or serviceKey as bearer), then PostgREST /sql as last resort
+    const mgmtResult = await execSQLviaManagementAPI(sql.trim(), mgmtToken)
+    if (mgmtResult.ok) {
+      results[label] = mgmtResult
     } else {
+      // Fallback to PostgREST /sql
       results[label] = await execSQL(sql.trim(), serviceKey)
     }
     if (!results[label].ok) break
   }
 
   const allOk = Object.values(results).every(r => r.ok)
-  if (!allOk && !pat) {
+  if (!allOk) {
     return NextResponse.json({
       ok: false, results,
-      hint: 'PostgREST /sql unavailable. Re-run with &pat=<sbp_...> (Supabase Personal Access Token from dashboard.supabase.com/account/tokens), OR apply supabase/migrations/004_analytics.sql manually in the Supabase SQL Editor.',
+      hint: 'All methods failed. Re-run with &pat=<sbp_...> (Supabase Personal Access Token from dashboard.supabase.com/account/tokens), OR apply supabase/migrations/004_analytics.sql manually in the Supabase SQL Editor.',
     }, { status: 500 })
   }
-  return NextResponse.json({ ok: allOk, results }, { status: allOk ? 200 : 500 })
+  return NextResponse.json({ ok: allOk, results }, { status: 200 })
 }

@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+import { NextResponse } from 'next/server'
 
 // Temporary one-shot migration route — remove after execution
 // Usage: POST /api/run-migration with body { "key": "<service_role_key>" }
@@ -75,14 +76,11 @@ async function runMigration(serviceKey: string) {
   return { ok: all.every(s => s.ok), steps: all }
 }
 
-export async function GET() {
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+export async function GET(req: NextRequest) {
+  const serviceKey = req.nextUrl.searchParams.get('key')
+    ?? process.env.SUPABASE_SERVICE_ROLE_KEY
   if (!serviceKey) {
-    return NextResponse.json({
-      ok: false,
-      reason: 'missing_key',
-      hint: 'POST { "key": "<service_role_key>" } or set SUPABASE_SERVICE_ROLE_KEY in Vercel env vars',
-    }, { status: 400 })
+    return NextResponse.json({ ok: false, reason: 'missing_key' }, { status: 400 })
   }
   const result = await runMigration(serviceKey)
   return NextResponse.json(result, { status: result.ok ? 200 : 500 })

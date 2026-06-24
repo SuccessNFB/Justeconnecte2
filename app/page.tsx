@@ -1,7 +1,8 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase-server'
 import ProductCard from '@/components/ProductCard'
-import { ShieldCheck, Award, Truck, HeadphonesIcon, CheckCircle } from 'lucide-react'
+import HeroInteractive from '@/components/HeroInteractive'
+import { ShieldCheck, Award, Truck, HeadphonesIcon } from 'lucide-react'
 import type { Brand, Product, ProductVariant, ProductZonePrice } from '@/lib/types'
 import { DEMO_BRANDS, DEMO_PRODUCTS } from '@/lib/demo-data'
 
@@ -39,20 +40,6 @@ const PAYMENT_LOGOS = ['Visa', 'Mastercard', 'Apple Pay', 'Google Pay', 'Scalapa
 function PhoneHeroIllustration() {
   return (
     <div className="relative w-full max-w-sm mx-auto">
-      {/* Back phone (Pixel) */}
-      <div className="absolute right-0 top-4 w-44 opacity-90">
-        <svg viewBox="0 0 140 260" fill="none" className="w-full drop-shadow-xl">
-          <rect x="10" y="4" width="120" height="252" rx="22" fill="#1a1a1a"/>
-          <rect x="14" y="8" width="112" height="244" rx="19" fill="#222"/>
-          <rect x="18" y="22" width="104" height="208" rx="10" fill="#0a0a0a"/>
-          <rect x="10" y="90" width="120" height="40" rx="0" fill="#2a2a2a"/>
-          <circle cx="42" cy="110" r="14" fill="#111"/>
-          <circle cx="42" cy="110" r="9" fill="#0a0a0a"/>
-          <circle cx="78" cy="110" r="10" fill="#111"/>
-          <rect x="50" y="236" width="40" height="5" rx="2.5" fill="#333"/>
-        </svg>
-      </div>
-      {/* Front phone (iPhone) */}
       <div className="relative z-10 w-52 ml-0">
         <svg viewBox="0 0 160 280" fill="none" className="w-full drop-shadow-2xl">
           <rect x="6" y="4" width="148" height="272" rx="26" fill="#c8b89a"/>
@@ -61,9 +48,7 @@ function PhoneHeroIllustration() {
           <rect x="60" y="28" width="40" height="12" rx="6" fill="#b8a888"/>
           <rect x="20" y="32" width="44" height="44" rx="12" fill="#b8a888" opacity="0.5"/>
           <circle cx="31" cy="47" r="9" fill="#1a1a1a" opacity="0.7"/>
-          <circle cx="31" cy="47" r="5.5" fill="#222" opacity="0.8"/>
           <circle cx="51" cy="47" r="9" fill="#1a1a1a" opacity="0.7"/>
-          <circle cx="51" cy="47" r="5.5" fill="#222" opacity="0.8"/>
           <circle cx="41" cy="66" r="4" fill="#1a1a1a" opacity="0.4"/>
           <rect x="60" y="255" width="40" height="5" rx="2.5" fill="#b8a888" opacity="0.6"/>
         </svg>
@@ -78,55 +63,7 @@ export default async function HomePage() {
   return (
     <>
       {/* ══ 1. HERO ══ */}
-      <section className="py-16 sm:py-24" style={{ background: 'var(--surface)' }}>
-        <div className="jc-container">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-0 items-center">
-            {/* Text */}
-            <div className="animate-fade-up">
-              <div className="inline-flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-full mb-8"
-                style={{ border: '1px solid var(--border-strong)', color: 'var(--gold)' }}>
-                <span className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--gold)' }} />
-                Nouveau · iPhone 16 Pro disponible
-              </div>
-
-              <h1 className="font-bold leading-[1.1] mb-5">
-                <span className="block" style={{ fontSize: 'clamp(2.6rem,6vw,4.4rem)' }}>La technologie,</span>
-                <span className="block jc-gold-text" style={{ fontSize: 'clamp(2.6rem,6vw,4.4rem)' }}>simplement.</span>
-              </h1>
-
-              <p className="text-sm sm:text-base leading-relaxed mb-3 max-w-lg opacity-60">
-                Smartphones Apple, Samsung, Xiaomi et Google Pixel. Produits authentiques, livraison express en Guadeloupe, Martinique et Guyane.
-              </p>
-
-              <p className="text-sm font-medium mb-8">
-                Livraison disponible en{' '}
-                <span className="font-bold" style={{ color: 'var(--gold)' }}>Guadeloupe / Martinique</span>
-              </p>
-
-              <div className="flex flex-wrap gap-3 mb-10">
-                <Link href="/boutique" className="jc-btn-dark text-base px-7 py-3">
-                  Découvrir la boutique →
-                </Link>
-                <button className="jc-btn-ghost text-base px-7 py-3">
-                  Paiement en 4× sans frais
-                </button>
-              </div>
-
-              {/* Mini trust */}
-              <div className="flex flex-wrap gap-5 text-xs opacity-45 font-medium">
-                <span className="flex items-center gap-1.5"><CheckCircle size={12} /> Authentiques</span>
-                <span className="flex items-center gap-1.5"><CheckCircle size={12} /> Garantie constructeur</span>
-                <span className="flex items-center gap-1.5"><CheckCircle size={12} /> Livraison express</span>
-              </div>
-            </div>
-
-            {/* Phone illustration */}
-            <div className="flex justify-center lg:justify-end">
-              <PhoneHeroIllustration />
-            </div>
-          </div>
-        </div>
-      </section>
+      <HeroInteractive />
 
       {/* ══ 2. TRUSTPILOT + 4 CARDS ══ */}
       <section className="py-16" style={{ background: 'var(--background)' }}>

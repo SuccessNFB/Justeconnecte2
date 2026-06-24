@@ -43,13 +43,65 @@ const FAQ = [
     a: "Sélectionnez Scalapay au moment du paiement. Vous payez le premier quart immédiatement, puis 3 prélèvements à 30 jours d'intervalle. Zéro frais, zéro intérêt." },
 ]
 
+function IconSavings() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="22" height="22">
+      <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/>
+      <circle cx="7" cy="7" r="1" fill="currentColor" stroke="none"/>
+      <path d="M11 15l4-4"/>
+      <circle cx="11" cy="15" r="0.85" fill="currentColor" stroke="none"/>
+      <circle cx="15" cy="11" r="0.85" fill="currentColor" stroke="none"/>
+    </svg>
+  )
+}
+function IconCpu() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="22" height="22">
+      <rect x="7" y="7" width="10" height="10" rx="1.5"/>
+      <path d="M10 7V4M14 7V4M10 20v-3M14 20v-3M7 10H4M7 14H4M20 10h-3M20 14h-3"/>
+    </svg>
+  )
+}
+function IconLeaf() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="22" height="22">
+      <path d="M6.5 18.5C6.5 11 12.5 4.5 21 4c0 8.5-6 14.5-14.5 14.5z"/>
+      <path d="M6.5 18.5L13 12"/>
+    </svg>
+  )
+}
+function IconUnlock() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="22" height="22">
+      <rect x="3" y="11" width="18" height="11" rx="2.5"/>
+      <path d="M7 11V7a5 5 0 019.9-1"/>
+    </svg>
+  )
+}
+function IconShieldCheck() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="22" height="22">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      <path d="M9 12l2 2 4-4"/>
+    </svg>
+  )
+}
+function IconReturn() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="22" height="22">
+      <path d="M3 7h14a4 4 0 010 8H7"/>
+      <path d="M7 4l-4 3 4 3"/>
+    </svg>
+  )
+}
+
 const BENEFITS = [
-  { emoji: '💰', title: 'Jusqu\'à −40 %',     body: 'Par rapport au prix neuf, à qualité équivalente.' },
-  { emoji: '⚡', title: 'Performances neuves', body: 'Puce, écran, batterie — 100 % opérationnels.' },
-  { emoji: '🌱', title: '−70 % CO₂',          body: 'Empreinte carbone réduite vs fabrication neuf.' },
-  { emoji: '🔓', title: 'Débloqué',            body: 'Compatible tous opérateurs sans restriction.' },
-  { emoji: '🛡️', title: 'Garantie 12 mois',   body: 'Garantie constructeur complète, batterie incluse.' },
-  { emoji: '↩️', title: 'Retours 14 j',        body: 'Satisfait ou remboursé, sans condition.' },
+  { icon: IconSavings,      title: 'Jusqu\'à −40 %',     body: 'Par rapport au prix neuf, à qualité équivalente.' },
+  { icon: IconCpu,          title: 'Performances neuves', body: 'Puce, écran, batterie — 100 % opérationnels.' },
+  { icon: IconLeaf,         title: '−70 % CO₂',          body: 'Empreinte carbone réduite vs fabrication neuf.' },
+  { icon: IconUnlock,       title: 'Débloqué',            body: 'Compatible tous opérateurs sans restriction.' },
+  { icon: IconShieldCheck,  title: 'Garantie 12 mois',   body: 'Garantie constructeur complète, batterie incluse.' },
+  { icon: IconReturn,       title: 'Retours 14 j',        body: 'Satisfait ou remboursé, sans condition.' },
 ]
 
 function PhoneDisplay({ colorHex }: { colorHex: string }) {
@@ -412,7 +464,12 @@ export default function ProductDetail({ product }: { product: FullProduct }) {
             {BENEFITS.map(b => (
               <div key={b.title} className="rounded-2xl p-5"
                 style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
-                <span className="text-2xl mb-3 block">{b.emoji}</span>
+                <div
+                  className="mb-3.5 w-10 h-10 rounded-xl flex items-center justify-center"
+                  style={{ background: 'var(--gold-bg)', color: 'var(--gold-deep)' }}
+                >
+                  <b.icon />
+                </div>
                 <p className="font-bold text-sm mb-1">{b.title}</p>
                 <p className="text-xs opacity-45 leading-relaxed">{b.body}</p>
               </div>

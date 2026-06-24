@@ -6,6 +6,7 @@ import { useZone } from '@/contexts/ZoneContext'
 import { useCart } from '@/contexts/CartContext'
 import { useWishlist } from '@/contexts/WishlistContext'
 import { formatPrice, getStockStatus } from '@/lib/utils'
+import { trackEvent } from '@/lib/analytics'
 import type { Brand, Product, ProductVariant, ProductZonePrice } from '@/lib/types'
 
 type FullProduct = Product & {
@@ -152,6 +153,10 @@ export default function ProductDetail({ product }: { product: FullProduct }) {
   const wishlisted                 = isWishlisted(product.slug)
 
   useEffect(() => {
+    trackEvent('product_view', { productSlug: product.slug, zone: zone?.name })
+  }, [product.slug])
+
+  useEffect(() => {
     setViewers(Math.floor(Math.random() * 8) + 4)
     const observer = new IntersectionObserver(
       ([entry]) => setStickyVisible(!entry.isIntersecting),
@@ -209,7 +214,7 @@ export default function ProductDetail({ product }: { product: FullProduct }) {
           <div className="flex gap-2 ml-auto">
             <button
               disabled={!canBuy}
-              onClick={() => selectedVariant && addItem(selectedVariant.id)}
+              onClick={() => { if (selectedVariant) { addItem(selectedVariant.id); trackEvent('add_to_cart', { productSlug: product.slug, variantId: selectedVariant.id, zone: zone?.name }) } }}
               className="jc-btn-primary px-6 py-2.5 text-sm"
             >
               <ShoppingCart size={15} />
@@ -217,7 +222,7 @@ export default function ProductDetail({ product }: { product: FullProduct }) {
             </button>
             <button
               disabled={!canBuy}
-              onClick={() => { if (selectedVariant) { addItem(selectedVariant.id); router.push('/panier') } }}
+              onClick={() => { if (selectedVariant) { addItem(selectedVariant.id); trackEvent('add_to_cart', { productSlug: product.slug, variantId: selectedVariant.id, zone: zone?.name }); router.push('/panier') } }}
               className="jc-btn-ghost px-5 py-2.5 text-sm"
             >
               Acheter maintenant
@@ -378,7 +383,7 @@ export default function ProductDetail({ product }: { product: FullProduct }) {
             <div ref={ctaRef} className="flex gap-3">
               <button
                 disabled={!canBuy}
-                onClick={() => selectedVariant && addItem(selectedVariant.id)}
+                onClick={() => { if (selectedVariant) { addItem(selectedVariant.id); trackEvent('add_to_cart', { productSlug: product.slug, variantId: selectedVariant.id, zone: zone?.name }) } }}
                 className="jc-btn-primary flex-1 py-3.5 text-sm"
               >
                 <ShoppingCart size={16} />
@@ -386,7 +391,7 @@ export default function ProductDetail({ product }: { product: FullProduct }) {
               </button>
               <button
                 disabled={!canBuy}
-                onClick={() => { if (selectedVariant) { addItem(selectedVariant.id); router.push('/panier') } }}
+                onClick={() => { if (selectedVariant) { addItem(selectedVariant.id); trackEvent('add_to_cart', { productSlug: product.slug, variantId: selectedVariant.id, zone: zone?.name }); router.push('/panier') } }}
                 className="jc-btn-ghost flex-1 py-3.5 text-sm"
               >
                 <Zap size={16} /> Acheter maintenant

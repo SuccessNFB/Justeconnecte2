@@ -2,16 +2,17 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { LayoutDashboard, Package, Boxes, LogOut, Zap, Menu, X } from 'lucide-react'
+import { LayoutDashboard, Package, Boxes, BarChart2, LogOut, Zap, Menu, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import type { Session } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
 
 const NAV = [
-  { href: '/admin',         icon: LayoutDashboard, label: 'Dashboard' },
-  { href: '/admin/produits',icon: Package,          label: 'Produits'  },
-  { href: '/admin/stock',   icon: Boxes,            label: 'Stock'     },
+  { href: '/admin',               icon: LayoutDashboard, label: 'Dashboard'   },
+  { href: '/admin/analytiques',   icon: BarChart2,       label: 'Analytiques' },
+  { href: '/admin/produits',      icon: Package,         label: 'Produits'    },
+  { href: '/admin/stock',         icon: Boxes,           label: 'Stock'       },
 ]
 
 const MAX_ATTEMPTS = 5

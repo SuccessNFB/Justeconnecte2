@@ -4,8 +4,9 @@ import { Minus, Plus, Trash2, ShoppingBag } from 'lucide-react'
 import { useCart } from '@/contexts/CartContext'
 import { useZone } from '@/contexts/ZoneContext'
 import { createClient } from '@/lib/supabase'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { formatPrice } from '@/lib/utils'
+import { trackEvent } from '@/lib/analytics'
 import type { ProductVariant, Product, Brand, ProductZonePrice } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
@@ -21,6 +22,14 @@ export default function PanierPage() {
   const { zone } = useZone()
   const [enriched, setEnriched] = useState<EnrichedItem[]>([])
   const [loading, setLoading] = useState(true)
+  const tracked = useRef(false)
+
+  // Track checkout_start once per page load (when cart is non-empty)
+  useEffect(() => {
+    if (tracked.current || !items.length) return
+    tracked.current = true
+    trackEvent('checkout_start', { zone: zone?.name })
+  }, [items.length])
 
   useEffect(() => {
     if (!items.length) { setLoading(false); return }

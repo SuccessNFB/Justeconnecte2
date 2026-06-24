@@ -4,6 +4,7 @@ import { ZoneProvider } from '@/contexts/ZoneContext'
 import { CartProvider } from '@/contexts/CartContext'
 import { WishlistProvider } from '@/contexts/WishlistContext'
 import SiteShell from '@/components/SiteShell'
+import AnalyticsTracker from '@/components/AnalyticsTracker'
 
 export const metadata: Metadata = {
   title: { default: 'Juste Connecté — Smartphones Reconditionnés Antilles & Guyane', template: '%s | Juste Connecté' },
@@ -23,6 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ZoneProvider>
           <CartProvider>
             <WishlistProvider>
+              <AnalyticsTracker />
               <SiteShell>{children}</SiteShell>
             </WishlistProvider>
           </CartProvider>

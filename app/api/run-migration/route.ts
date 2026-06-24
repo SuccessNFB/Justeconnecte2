@@ -14,7 +14,7 @@ async function execSQL(sql: string, serviceKey: string) {
     headers: {
       apikey:          serviceKey,
       Authorization:   `Bearer ${serviceKey}`,
-      'Content-Type':  'application/sql',
+      'Content-Type':  'text/plain',
       Prefer:          'params=single-object',
     },
     body: sql,

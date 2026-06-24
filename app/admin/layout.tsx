@@ -6,6 +6,8 @@ import { LayoutDashboard, Package, Boxes, LogOut, Zap, Menu, X } from 'lucide-re
 import { createClient } from '@/lib/supabase'
 import type { Session } from '@supabase/supabase-js'
 
+export const dynamic = 'force-dynamic'
+
 const NAV = [
   { href: '/admin',         icon: LayoutDashboard, label: 'Dashboard' },
   { href: '/admin/produits',icon: Package,          label: 'Produits'  },

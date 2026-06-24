@@ -1,5 +1,7 @@
 import ProductForm from '@/components/ui/ProductForm'
 
+export const dynamic = 'force-dynamic'
+
 export default function NouveauProduit() {
   return (
     <div>

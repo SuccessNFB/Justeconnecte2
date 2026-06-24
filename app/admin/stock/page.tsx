@@ -4,6 +4,8 @@ import { AlertTriangle, XCircle, CheckCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import type { ProductVariant, Product } from '@/lib/types'
 
+export const dynamic = 'force-dynamic'
+
 type Row = ProductVariant & { products: Pick<Product, 'name'> }
 
 type Filter = 'all' | 'low' | 'out'

@@ -8,6 +8,8 @@ import { useEffect, useState } from 'react'
 import { formatPrice } from '@/lib/utils'
 import type { ProductVariant, Product, Brand, ProductZonePrice } from '@/lib/types'
 
+export const dynamic = 'force-dynamic'
+
 type EnrichedItem = {
   variantId: string
   quantity: number

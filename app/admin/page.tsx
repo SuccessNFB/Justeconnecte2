@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react'
 import { Package, Boxes, AlertTriangle, XCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 
+export const dynamic = 'force-dynamic'
+
 interface Stats {
   activeProducts: number
   totalVariants: number

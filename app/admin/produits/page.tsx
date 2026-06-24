@@ -3,6 +3,8 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { Plus, Edit, Trash2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
+
+export const dynamic = 'force-dynamic'
 import type { Product, Brand } from '@/lib/types'
 
 type Row = Product & { brands: Brand; variant_count: number }

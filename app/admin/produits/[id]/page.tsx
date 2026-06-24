@@ -5,6 +5,8 @@ import { createClient } from '@/lib/supabase'
 import ProductForm from '@/components/ui/ProductForm'
 import type { Product, ProductVariant, ProductZonePrice } from '@/lib/types'
 
+export const dynamic = 'force-dynamic'
+
 type Full = Product & {
   product_variants: (ProductVariant & { product_zone_prices: ProductZonePrice[] })[]
 }

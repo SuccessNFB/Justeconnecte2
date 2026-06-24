@@ -1,15 +1,25 @@
 import { NextResponse } from 'next/server'
 
-// Temporary one-shot migration route — will be removed after execution
+// Temporary diagnostic + migration route — remove after execution
 export async function GET() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const serviceKey  = process.env.SUPABASE_SERVICE_ROLE_KEY
+  // List available env var names (not values) to diagnose what's set
+  const envKeys = Object.keys(process.env).filter(k =>
+    k.includes('SUPA') || k.includes('DATABASE') || k.includes('POSTGRES') || k.includes('DB_')
+  )
 
-  if (!supabaseUrl || !serviceKey) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    ?? 'https://qyvhkpyshkvogdcsbzst.supabase.co'
+
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    ?? process.env.SUPABASE_SERVICE_KEY
+    ?? process.env.SUPABASE_SECRET_KEY
+
+  if (!serviceKey) {
     return NextResponse.json({
       ok: false,
-      reason: 'missing_env',
-      hint: 'NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set',
+      reason: 'missing_service_role_key',
+      supabaseUrlFound: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+      availableSupabaseEnvKeys: envKeys,
     }, { status: 500 })
   }
 
@@ -27,7 +37,6 @@ export async function GET() {
     })
     if (res.ok) return { ok: true }
     const text = await res.text()
-    // "already exists" errors are fine — treat as success
     if (text.includes('already exists')) return { ok: true }
     return { ok: false, error: text.slice(0, 300) }
   }
@@ -51,6 +60,10 @@ export async function GET() {
     )
   `)
 
+  if (!results.create_table.ok) {
+    return NextResponse.json({ ok: false, step: 'create_table', results })
+  }
+
   results.idx_type_date = await sql(
     `CREATE INDEX IF NOT EXISTS analytics_events_type_date ON analytics_events (event_type, created_at DESC)`
   )
@@ -69,8 +82,7 @@ export async function GET() {
   results.policy_insert = await sql(`
     DO $$ BEGIN
       IF NOT EXISTS (
-        SELECT 1 FROM pg_policies
-        WHERE tablename = 'analytics_events' AND policyname = 'anon_insert_analytics'
+        SELECT 1 FROM pg_policies WHERE tablename='analytics_events' AND policyname='anon_insert_analytics'
       ) THEN
         CREATE POLICY "anon_insert_analytics" ON analytics_events FOR INSERT WITH CHECK (true);
       END IF;
@@ -79,8 +91,7 @@ export async function GET() {
   results.policy_select = await sql(`
     DO $$ BEGIN
       IF NOT EXISTS (
-        SELECT 1 FROM pg_policies
-        WHERE tablename = 'analytics_events' AND policyname = 'admin_select_analytics'
+        SELECT 1 FROM pg_policies WHERE tablename='analytics_events' AND policyname='admin_select_analytics'
       ) THEN
         CREATE POLICY "admin_select_analytics" ON analytics_events FOR SELECT USING (
           (auth.jwt() -> 'app_metadata' ->> 'role') = 'admin'

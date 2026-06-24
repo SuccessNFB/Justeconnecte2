@@ -1,8 +1,10 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
-import { ShoppingCart, Zap, Award, CheckCircle, AlertTriangle, XCircle, ChevronDown } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { ShoppingCart, Zap, Award, CheckCircle, AlertTriangle, XCircle, ChevronDown, Heart } from 'lucide-react'
 import { useZone } from '@/contexts/ZoneContext'
 import { useCart } from '@/contexts/CartContext'
+import { useWishlist } from '@/contexts/WishlistContext'
 import { formatPrice, getStockStatus } from '@/lib/utils'
 import type { Brand, Product, ProductVariant, ProductZonePrice } from '@/lib/types'
 
@@ -88,11 +90,14 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 }
 
 export default function ProductDetail({ product }: { product: FullProduct }) {
-  const { zone }     = useZone()
-  const { addItem }  = useCart()
-  const ctaRef       = useRef<HTMLDivElement>(null)
+  const { zone }                   = useZone()
+  const { addItem }                = useCart()
+  const { toggle, isWishlisted }   = useWishlist()
+  const router                     = useRouter()
+  const ctaRef                     = useRef<HTMLDivElement>(null)
   const [stickyVisible, setStickyVisible] = useState(false)
-  const [viewers, setViewers] = useState(0)
+  const [viewers, setViewers]      = useState(0)
+  const wishlisted                 = isWishlisted(product.slug)
 
   useEffect(() => {
     setViewers(Math.floor(Math.random() * 8) + 4)
@@ -158,7 +163,11 @@ export default function ProductDetail({ product }: { product: FullProduct }) {
               <ShoppingCart size={15} />
               Ajouter au panier
             </button>
-            <button disabled={!canBuy} className="jc-btn-ghost px-5 py-2.5 text-sm">
+            <button
+              disabled={!canBuy}
+              onClick={() => { if (selectedVariant) { addItem(selectedVariant.id); router.push('/panier') } }}
+              className="jc-btn-ghost px-5 py-2.5 text-sm"
+            >
               Acheter maintenant
             </button>
           </div>
@@ -323,8 +332,30 @@ export default function ProductDetail({ product }: { product: FullProduct }) {
                 <ShoppingCart size={16} />
                 {stockStatus === 'out_of_stock' ? 'Rupture de stock' : 'Ajouter au panier'}
               </button>
-              <button disabled={!canBuy} className="jc-btn-ghost flex-1 py-3.5 text-sm">
+              <button
+                disabled={!canBuy}
+                onClick={() => { if (selectedVariant) { addItem(selectedVariant.id); router.push('/panier') } }}
+                className="jc-btn-ghost flex-1 py-3.5 text-sm"
+              >
                 <Zap size={16} /> Acheter maintenant
+              </button>
+              <button
+                onClick={() => toggle(product.slug)}
+                className="p-3.5 rounded-full transition-all"
+                aria-label={wishlisted ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+                style={{
+                  border: `1.5px solid ${wishlisted ? 'var(--gold)' : 'var(--border-strong)'}`,
+                  background: wishlisted ? 'var(--gold-bg)' : 'transparent',
+                }}
+              >
+                <Heart
+                  size={17}
+                  style={{
+                    fill: wishlisted ? 'var(--gold)' : 'none',
+                    color: wishlisted ? 'var(--gold)' : 'inherit',
+                    transition: 'all 0.2s ease',
+                  }}
+                />
               </button>
             </div>
 

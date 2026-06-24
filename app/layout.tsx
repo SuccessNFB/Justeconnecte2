@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import { ZoneProvider } from '@/contexts/ZoneContext'
 import { CartProvider } from '@/contexts/CartContext'
+import { WishlistProvider } from '@/contexts/WishlistContext'
 import SiteShell from '@/components/SiteShell'
 
 export const metadata: Metadata = {
@@ -21,7 +22,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <ZoneProvider>
           <CartProvider>
-            <SiteShell>{children}</SiteShell>
+            <WishlistProvider>
+              <SiteShell>{children}</SiteShell>
+            </WishlistProvider>
           </CartProvider>
         </ZoneProvider>
       </body>

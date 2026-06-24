@@ -51,7 +51,7 @@ export default function SearchOverlay({ open, onClose }: Props) {
         .ilike('name', `%${query.trim()}%`)
         .eq('is_active', true)
         .limit(6)
-      setResults((data ?? []) as ProductResult[])
+      setResults((data ?? []) as unknown as ProductResult[])
       setLoading(false)
     }, 260)
     return () => clearTimeout(timer)

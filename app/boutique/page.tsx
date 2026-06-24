@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase-server'
 import ProductCard from '@/components/ProductCard'
 import ScrollReveal from '@/components/ScrollReveal'
-import type { Brand, Product, ProductVariant, ProductZonePrice } from '@/lib/types'
+import type { Brand, Category, Product, ProductVariant, ProductZonePrice } from '@/lib/types'
 import { DEMO_BRANDS, DEMO_PRODUCTS } from '@/lib/demo-data'
 
 export const metadata: Metadata = {
@@ -10,37 +10,45 @@ export const metadata: Metadata = {
   description: 'Tous nos smartphones disponibles aux Antilles et en Guyane.',
 }
 
-interface SearchParams { marque?: string; stockage?: string; tri?: string }
+interface SearchParams { marque?: string; categorie?: string; stockage?: string; tri?: string }
 
 async function getData(params: SearchParams) {
   try {
     const supabase = createClient()
-    const [brandsRes, productsRes] = await Promise.all([
+    const [brandsRes, categoriesRes, productsRes] = await Promise.all([
       supabase.from('brands').select('*').order('sort_order'),
-      supabase.from('products').select(`*, brands(*), product_variants(*, product_zone_prices(*))`).eq('is_active', true).order('created_at', { ascending: false }),
+      supabase.from('categories').select('*').order('sort_order'),
+      supabase.from('products').select(`*, brands(*), category:categories(*), product_variants(*, product_zone_prices(*))`).eq('is_active', true).order('created_at', { ascending: false }),
     ])
 
     let products = (productsRes.data ?? []) as (Product & {
       brands: Brand
+      category: Category | null
       product_variants: (ProductVariant & { product_zone_prices: ProductZonePrice[] })[]
     })[]
 
     if (params.marque) products = products.filter(p => p.brands?.slug === params.marque)
+    if (params.categorie) products = products.filter(p => p.category?.slug === params.categorie)
     if (params.stockage) products = products.filter(p => p.product_variants?.some(v => v.storage === params.stockage))
     if (params.tri === 'new') products = products.filter(p => p.is_new)
     if (params.tri === 'bestseller') products = products.filter(p => p.is_bestseller)
 
-    return { brands: (brandsRes.data ?? []) as Brand[], products }
+    return {
+      brands: (brandsRes.data ?? []) as Brand[],
+      categories: (categoriesRes.data ?? []) as Category[],
+      products,
+    }
   } catch {
     let products = DEMO_PRODUCTS as typeof DEMO_PRODUCTS
     if (params.marque) products = products.filter(p => p.brands?.slug === params.marque)
-    return { brands: DEMO_BRANDS, products }
+    return { brands: DEMO_BRANDS, categories: [], products }
   }
 }
 
 export default async function BoutiquePage({ searchParams }: { searchParams: SearchParams }) {
-  const { brands, products } = await getData(searchParams)
+  const { brands, categories, products } = await getData(searchParams)
   const activeMarque = searchParams.marque
+  const activeCategorie = searchParams.categorie
 
   return (
     <div className="py-10 min-h-screen">
@@ -48,15 +56,46 @@ export default async function BoutiquePage({ searchParams }: { searchParams: Sea
         <div className="flex flex-col lg:flex-row gap-10">
           {/* ── SIDEBAR ── */}
           <aside className="lg:w-48 shrink-0">
-            <div className="sticky top-20">
-              <p className="text-[10px] font-bold uppercase tracking-widest mb-4 opacity-40">Marque</p>
-              <div className="flex flex-col gap-0.5">
-                <SidebarLink href="/boutique" active={!activeMarque}>Toutes les marques</SidebarLink>
-                {brands.map(b => (
-                  <SidebarLink key={b.id} href={`/boutique?marque=${b.slug}`} active={activeMarque === b.slug}>
-                    {b.name}
+            <div className="sticky top-20 flex flex-col gap-6">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest mb-4 opacity-40">Catégorie</p>
+                <div className="flex flex-col gap-0.5">
+                  <SidebarLink
+                    href={activeMarque ? `/boutique?marque=${activeMarque}` : '/boutique'}
+                    active={!activeCategorie}
+                  >
+                    Tout
                   </SidebarLink>
-                ))}
+                  {categories.map(c => (
+                    <SidebarLink
+                      key={c.id}
+                      href={activeMarque ? `/boutique?marque=${activeMarque}&categorie=${c.slug}` : `/boutique?categorie=${c.slug}`}
+                      active={activeCategorie === c.slug}
+                    >
+                      {c.name}
+                    </SidebarLink>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest mb-4 opacity-40">Marque</p>
+                <div className="flex flex-col gap-0.5">
+                  <SidebarLink
+                    href={activeCategorie ? `/boutique?categorie=${activeCategorie}` : '/boutique'}
+                    active={!activeMarque}
+                  >
+                    Toutes les marques
+                  </SidebarLink>
+                  {brands.map(b => (
+                    <SidebarLink
+                      key={b.id}
+                      href={activeCategorie ? `/boutique?categorie=${activeCategorie}&marque=${b.slug}` : `/boutique?marque=${b.slug}`}
+                      active={activeMarque === b.slug}
+                    >
+                      {b.name}
+                    </SidebarLink>
+                  ))}
+                </div>
               </div>
             </div>
           </aside>
@@ -65,7 +104,11 @@ export default async function BoutiquePage({ searchParams }: { searchParams: Sea
           <div className="flex-1">
             <div className="flex items-center justify-between mb-6">
               <h1 className="font-bold text-2xl">
-                {activeMarque ? brands.find(b => b.slug === activeMarque)?.name ?? 'Boutique' : 'Boutique'}
+                {activeCategorie
+                  ? categories.find(c => c.slug === activeCategorie)?.name ?? 'Boutique'
+                  : activeMarque
+                    ? brands.find(b => b.slug === activeMarque)?.name ?? 'Boutique'
+                    : 'Boutique'}
               </h1>
               <p className="text-sm opacity-40">{products.length} produit{products.length !== 1 ? 's' : ''}</p>
             </div>

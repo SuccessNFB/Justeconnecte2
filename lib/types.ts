@@ -1,3 +1,19 @@
+export interface Category {
+  id: string
+  name: string
+  slug: string
+  sort_order: number
+}
+
+export interface SiteContent {
+  id: string
+  page: string
+  section: string
+  key: string
+  value: string
+  type: string
+}
+
 export interface Zone {
   id: string
   name: string
@@ -25,8 +41,10 @@ export interface Product {
   is_new: boolean
   is_bestseller: boolean
   badge: string | null
+  category_id?: string | null
   created_at: string
   brands?: Brand
+  category?: Category
   product_variants?: ProductVariant[]
 }
 

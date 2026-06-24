@@ -142,7 +142,8 @@ function FaqItem({ q, a }: { q: string; a: string }) {
   )
 }
 
-export default function ProductDetail({ product }: { product: FullProduct }) {
+export default function ProductDetail({ product, faq: faqProp }: { product: FullProduct; faq?: { q: string; a: string }[] }) {
+  const faqItems = faqProp ?? FAQ
   const { zone }                   = useZone()
   const { addItem }                = useCart()
   const { toggle, isWishlisted }   = useWishlist()
@@ -487,7 +488,7 @@ export default function ProductDetail({ product }: { product: FullProduct }) {
           <h2 className="font-bold text-xl mb-6">Questions fréquentes</h2>
           <div className="max-w-2xl rounded-2xl px-6 py-2"
             style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
-            {FAQ.map(item => <FaqItem key={item.q} q={item.q} a={item.a} />)}
+            {faqItems.map(item => <FaqItem key={item.q} q={item.q} a={item.a} />)}
           </div>
         </div>
 

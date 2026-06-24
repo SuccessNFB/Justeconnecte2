@@ -1,10 +1,10 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
+import { Plus, Trash2, ChevronDown, ChevronUp, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import { slugify } from '@/lib/utils'
-import type { Brand, Zone, Product, ProductVariant, ProductZonePrice } from '@/lib/types'
+import type { Brand, Category, Zone, Product, ProductVariant, ProductZonePrice } from '@/lib/types'
 
 interface VariantDraft {
   id?: string
@@ -29,6 +29,7 @@ export default function ProductForm({ product }: Props) {
   const router = useRouter()
   const supabase = createClient()
   const [brands, setBrands] = useState<Brand[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
   const [zones, setZones] = useState<Zone[]>([])
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -45,14 +46,19 @@ export default function ProductForm({ product }: Props) {
   const [isNew, setIsNew] = useState(product?.is_new ?? false)
   const [isBestseller, setIsBestseller] = useState(product?.is_bestseller ?? false)
   const [badge, setBadge] = useState(product?.badge ?? '')
+  const [categoryId, setCategoryId] = useState(product?.category_id ?? '')
+  const [newCategoryMode, setNewCategoryMode] = useState(false)
+  const [newCategoryName, setNewCategoryName] = useState('')
   const [variants, setVariants] = useState<VariantDraft[]>([])
 
   useEffect(() => {
     Promise.all([
       supabase.from('brands').select('*').order('sort_order'),
       supabase.from('zones').select('*').order('sort_order'),
-    ]).then(([b, z]) => {
+      supabase.from('categories').select('*').order('sort_order'),
+    ]).then(([b, z, c]) => {
       setBrands(b.data ?? [])
+      setCategories((c.data ?? []) as Category[])
       const zonesData = (z.data ?? []) as Zone[]
       setZones(zonesData)
 
@@ -84,6 +90,22 @@ export default function ProductForm({ product }: Props) {
       }
     })
   }, [])
+
+  async function createCategory() {
+    if (!newCategoryName.trim()) return
+    const slug = slugify(newCategoryName)
+    const { data, error } = await supabase
+      .from('categories')
+      .insert({ name: newCategoryName.trim(), slug, sort_order: categories.length + 1 })
+      .select('id, name, slug, sort_order')
+      .single()
+    if (!error && data) {
+      setCategories(prev => [...prev, data as Category])
+      setCategoryId((data as Category).id)
+    }
+    setNewCategoryMode(false)
+    setNewCategoryName('')
+  }
 
   function makeVariant(zonesData: Zone[]): VariantDraft {
     return {
@@ -135,11 +157,13 @@ export default function ProductForm({ product }: Props) {
         await supabase.from('products').update({
           name, slug, brand_id: brandId, description, specs: specsObj,
           is_active: isActive, is_new: isNew, is_bestseller: isBestseller, badge: badge || null,
+          category_id: categoryId || null,
         }).eq('id', productId)
       } else {
         const { data, error: e } = await supabase.from('products').insert({
           name, slug, brand_id: brandId, description, specs: specsObj,
           is_active: isActive, is_new: isNew, is_bestseller: isBestseller, badge: badge || null,
+          category_id: categoryId || null,
         }).select('id').single()
         if (e) throw e
         productId = data.id
@@ -201,6 +225,36 @@ export default function ProductForm({ product }: Props) {
               <option value="">Sélectionner…</option>
               {brands.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
             </select>
+          </div>
+          <div>
+            <label className="block text-xs font-semibold mb-1.5">Catégorie</label>
+            {newCategoryMode ? (
+              <div className="flex gap-2">
+                <input
+                  className="jc-input flex-1"
+                  placeholder="Nom de la catégorie (ex: Caméras)"
+                  value={newCategoryName}
+                  onChange={e => setNewCategoryName(e.target.value)}
+                  onKeyDown={async e => { if (e.key === 'Enter') { e.preventDefault(); await createCategory() } }}
+                  autoFocus
+                />
+                <button type="button" onClick={createCategory} className="jc-btn-primary px-3" disabled={!newCategoryName.trim()}>
+                  <Plus size={14} />
+                </button>
+                <button type="button" onClick={() => { setNewCategoryMode(false); setNewCategoryName('') }} className="jc-btn-ghost px-3">
+                  <X size={14} />
+                </button>
+              </div>
+            ) : (
+              <select className="jc-input" value={categoryId} onChange={e => {
+                if (e.target.value === '__new__') setNewCategoryMode(true)
+                else setCategoryId(e.target.value)
+              }}>
+                <option value="">Sélectionner…</option>
+                {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                <option value="__new__">+ Créer une catégorie…</option>
+              </select>
+            )}
           </div>
           <div>
             <label className="block text-xs font-semibold mb-1.5">Badge</label>

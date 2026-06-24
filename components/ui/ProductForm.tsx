@@ -105,10 +105,27 @@ export default function ProductForm({ product }: Props) {
     }))
   }
 
+  const HEX_RE  = /^#[0-9a-fA-F]{6}$/
+  const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setSaving(true)
     setError('')
+
+    if (!SLUG_RE.test(slug)) {
+      setError('Slug invalide : lettres minuscules, chiffres et tirets uniquement (ex: iphone-14).')
+      setSaving(false)
+      return
+    }
+
+    for (const v of variants) {
+      if (v.color_hex && !HEX_RE.test(v.color_hex)) {
+        setError(`Couleur invalide pour la variante "${v.color_name || 'sans nom'}" — format attendu : #rrggbb.`)
+        setSaving(false)
+        return
+      }
+    }
 
     try {
       const specsObj = Object.fromEntries(specs.filter(s => s.key).map(s => [s.key, s.value]))
@@ -170,13 +187,13 @@ export default function ProductForm({ product }: Props) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-semibold mb-1.5">Nom *</label>
-            <input className="jc-input" value={name} required
+            <input className="jc-input" value={name} required maxLength={200}
               onChange={e => { setName(e.target.value); if (!product) setSlug(slugify(e.target.value)) }} />
           </div>
           <div>
             <label className="block text-xs font-semibold mb-1.5">Slug *</label>
-            <input className="jc-input font-mono text-xs" value={slug} required
-              onChange={e => setSlug(e.target.value)} />
+            <input className="jc-input font-mono text-xs" value={slug} required maxLength={120}
+              onChange={e => setSlug(slugify(e.target.value))} />
           </div>
           <div>
             <label className="block text-xs font-semibold mb-1.5">Marque *</label>
@@ -187,7 +204,7 @@ export default function ProductForm({ product }: Props) {
           </div>
           <div>
             <label className="block text-xs font-semibold mb-1.5">Badge</label>
-            <input className="jc-input" value={badge} placeholder="ex: Nouveau, Top vente…"
+            <input className="jc-input" value={badge} placeholder="ex: Nouveau, Top vente…" maxLength={50}
               onChange={e => setBadge(e.target.value)} />
           </div>
           <div className="sm:col-span-2">

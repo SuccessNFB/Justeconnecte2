@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { LayoutDashboard, Package, Boxes, LogOut, Zap, Menu, X } from 'lucide-react'
@@ -12,6 +12,9 @@ const NAV = [
   { href: '/admin/stock',   icon: Boxes,            label: 'Stock'     },
 ]
 
+const MAX_ATTEMPTS = 5
+const LOCKOUT_MS   = 5 * 60 * 1000  // 5 minutes
+
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
@@ -21,6 +24,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [loggingIn, setLoggingIn] = useState(false)
+  const attemptCount  = useRef(0)
+  const firstAttemptAt = useRef(0)
   const supabase = createClient()
 
   useEffect(() => {
@@ -35,8 +41,30 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
     setError('')
+
+    const now = Date.now()
+
+    // Reset window after lockout period
+    if (now - firstAttemptAt.current > LOCKOUT_MS) {
+      attemptCount.current  = 0
+      firstAttemptAt.current = now
+    }
+
+    if (attemptCount.current >= MAX_ATTEMPTS) {
+      const remaining = Math.ceil((firstAttemptAt.current + LOCKOUT_MS - now) / 1000 / 60)
+      setError(`Trop de tentatives. Réessayez dans ${remaining} min.`)
+      return
+    }
+
+    if (attemptCount.current === 0) firstAttemptAt.current = now
+    attemptCount.current += 1
+
+    setLoggingIn(true)
     const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) setError(error.message)
+    setLoggingIn(false)
+
+    // Generic message — do not expose whether email or password is wrong
+    if (error) setError('Identifiants incorrects.')
   }
 
   async function handleLogout() {
@@ -65,7 +93,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <input className="jc-input" type="password" placeholder="Mot de passe" value={password}
             onChange={e => setPassword(e.target.value)} required />
           {error && <p className="text-sm" style={{ color: 'var(--destructive)' }}>{error}</p>}
-          <button type="submit" className="jc-btn-primary">Se connecter</button>
+          <button type="submit" disabled={loggingIn} className="jc-btn-primary">
+            {loggingIn ? 'Connexion…' : 'Se connecter'}
+          </button>
         </form>
       </div>
     </div>

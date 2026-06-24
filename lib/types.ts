@@ -51,6 +51,8 @@ export interface Product {
   is_bestseller: boolean
   badge: string | null
   category_id?: string | null
+  image_url?: string | null
+  images?: string[]
   created_at: string
   brands?: Brand
   category?: Category

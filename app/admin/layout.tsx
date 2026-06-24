@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { LayoutDashboard, Package, Boxes, BarChart2, LogOut, Zap, Menu, X, FileText, Layout } from 'lucide-react'
+import { LayoutDashboard, Package, Boxes, BarChart2, LogOut, Zap, Menu, X, FileText, Layout, Images } from 'lucide-react'
 import AdminNotifBadge from '@/components/AdminNotifBadge'
 import { createClient } from '@/lib/supabase'
 import type { Session } from '@supabase/supabase-js'
@@ -16,6 +16,7 @@ const NAV = [
   { href: '/admin/stock',         icon: Boxes,           label: 'Stock'       },
   { href: '/admin/contenu',       icon: FileText,        label: 'Contenu'     },
   { href: '/admin/pages',         icon: Layout,          label: 'Pages'       },
+  { href: '/admin/images',        icon: Images,          label: 'Images'      },
 ]
 
 const MAX_ATTEMPTS = 5

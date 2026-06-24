@@ -1,5 +1,6 @@
 'use client'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useZone } from '@/contexts/ZoneContext'
 import { formatPrice } from '@/lib/utils'
 import type { Product, ProductVariant, ProductZonePrice } from '@/lib/types'
@@ -73,7 +74,18 @@ export default function ProductCard({ product }: Props) {
 
           {/* Phone with spring-scale on hover */}
           <div className="jc-phone-wrap">
-            <PhoneIllustration colorHex={colorHex} />
+            {product.image_url ? (
+              <Image
+                src={product.image_url}
+                alt={product.name}
+                width={200}
+                height={200}
+                className="w-36 h-36 object-contain drop-shadow-md"
+                sizes="160px"
+              />
+            ) : (
+              <PhoneIllustration colorHex={colorHex} />
+            )}
           </div>
 
           {/* Gold radial glow */}

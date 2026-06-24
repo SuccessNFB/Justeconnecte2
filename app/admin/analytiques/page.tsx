@@ -23,7 +23,7 @@ type AEvent = {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const uniq = <T,>(a: T[]) => [...new Set(a)]
+const uniq = <T,>(a: T[]): T[] => a.filter((v, i) => a.indexOf(v) === i)
 
 function relTime(iso: string) {
   const d = Math.floor((Date.now() - new Date(iso).getTime()) / 60000)

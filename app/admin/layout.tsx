@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { LayoutDashboard, Package, Boxes, BarChart2, LogOut, Zap, Menu, X } from 'lucide-react'
+import AdminNotifBadge from '@/components/AdminNotifBadge'
 import { createClient } from '@/lib/supabase'
 import type { Session } from '@supabase/supabase-js'
 
@@ -138,6 +139,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   }}
                 >
                   <Icon size={16} /> {label}
+                  {href === '/admin/analytiques' && session && <AdminNotifBadge />}
                 </Link>
               )
             })}

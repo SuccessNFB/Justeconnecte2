@@ -24,11 +24,16 @@ export default function PanierPage() {
   const [loading, setLoading] = useState(true)
   const tracked = useRef(false)
 
-  // Track checkout_start once per page load (when cart is non-empty)
+  // Track checkout_start + email notification once per page load (when cart is non-empty)
   useEffect(() => {
     if (tracked.current || !items.length) return
     tracked.current = true
     trackEvent('checkout_start', { zone: zone?.name })
+    fetch('/api/notify-sale', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ zone: zone?.name, items: items.length }),
+    }).catch(() => {})
   }, [items.length])
 
   useEffect(() => {

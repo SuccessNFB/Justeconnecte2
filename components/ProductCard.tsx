@@ -15,20 +15,16 @@ function PhoneIllustration({ colorHex }: { colorHex?: string }) {
   const fill = colorHex || '#e8e0d4'
   return (
     <svg viewBox="0 0 140 240" fill="none" xmlns="http://www.w3.org/2000/svg"
-      className="w-28 h-auto drop-shadow-sm">
+      className="w-28 h-auto drop-shadow-md">
       <rect x="12" y="4" width="116" height="232" rx="22" fill={fill} />
       <rect x="16" y="8" width="108" height="224" rx="19" fill={fill} opacity="0.7" />
-      {/* Screen */}
       <rect x="18" y="24" width="104" height="192" rx="14" fill="#f0f0f0" opacity="0.9" />
-      {/* Dynamic Island */}
       <rect x="52" y="28" width="36" height="10" rx="5" fill="#d0ccc6" />
-      {/* Camera bump */}
       <rect x="26" y="30" width="34" height="34" rx="10" fill={fill} opacity="0.4" />
       <circle cx="35" cy="43" r="7" fill="#1a1a1a" opacity="0.6" />
       <circle cx="35" cy="43" r="4" fill="#333" opacity="0.7" />
       <circle cx="51" cy="43" r="7" fill="#1a1a1a" opacity="0.6" />
       <circle cx="51" cy="43" r="4" fill="#333" opacity="0.7" />
-      {/* Home indicator */}
       <rect x="54" y="210" width="32" height="4" rx="2" fill="#aaa" opacity="0.5" />
     </svg>
   )
@@ -64,35 +60,48 @@ export default function ProductCard({ product }: Props) {
     ? 'jc-badge-best' : 'jc-badge-new'
 
   return (
-    <Link href={`/produits/${product.slug}`} className="block group">
-      <div
-        className="rounded-2xl overflow-hidden transition-all duration-200 group-hover:shadow-lg group-hover:-translate-y-1"
-        style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
-      >
-        {/* Image zone */}
-        <div className="relative flex items-center justify-center pt-8 pb-4 px-6"
+    <Link href={`/produits/${product.slug}`} className="block">
+      <div className="jc-product-card">
+
+        {/* ── Image zone ── */}
+        <div className="relative flex items-center justify-center pt-8 pb-6 px-6 overflow-hidden"
           style={{ background: 'linear-gradient(160deg, #faf8f5 0%, #f0ece4 100%)' }}>
+
           {badge && (
-            <span className={`${badgeClass} absolute top-3 left-3`}>{badge}</span>
+            <span className={`${badgeClass} absolute top-3 left-3 z-10`}>{badge}</span>
           )}
-          <PhoneIllustration colorHex={colorHex} />
+
+          {/* Phone with spring-scale on hover */}
+          <div className="jc-phone-wrap">
+            <PhoneIllustration colorHex={colorHex} />
+          </div>
+
+          {/* Gold radial glow */}
+          <div className="jc-img-glow absolute inset-0 pointer-events-none"
+            style={{ background: 'radial-gradient(ellipse at 50% 10%, rgba(196,146,42,0.12) 0%, transparent 65%)' }} />
+
+          {/* CTA badge */}
+          <div className="jc-cta-overlay absolute bottom-3 left-0 right-0 flex justify-center pointer-events-none z-10">
+            <span className="text-[11px] font-semibold px-3.5 py-1.5 rounded-full text-white"
+              style={{ background: 'rgba(17,17,17,0.74)', backdropFilter: 'blur(8px)' }}>
+              Voir le produit →
+            </span>
+          </div>
         </div>
 
-        {/* Info */}
-        <div className="px-4 pb-4 pt-3">
-          <p className="text-[10px] font-semibold uppercase tracking-widest mb-1 opacity-45">
+        {/* ── Info ── */}
+        <div className="jc-card-info px-4 pb-4 pt-3">
+          <p className="text-[10px] font-semibold uppercase tracking-widest mb-1 opacity-40">
             {product.brands?.name}
           </p>
           <h3 className="font-semibold text-sm leading-snug mb-1.5">{product.name}</h3>
 
-          {/* Stars */}
           <div className="flex items-center gap-1.5 mb-2">
             <span className="jc-stars text-xs">★★★★★</span>
             <span className="text-[11px] font-medium" style={{ color: 'var(--gold)' }}>4.8</span>
             <span className="text-[11px] opacity-40">· 42 avis</span>
           </div>
 
-          {/* Price */}
           {minPrice !== null && (
             <div>
               <div className="flex items-baseline gap-2">
@@ -109,6 +118,7 @@ export default function ProductCard({ product }: Props) {
             </div>
           )}
         </div>
+
       </div>
     </Link>
   )

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase-server'
 import ProductCard from '@/components/ProductCard'
+import ScrollReveal from '@/components/ScrollReveal'
 import type { Brand, Product, ProductVariant, ProductZonePrice } from '@/lib/types'
 import { DEMO_BRANDS, DEMO_PRODUCTS } from '@/lib/demo-data'
 
@@ -70,13 +71,19 @@ export default async function BoutiquePage({ searchParams }: { searchParams: Sea
             </div>
 
             {products.length === 0 ? (
-              <div className="text-center py-24 opacity-30">
-                <p className="text-5xl mb-4">📱</p>
-                <p className="font-medium">Aucun produit trouvé.</p>
-              </div>
+              <ScrollReveal direction="up">
+                <div className="text-center py-24 opacity-30">
+                  <p className="text-5xl mb-4">📱</p>
+                  <p className="font-medium">Aucun produit trouvé.</p>
+                </div>
+              </ScrollReveal>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-                {products.map(p => <ProductCard key={p.id} product={p} />)}
+                {products.map((p, i) => (
+                  <ScrollReveal key={p.id} delay={Math.min(i, 5) * 65} direction="up">
+                    <ProductCard product={p} />
+                  </ScrollReveal>
+                ))}
               </div>
             )}
           </div>

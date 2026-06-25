@@ -42,10 +42,7 @@ export default function ZoneSelector() {
           <X size={18} />
         </button>
 
-        <h2 className="text-xl font-bold mb-1">Votre zone de livraison</h2>
-        <p className="text-sm mb-6" style={{ color: 'oklch(0.18 0.004 264 / 0.5)' }}>
-          Les prix s'adaptent à votre territoire.
-        </p>
+        <h2 className="text-xl font-bold mb-6">Votre zone de livraison</h2>
 
         <div className="flex flex-col gap-2">
           {zones.map(z => (

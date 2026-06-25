@@ -5,6 +5,7 @@ export type EventType =
   | 'product_view'
   | 'add_to_cart'
   | 'checkout_start'
+  | 'purchase'
 
 function getOrCreate(storage: Storage, key: string): string {
   let id = storage.getItem(key)

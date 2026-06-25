@@ -1,14 +1,30 @@
 'use client'
 import { useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { CheckCircle } from 'lucide-react'
 import { useCart } from '@/contexts/CartContext'
+import { trackEvent } from '@/lib/analytics'
 
 export default function MerciPage() {
   const { clearCart } = useCart()
+  const params = useSearchParams()
 
   useEffect(() => {
     clearCart()
+    const sessionId = params.get('session_id')
+    if (!sessionId) return
+
+    fetch(`/api/order-confirm?session_id=${sessionId}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (!data || data.error) return
+        trackEvent('purchase', {
+          zone: data.zone ?? undefined,
+          metadata: { amount: data.amount, items: data.items, currency: data.currency },
+        })
+      })
+      .catch(() => {})
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 

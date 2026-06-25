@@ -228,8 +228,11 @@ export default function ProductDetail({ product, faq: faqProp }: { product: Full
 
   const selectedVariant = colorVariants.find(v => v.storage === selectedStorage) ?? colorVariants[0]
 
-  // Gallery images: prefer variant-level images (per colour), fall back to product-level
-  const variantImages  = (selectedVariant?.images ?? []).filter(Boolean)
+  // Gallery images: use images from any variant of the selected colour (first one that has some),
+  // then fall back to product-level images so the carousel is never empty.
+  const variantImages = colorVariants
+    .flatMap(v => (v.images ?? []).filter(Boolean))
+    .filter((url, i, arr) => arr.indexOf(url) === i) // deduplicate
   const galleryImages: string[] = variantImages.length
     ? variantImages
     : product.images?.length

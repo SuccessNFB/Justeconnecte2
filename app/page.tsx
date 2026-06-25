@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase-server'
 import ProductCard from '@/components/ProductCard'
+import ProductCarousel from '@/components/ProductCarousel'
 import HeroInteractive from '@/components/HeroInteractive'
 import ScrollReveal from '@/components/ScrollReveal'
 import { ShieldCheck, Award, Truck, HeadphonesIcon, MessageCircle } from 'lucide-react'
@@ -403,10 +404,10 @@ export default async function HomePage() {
             return <TrustSection key={s.id} items={items} />
           }
           if (s.type === 'products_new') {
-            return <ProductsSection key={s.id} title={s.config.title ?? 'Nouveautés'} products={newProducts} href="/boutique?tri=new" />
+            return <ProductCarousel key={s.id} title={s.config.title ?? 'Nouveautés'} products={newProducts} href="/boutique?tri=new" />
           }
           if (s.type === 'products_bestseller') {
-            return <ProductsSection key={s.id} title={s.config.title ?? 'Meilleures ventes'} products={bestProducts} href="/boutique?tri=bestseller" />
+            return <ProductCarousel key={s.id} title={s.config.title ?? 'Meilleures ventes'} products={bestProducts} href="/boutique?tri=bestseller" />
           }
           if (s.type === 'text_block') {
             return <TextSection key={s.id} title={s.config.title ?? ''} body={s.config.body ?? ''} />
@@ -419,8 +420,8 @@ export default async function HomePage() {
       ) : (
         <>
           <TrustSection items={DEFAULT_TRUST} />
-          <ProductsSection title="Nouveautés" products={newProducts} href="/boutique?tri=new" />
-          <ProductsSection title="Meilleures ventes" products={bestProducts} href="/boutique?tri=bestseller" />
+          <ProductCarousel title="Nouveautés" products={newProducts} href="/boutique?tri=new" />
+          <ProductCarousel title="Meilleures ventes" products={bestProducts} href="/boutique?tri=bestseller" />
         </>
       )}
 

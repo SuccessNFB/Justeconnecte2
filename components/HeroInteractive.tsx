@@ -185,27 +185,24 @@ export default function HeroInteractive() {
           {/* ── PHONE IMAGE ── */}
           <div className="flex justify-center lg:justify-end">
             <TiltCard glow={brand.glow}>
-              <div className="relative w-52 sm:w-64">
+              <div className="relative" style={{ width: 'clamp(220px, 36vw, 340px)' }}>
 
+                {/* Phone — no card, floats freely */}
                 <Link
                   href={brand.productHref}
-                  className="group relative block rounded-3xl overflow-hidden"
-                  style={{
-                    ...transStyle,
-                    height: '380px',
-                    background: 'linear-gradient(160deg,#f9f5ee 0%,#ede5d4 100%)',
-                    border: '1px solid rgba(196,146,42,0.15)',
-                  }}
+                  className="group relative block"
+                  style={{ ...transStyle, height: 'clamp(360px, 55vw, 520px)' }}
                 >
                   <Image
                     src={brand.image}
                     alt={brand.model}
                     fill
-                    className="object-contain p-6 drop-shadow-2xl transition-transform duration-500 group-hover:scale-105"
-                    sizes="(max-width: 640px) 208px, 256px"
+                    className="object-contain drop-shadow-2xl transition-transform duration-500 group-hover:scale-[1.04]"
+                    sizes="(max-width: 640px) 55vw, 340px"
                     priority={activeIdx === 0}
                   />
-                  <div className="absolute inset-0 flex items-end justify-center pb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                  {/* Hover label */}
+                  <div className="absolute inset-0 flex items-end justify-center pb-6 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
                     <span className="text-[11px] font-semibold px-3.5 py-1.5 rounded-full text-white"
                       style={{ background: 'rgba(17,17,17,0.74)', backdropFilter: 'blur(8px)' }}>
                       Voir le produit →
@@ -215,7 +212,7 @@ export default function HeroInteractive() {
 
                 {/* Floating price badge */}
                 <div
-                  className="absolute -right-6 top-1/3 rounded-2xl px-4 py-3 shadow-xl pointer-events-none"
+                  className="absolute -right-4 sm:-right-8 top-1/3 rounded-2xl px-4 py-3 shadow-xl pointer-events-none"
                   style={{
                     background: 'var(--surface)',
                     border: '1px solid var(--border)',
@@ -231,7 +228,7 @@ export default function HeroInteractive() {
                 </div>
 
                 {/* Progress dots */}
-                <div className="flex justify-center gap-1.5 mt-5">
+                <div className="flex justify-center gap-1.5 mt-4">
                   {BRANDS.map((_, i) => (
                     <button
                       key={i}

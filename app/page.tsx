@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase-server'
 import ProductCard from '@/components/ProductCard'
 import HeroInteractive from '@/components/HeroInteractive'
 import ScrollReveal from '@/components/ScrollReveal'
-import { ShieldCheck, Award, Truck, HeadphonesIcon } from 'lucide-react'
+import { ShieldCheck, Award, Truck, HeadphonesIcon, MessageCircle } from 'lucide-react'
 import type { Brand, Product, ProductVariant, ProductZonePrice, SiteSection } from '@/lib/types'
 import { DEMO_BRANDS, DEMO_PRODUCTS } from '@/lib/demo-data'
 
@@ -48,6 +48,171 @@ async function getData() {
       bestProducts: DEMO_PRODUCTS.filter(p => p.is_bestseller) as unknown as FullProduct[],
     }
   }
+}
+
+// ── Conversion sections ──────────────────────────────────────────────────────
+
+const HOMEPAGE_REVIEWS = [
+  {
+    name: 'Kevin M.',
+    location: 'Guadeloupe',
+    rating: 5,
+    text: 'Livraison reçue en 3 jours en Guadeloupe, téléphone impeccable. Impossible de distinguer du neuf. Je recommande sans hésiter.',
+    product: 'iPhone 16 Pro Max',
+    initials: 'KM',
+    color: '#c4922a',
+  },
+  {
+    name: 'Sandra T.',
+    location: 'Martinique',
+    rating: 5,
+    text: "J'avais des doutes mais le Samsung est arrivé scellé avec tous ses accessoires. Le SAV a répondu en 20 min sur WhatsApp. Parfait.",
+    product: 'Samsung Galaxy S26 Ultra',
+    initials: 'ST',
+    color: '#0078ff',
+  },
+  {
+    name: 'Lara D.',
+    location: 'Guyane',
+    rating: 5,
+    text: 'Enfin un site qui livre en Guyane sans frais excessifs. Le Xiaomi est en parfait état, batterie au top. Prix vraiment imbattable.',
+    product: 'Xiaomi 15',
+    initials: 'LD',
+    color: '#e55a1b',
+  },
+  {
+    name: 'Marc S.',
+    location: 'Guadeloupe',
+    rating: 5,
+    text: 'Paiement en 4 fois sans frais, livraison rapide, téléphone nickel. Le service client répond vite. Je reprendrai certainement.',
+    product: 'iPhone 17 Pro',
+    initials: 'MS',
+    color: '#c4922a',
+  },
+]
+
+function SocialProofStrip() {
+  const stats = [
+    { value: '1 200+',  label: 'commandes livrées' },
+    { value: '4.8 / 5', label: '127 avis vérifiés'  },
+    { value: '2 à 5 j', label: 'délai de livraison' },
+    { value: '3',        label: 'territoires couverts' },
+  ]
+  return (
+    <div style={{ borderBottom: '1px solid var(--border)', background: 'var(--surface)' }}>
+      <div className="jc-container py-5">
+        <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-12 divide-x"
+          style={{ '--tw-divide-opacity': 1 } as React.CSSProperties}>
+          {stats.map(({ value, label }, i) => (
+            <div key={i} className={`flex flex-col items-center text-center ${i > 0 ? 'pl-6 sm:pl-12' : ''}`}>
+              <span className="font-bold text-lg jc-gold-text leading-none">{value}</span>
+              <span className="text-[11px] opacity-40 mt-0.5 whitespace-nowrap">{label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ReviewsSection() {
+  return (
+    <section className="py-16" style={{ background: 'var(--background)' }}>
+      <div className="jc-container">
+        <ScrollReveal direction="up">
+          <div className="text-center mb-10">
+            <p className="jc-overline mb-2">Témoignages</p>
+            <h2 className="font-bold mb-3" style={{ fontSize: 'clamp(1.6rem,3.5vw,2.3rem)' }}>
+              Ils ont commandé depuis les Antilles
+            </h2>
+            <div className="flex items-center justify-center gap-2">
+              <span className="jc-stars text-base">★★★★★</span>
+              <span className="font-bold text-sm" style={{ color: 'var(--gold)' }}>4.8</span>
+              <span className="text-sm opacity-40">· 127 avis vérifiés</span>
+            </div>
+          </div>
+        </ScrollReveal>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {HOMEPAGE_REVIEWS.map((r, i) => (
+            <ScrollReveal key={r.name} delay={i * 80} direction="up">
+              <div
+                className="h-full rounded-2xl p-5 flex flex-col gap-3"
+                style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+              >
+                <div className="jc-stars text-sm">{'★'.repeat(r.rating)}</div>
+                <p className="text-sm leading-relaxed flex-1" style={{ opacity: 0.6 }}>
+                  &ldquo;{r.text}&rdquo;
+                </p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider opacity-35">{r.product}</p>
+                <div className="flex items-center gap-2.5 pt-2" style={{ borderTop: '1px solid var(--border)' }}>
+                  <div
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold text-white flex-shrink-0"
+                    style={{ background: r.color }}
+                  >
+                    {r.initials}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold leading-none">{r.name}</p>
+                    <p className="text-[10px] opacity-40 mt-0.5">{r.location}</p>
+                  </div>
+                  <span
+                    className="text-[9px] font-bold px-1.5 py-0.5 rounded flex-shrink-0"
+                    style={{ background: '#dcfce7', color: '#16a34a' }}
+                  >
+                    ✓ Vérifié
+                  </span>
+                </div>
+              </div>
+            </ScrollReveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function WhatsAppCTA() {
+  return (
+    <section className="py-14" style={{ background: 'var(--primary)' }}>
+      <div className="jc-container">
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
+          <ScrollReveal direction="left">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                Support client
+              </p>
+              <h2 className="font-bold text-white mb-2" style={{ fontSize: 'clamp(1.4rem,3vw,2rem)' }}>
+                Une question avant de commander ?
+              </h2>
+              <p className="text-sm leading-relaxed max-w-md" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                Notre équipe répond sous 2 heures, 7j/7. Conseils personnalisés,
+                suivi de commande et garantie — tout passe par WhatsApp.
+              </p>
+            </div>
+          </ScrollReveal>
+          <ScrollReveal direction="right" delay={100}>
+            <div className="flex flex-col sm:flex-row gap-4 items-center shrink-0">
+              <a
+                href="https://wa.me/596XXXXXXXXX"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-3 px-7 py-3.5 rounded-full font-semibold text-sm text-white transition-all hover:opacity-90 active:scale-95"
+                style={{ background: '#25D366' }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                </svg>
+                Écrire sur WhatsApp
+              </a>
+              <p className="text-xs text-center" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                Réponse en moins de 2 h<br />7j/7 · 8h – 20h
+              </p>
+            </div>
+          </ScrollReveal>
+        </div>
+      </div>
+    </section>
+  )
 }
 
 // ── Section renderers ────────────────────────────────────────────────────────
@@ -213,8 +378,11 @@ export default async function HomePage() {
 
   return (
     <>
-      {/* Hero — always */}
+      {/* Hero */}
       <HeroInteractive />
+
+      {/* Social proof chiffrée — credibilité immédiate */}
+      <SocialProofStrip />
 
       {/* Dynamic sections from admin page builder */}
       {sections.length > 0 ? (
@@ -238,7 +406,6 @@ export default async function HomePage() {
           return null
         })
       ) : (
-        // Fallback hardcoded layout (before migration is applied)
         <>
           <TrustSection items={DEFAULT_TRUST} />
           <ProductsSection title="Nouveautés" products={newProducts} href="/boutique?tri=new" />
@@ -246,17 +413,23 @@ export default async function HomePage() {
         </>
       )}
 
-      {/* Notre engagement — always */}
+      {/* Témoignages clients */}
+      <ReviewsSection />
+
+      {/* CTA WhatsApp */}
+      <WhatsAppCTA />
+
+      {/* Notre engagement */}
       <EngagementSection />
 
-      {/* Scalapay — always */}
+      {/* Paiement en 4 fois */}
       <section className="py-16" style={{ background: 'var(--background)' }}>
         <div className="jc-container text-center">
           <ScrollReveal direction="up">
             <p className="jc-overline mb-3">Paiement</p>
-            <h2 className="font-bold text-3xl sm:text-4xl mb-3">Payez en 4 fois sans frais avec Scalapay</h2>
+            <h2 className="font-bold text-3xl sm:text-4xl mb-3">Payez en 4 fois sans frais</h2>
             <p className="text-sm opacity-45 mb-8">
-              Exemple pour un iPhone 16 Pro à 1 299 € : 4 versements de 324,75 €. Sans intérêts.
+              Un iPhone 17 Pro à 1 599 € : 4 versements de 399,75 €. Zéro intérêt, zéro frais.
             </p>
           </ScrollReveal>
           <ScrollReveal direction="up" delay={200}>

@@ -185,20 +185,20 @@ export default function HeroInteractive() {
           {/* ── PHONE IMAGE ── */}
           <div className="flex justify-center lg:justify-end">
             <TiltCard glow={brand.glow}>
-              <div className="relative" style={{ width: 'clamp(220px, 36vw, 340px)' }}>
+              <div className="relative" style={{ width: 'clamp(280px, 44vw, 420px)' }}>
 
                 {/* Phone — no card, floats freely */}
                 <Link
                   href={brand.productHref}
                   className="group relative block"
-                  style={{ ...transStyle, height: 'clamp(360px, 55vw, 520px)' }}
+                  style={{ ...transStyle, height: 'clamp(440px, 66vw, 640px)' }}
                 >
                   <Image
                     src={brand.image}
                     alt={brand.model}
                     fill
                     className="object-contain drop-shadow-2xl transition-transform duration-500 group-hover:scale-[1.04]"
-                    sizes="(max-width: 640px) 55vw, 340px"
+                    sizes="(max-width: 640px) 70vw, 420px"
                     priority={activeIdx === 0}
                   />
                   {/* Hover label */}

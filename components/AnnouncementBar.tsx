@@ -5,7 +5,7 @@ import { Truck, Shield, CreditCard } from 'lucide-react'
 const MESSAGES = [
   { icon: Truck,       text: 'Livraison gratuite · Taxe et octroi de mer offerts' },
   { icon: Shield,      text: 'Garantie constructeur incluse sur tous les appareils' },
-  { icon: CreditCard,  text: 'Paiement en 4× sans frais disponible dès 100 €' },
+  { icon: CreditCard,  text: 'Paiement en 4× sans frais avec Scalapay — sans condition de montant minimum' },
 ]
 
 export default function AnnouncementBar() {

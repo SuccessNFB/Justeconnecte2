@@ -31,8 +31,9 @@ export default function AdminStock() {
   async function setStock(id: string, next: number) {
     if (next < 0) return
     setUpdating(id)
-    await supabase.from('product_variants').update({ stock: next }).eq('id', id)
-    setRows(prev => prev.map(r => r.id === id ? { ...r, stock: next } : r))
+    const out_of_stock = next === 0
+    await supabase.from('product_variants').update({ stock: next, out_of_stock }).eq('id', id)
+    setRows(prev => prev.map(r => r.id === id ? { ...r, stock: next, out_of_stock } : r))
     setUpdating(null)
   }
 

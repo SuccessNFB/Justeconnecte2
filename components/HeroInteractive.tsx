@@ -113,7 +113,7 @@ const fmt = (p: number) =>
   new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(p)
 
 /* ─ Main ─────────────────────────────────────────────────────────────────── */
-export default function HeroInteractive() {
+export default function HeroInteractive({ brandPrices = {} }: { brandPrices?: Record<string, number> }) {
   const [activeIdx, setActiveIdx] = useState(0)
   const [entering, setEntering]   = useState(true)
   const [progress, setProgress]   = useState(0)
@@ -122,7 +122,8 @@ export default function HeroInteractive() {
   const progressRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const activeRef   = useRef(0)          /* always current without stale closure */
 
-  const brand = BRANDS[activeIdx]
+  const brand    = BRANDS[activeIdx]
+  const fromPrice = brandPrices[brand.id] ?? brand.from
 
   /* ── Progress bar ── */
   const startProgress = useCallback(() => {
@@ -324,7 +325,7 @@ export default function HeroInteractive() {
                   }}
                 >
                   <p className="text-[10px] font-semibold uppercase tracking-wider opacity-40 mb-0.5 whitespace-nowrap">À partir de</p>
-                  <p className="font-bold text-xl leading-none jc-gold-text">{fmt(brand.from)}</p>
+                  <p className="font-bold text-xl leading-none jc-gold-text">{fmt(fromPrice)}</p>
                   <p className="text-[10px] opacity-30 mt-1">ou 4× sans frais</p>
                 </div>
 

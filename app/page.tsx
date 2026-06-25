@@ -73,14 +73,27 @@ function PaymentLogosRow() {
 async function getData() {
   try {
     const supabase = createClient()
-    const [sectionsRes, brandsRes, newRes, bestRes, contactRes] = await Promise.all([
+    const [sectionsRes, brandsRes, newRes, bestRes, contactRes, allRes] = await Promise.all([
       supabase.from('site_sections').select('*').eq('page', 'accueil').eq('is_active', true).order('sort_order'),
       supabase.from('brands').select('*').order('sort_order'),
       supabase.from('products').select(`*, brands(*), product_variants(*, product_zone_prices(*))`).eq('is_new', true).eq('is_active', true).limit(4),
       supabase.from('products').select(`*, brands(*), product_variants(*, product_zone_prices(*))`).eq('is_bestseller', true).eq('is_active', true).limit(4),
       supabase.from('site_content').select('*').eq('page', 'global').eq('section', 'contact'),
+      supabase.from('products').select('brands(slug), product_variants(product_zone_prices(price))').eq('is_active', true),
     ])
     if (newRes.error || bestRes.error) throw new Error('db')
+
+    // Compute minimum price per brand slug across all active products/variants/zones
+    const brandPrices: Record<string, number> = {}
+    for (const p of (allRes.data ?? [])) {
+      const slug = (p.brands as any)?.slug as string | undefined
+      if (!slug) continue
+      const prices = ((p.product_variants ?? []) as any[])
+        .flatMap((v: any) => (v.product_zone_prices ?? []).map((pr: any) => pr.price as number))
+        .filter((n: number) => Number.isFinite(n) && n > 0)
+      const min = prices.length ? Math.min(...prices) : null
+      if (min !== null && (!brandPrices[slug] || min < brandPrices[slug])) brandPrices[slug] = min
+    }
 
     const contact = (contactRes.data ?? []) as SiteContent[]
     const waNumber = contact.find(r => r.key === 'whatsapp_number')?.value ?? '33610750294'
@@ -90,6 +103,7 @@ async function getData() {
       brands:       (brandsRes.data ?? []) as Brand[],
       newProducts:  (newRes.data  ?? []) as FullProduct[],
       bestProducts: (bestRes.data ?? []) as FullProduct[],
+      brandPrices,
       waNumber,
     }
   } catch {
@@ -98,6 +112,7 @@ async function getData() {
       brands:       DEMO_BRANDS,
       newProducts:  DEMO_PRODUCTS.filter(p => p.is_new) as unknown as FullProduct[],
       bestProducts: DEMO_PRODUCTS.filter(p => p.is_bestseller) as unknown as FullProduct[],
+      brandPrices:  {} as Record<string, number>,
       waNumber:     '33610750294',
     }
   }
@@ -432,12 +447,12 @@ function EngagementSection() {
 // ── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function HomePage() {
-  const { sections, newProducts, bestProducts, waNumber } = await getData()
+  const { sections, newProducts, bestProducts, brandPrices, waNumber } = await getData()
 
   return (
     <>
       {/* Hero */}
-      <HeroInteractive />
+      <HeroInteractive brandPrices={brandPrices} />
 
       {/* Social proof chiffrée — credibilité immédiate */}
       <SocialProofStrip />

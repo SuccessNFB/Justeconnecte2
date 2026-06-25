@@ -20,8 +20,9 @@ type EnrichedItem = {
 export default function PanierPage() {
   const { items, updateQuantity, removeItem } = useCart()
   const { zone } = useZone()
-  const [enriched, setEnriched] = useState<EnrichedItem[]>([])
-  const [loading, setLoading] = useState(true)
+  const [enriched,      setEnriched]      = useState<EnrichedItem[]>([])
+  const [loading,       setLoading]       = useState(true)
+  const [checkingOut,   setCheckingOut]   = useState(false)
   const tracked = useRef(false)
 
   // Track checkout_start + email notification once per page load (when cart is non-empty)
@@ -65,6 +66,33 @@ export default function PanierPage() {
 
   const subtotal = enriched.reduce((s, i) => s + getPrice(i.variant) * i.quantity, 0)
   const shipping = 0
+
+  async function handleCheckout() {
+    setCheckingOut(true)
+    const lineItems = enriched.map(item => ({
+      name: `${(item.variant as any).products?.name ?? 'Produit'} · ${item.variant.color_name} · ${item.variant.storage}`,
+      price: Math.round(getPrice(item.variant) * 100),
+      quantity: item.quantity,
+      image: (item.variant as any).products?.image_url ?? undefined,
+    }))
+    try {
+      const res  = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items: lineItems, zone: zone?.name }),
+      })
+      const data = await res.json()
+      if (data.url) {
+        window.location.href = data.url
+      } else {
+        alert(data.error ?? 'Une erreur est survenue.')
+        setCheckingOut(false)
+      }
+    } catch {
+      alert('Impossible de joindre le serveur. Réessayez.')
+      setCheckingOut(false)
+    }
+  }
 
   if (loading) return (
     <div className="py-24 text-center" style={{ color: 'oklch(0.18 0.004 264 / 0.4)' }}>Chargement…</div>
@@ -173,11 +201,11 @@ export default function PanierPage() {
               </div>
 
               <button
-                disabled
-                className="jc-btn-primary w-full cursor-not-allowed opacity-60"
-                title="Paiement bientôt disponible"
+                onClick={handleCheckout}
+                disabled={checkingOut || !enriched.length}
+                className="jc-btn-primary w-full"
               >
-                Passer la commande — Bientôt disponible
+                {checkingOut ? 'Redirection…' : 'Passer la commande →'}
               </button>
 
               <p className="text-xs text-center mt-3" style={{ color: 'oklch(0.18 0.004 264 / 0.4)' }}>

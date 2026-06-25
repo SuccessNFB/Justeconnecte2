@@ -393,8 +393,17 @@ export default function ProductDetail({ product, faq: faqProp }: { product: Full
                   )}
                 </>
               ) : (
-                <div className="w-full h-full flex items-center justify-center p-8">
-                  <PhoneDisplay colorHex={selectedColor} />
+                <div className="w-full h-full flex flex-col items-center justify-center gap-5">
+                  <div
+                    className="w-28 h-28 rounded-3xl shadow-inner"
+                    style={{ background: selectedColor || 'var(--border-strong)', opacity: 0.22 }}
+                  />
+                  <div className="text-center px-6">
+                    <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ opacity: 0.3 }}>
+                      {product.brands?.name}
+                    </p>
+                    <p className="text-sm font-medium" style={{ opacity: 0.25 }}>{product.name}</p>
+                  </div>
                 </div>
               )}
             </div>

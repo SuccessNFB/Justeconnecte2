@@ -35,17 +35,57 @@ function relTime(iso: string) {
   return `il y a ${Math.floor(h / 24)}j`
 }
 
-function dayChart(events: AEvent[], days: number, type: 'sessions' | 'revenue') {
+/**
+ * Builds daily chart data.
+ * - type 'visitors': counts unique visitor_id per day (localStorage-based, ignores repeat sessions)
+ * - type 'revenue':  sums purchase amounts per day
+ * - period 0 = All Time (no date cap, range derived from data)
+ */
+function buildChartData(
+  events: AEvent[],
+  period: number,
+  type: 'visitors' | 'revenue',
+): { label: string; value: number }[] {
+  if (events.length === 0) return []
+
   const now = new Date()
-  return Array.from({ length: days }, (_, i) => {
-    const d = new Date(now)
-    d.setDate(d.getDate() - (days - 1 - i))
-    const key   = d.toISOString().slice(0, 10)
-    const label = d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
-    const dayEvts = events.filter(e => e.created_at.slice(0, 10) === key)
-    const value = type === 'sessions'
-      ? uniq(dayEvts.filter(e => e.event_type === 'page_view').map(e => e.session_id)).length
+  now.setHours(23, 59, 59, 999)
+
+  let startDate: Date
+  if (period === 0) {
+    const oldest = events.reduce(
+      (min, e) => (e.created_at < min ? e.created_at : min),
+      events[0].created_at,
+    )
+    startDate = new Date(oldest)
+    startDate.setHours(0, 0, 0, 0)
+  } else {
+    startDate = new Date()
+    startDate.setDate(startDate.getDate() - (period - 1))
+    startDate.setHours(0, 0, 0, 0)
+  }
+
+  const totalDays = Math.ceil((now.getTime() - startDate.getTime()) / 86400000) + 1
+
+  // Group events by ISO date key
+  const byDay: Record<string, AEvent[]> = {}
+  events.forEach(e => {
+    const key = e.created_at.slice(0, 10)
+    if (!byDay[key]) byDay[key] = []
+    byDay[key].push(e)
+  })
+
+  return Array.from({ length: totalDays }, (_, i) => {
+    const d = new Date(startDate)
+    d.setDate(d.getDate() + i)
+    const key      = d.toISOString().slice(0, 10)
+    const label    = d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+    const dayEvts  = byDay[key] ?? []
+
+    const value = type === 'visitors'
+      ? uniq(dayEvts.filter(e => e.visitor_id).map(e => e.visitor_id as string)).length
       : dayEvts.filter(e => e.event_type === 'purchase').reduce((s, e) => s + (e.metadata?.amount ?? 0), 0)
+
     return { label, value }
   })
 }
@@ -64,39 +104,70 @@ function AreaChart({ data, color = 'var(--gold)', fmt }: {
     return <p className="text-sm text-center py-10 opacity-25">Aucune donnée</p>
 
   const W = 600; const H = 100
-  const max = Math.max(...data.map(d => d.value), 1)
-  const pts = data.map((d, i) => ({
+  const max  = Math.max(...data.map(d => d.value), 1)
+  const mid  = Math.round(max / 2)
+  const pts  = data.map((d, i) => ({
     x: data.length === 1 ? W / 2 : (i / (data.length - 1)) * W,
     y: H - (d.value / max) * H * 0.82 + 4,
   }))
   const line = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ')
   const area = `${line} L${W},${H} L0,${H}Z`
-  const step = Math.max(1, Math.ceil(data.length / 7))
-  const gradId = `cg-${color.replace(/[^a-z]/gi, '')}`
+  const step = Math.max(1, Math.ceil(data.length / 6))
+  const gradId = `cg-${color.replace(/[^a-z0-9]/gi, 'x')}`
+  const fmtV  = fmt ?? ((v: number) => v.toLocaleString('fr-FR'))
+
+  // Grid Y positions for max, mid, 0
+  const gridY = [
+    H - (1)   * H * 0.82 + 4,  // max
+    H - (0.5) * H * 0.82 + 4,  // mid
+    H - (0)   * H * 0.82 + 4,  // 0 (bottom)
+  ]
 
   return (
-    <div>
-      {/* Y-axis labels */}
-      <div className="flex justify-between text-[9px] mb-1 px-0.5" style={{ opacity: 0.35 }}>
-        <span>{fmt ? fmt(max) : max}</span>
-        <span>{fmt ? fmt(Math.round(max / 2)) : Math.round(max / 2)}</span>
-        <span>0</span>
-      </div>
-      <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="w-full" style={{ height: 100 }}>
-        <defs>
-          <linearGradient id={gradId} x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%"   stopColor={color} stopOpacity="0.28" />
-            <stop offset="100%" stopColor={color} stopOpacity="0"    />
-          </linearGradient>
-        </defs>
-        <path d={area} fill={`url(#${gradId})`} />
-        <path d={line} fill="none" stroke={color} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-        {pts.map((p, i) => data[i].value > 0 && <circle key={i} cx={p.x} cy={p.y} r="3" fill={color} />)}
-      </svg>
-      <div className="flex justify-between mt-1 px-0.5">
-        {data.map((d, i) => i % step === 0 && (
-          <span key={i} className="text-[9px]" style={{ opacity: 0.3 }}>{d.label}</span>
+    <div className="flex gap-2 items-start">
+      {/* Y-axis labels aligned with grid lines */}
+      <div className="relative shrink-0 text-right" style={{ width: 46, height: 100 }}>
+        {[fmtV(max), fmtV(mid), '0'].map((label, i) => (
+          <span
+            key={i}
+            className="absolute right-0 text-[9px] leading-none"
+            style={{
+              top: gridY[i],
+              transform: 'translateY(-50%)',
+              opacity: 0.35,
+            }}
+          >
+            {label}
+          </span>
         ))}
+      </div>
+
+      {/* Chart + X-axis */}
+      <div className="flex-1 min-w-0">
+        <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="w-full" style={{ height: 100 }}>
+          <defs>
+            <linearGradient id={gradId} x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%"   stopColor={color} stopOpacity="0.25" />
+              <stop offset="100%" stopColor={color} stopOpacity="0"    />
+            </linearGradient>
+          </defs>
+          {/* Horizontal grid lines */}
+          {gridY.map((y, i) => (
+            <line key={i} x1="0" y1={y.toFixed(1)} x2={W} y2={y.toFixed(1)}
+              stroke="currentColor" strokeOpacity="0.07" strokeWidth="1" />
+          ))}
+          <path d={area} fill={`url(#${gradId})`} />
+          <path d={line} fill="none" stroke={color} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+          {data.length <= 60 && pts.map((p, i) =>
+            data[i].value > 0 && <circle key={i} cx={p.x} cy={p.y} r="3" fill={color} />
+          )}
+        </svg>
+        {/* X-axis labels */}
+        <div className="flex justify-between mt-1 px-0.5">
+          {data.map((d, i) => i % step === 0 && (
+            <span key={i} className="text-[9px]" style={{ opacity: 0.3 }}>{d.label}</span>
+          ))}
+        </div>
       </div>
     </div>
   )
@@ -162,10 +233,10 @@ function KpiCard({ icon: Icon, label, value, sub, color }: {
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 const PERIODS = [
-  { label: "Aujourd'hui", days: 1  },
-  { label: '7 jours',     days: 7  },
-  { label: '30 jours',    days: 30 },
-  { label: '90 jours',    days: 90 },
+  { label: '7 jours',  days: 7  },
+  { label: '30 jours', days: 30 },
+  { label: '90 jours', days: 90 },
+  { label: 'All Time', days: 0  },
 ]
 
 const ZONE_LABEL: Record<string, string> = {
@@ -183,25 +254,31 @@ export default function AnalytiquesPage() {
   useEffect(() => {
     setLoading(true)
     setError(false)
-    const from = new Date()
-    from.setDate(from.getDate() - period)
-    from.setHours(0, 0, 0, 0)
 
-    supabase
+    let query = supabase
       .from('analytics_events')
       .select('session_id, visitor_id, event_type, page, product_slug, zone, device, metadata, created_at')
-      .gte('created_at', from.toISOString())
       .order('created_at', { ascending: false })
       .limit(10000)
-      .then(({ data, error: err }) => {
-        if (err) { setError(true); setLoading(false); return }
-        setEvents((data ?? []) as AEvent[])
-        setLoading(false)
-      })
+
+    if (period > 0) {
+      const from = new Date()
+      from.setDate(from.getDate() - period)
+      from.setHours(0, 0, 0, 0)
+      query = query.gte('created_at', from.toISOString())
+    }
+
+    query.then(({ data, error: err }) => {
+      if (err) { setError(true); setLoading(false); return }
+      setEvents((data ?? []) as AEvent[])
+      setLoading(false)
+    })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [period])
 
   const stats = useMemo(() => {
     const sessions      = uniq(events.map(e => e.session_id))
+    // Unique visitors by localStorage visitor_id — does not count the same person twice
     const visitors      = uniq(events.filter(e => e.visitor_id).map(e => e.visitor_id as string))
     const pageViews     = events.filter(e => e.event_type === 'page_view')
     const pvSessions    = uniq(events.filter(e => e.event_type === 'product_view').map(e => e.session_id))
@@ -211,7 +288,6 @@ export default function AnalytiquesPage() {
     const abandonRate   = cartSessions.length ? Math.round((abandoned.length / cartSessions.length) * 100) : 0
     const convRate      = sessions.length ? ((ckoutSessions.length / sessions.length) * 100).toFixed(1) : '0.0'
 
-    // Top products
     const pmap: Record<string, { views: number; cart: number }> = {}
     events.forEach(e => {
       if (!e.product_slug) return
@@ -224,7 +300,6 @@ export default function AnalytiquesPage() {
       .sort((a, b) => b.views - a.views)
       .slice(0, 10)
 
-    // Zones
     const zmap: Record<string, Set<string>> = {}
     events.forEach(e => {
       if (!e.zone) return
@@ -235,7 +310,6 @@ export default function AnalytiquesPage() {
       .map(([z, s]) => ({ zone: z, count: s.size }))
       .sort((a, b) => b.count - a.count)
 
-    // Devices (one device per session)
     const dmap: Record<string, number> = {}
     const seen = new Map<string, string>()
     events.forEach(e => {
@@ -244,7 +318,6 @@ export default function AnalytiquesPage() {
     })
     seen.forEach(d => { dmap[d] = (dmap[d] ?? 0) + 1 })
 
-    // Top pages
     const ppmap: Record<string, number> = {}
     pageViews.forEach(e => {
       if (!e.page) return
@@ -278,11 +351,14 @@ export default function AnalytiquesPage() {
     }
   }, [events])
 
-  const chartSessions = useMemo(() => dayChart(events, Math.min(period, 30), 'sessions'), [events, period])
-  const chartRevenue  = useMemo(() => dayChart(events, Math.min(period, 30), 'revenue'),  [events, period])
+  // Charts use buildChartData with the full period (no 30-day cap)
+  const chartVisitors = useMemo(() => buildChartData(events, period, 'visitors'), [events, period])
+  const chartRevenue  = useMemo(() => buildChartData(events, period, 'revenue'),  [events, period])
 
   const totalDev = Object.values(stats.dmap).reduce((s, n) => s + n, 0)
   const devColors: Record<string, string> = { mobile: 'var(--gold)', tablet: '#6366f1', desktop: '#22c55e' }
+
+  const periodLabel = PERIODS.find(p => p.days === period)?.label ?? ''
 
   return (
     <div>
@@ -331,26 +407,26 @@ export default function AnalytiquesPage() {
 
           {/* ── KPIs ── */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <KpiCard icon={TrendingUp}  color="var(--gold-deep)" label="Sessions"          value={stats.sessions.toLocaleString('fr-FR')}  sub="visites totales" />
-            <KpiCard icon={Users}       color="#6366f1"           label="Visiteurs uniques"  value={stats.visitors.toLocaleString('fr-FR')}   sub="sur la période" />
+            <KpiCard icon={TrendingUp}  color="var(--gold-deep)" label="Sessions"           value={stats.sessions.toLocaleString('fr-FR')}  sub={`visites — ${periodLabel}`} />
+            <KpiCard icon={Users}       color="#6366f1"           label="Visiteurs uniques"  value={stats.visitors.toLocaleString('fr-FR')}   sub="sans doublons (cookie)" />
             <KpiCard icon={ShoppingCart}color="#22c55e"           label="Ventes confirmées"  value={stats.salesCount.toLocaleString('fr-FR')} sub="paiements Stripe" />
-            <KpiCard icon={CreditCard}  color="var(--gold)"       label="Chiffre d'affaires" value={fmtEur(stats.revenue)}                    sub="revenus totaux" />
+            <KpiCard icon={CreditCard}  color="var(--gold)"       label="Chiffre d'affaires" value={fmtEur(stats.revenue)}                    sub={`revenus — ${periodLabel}`} />
           </div>
 
           {/* ── Charts ── */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div className="jc-card p-6">
-              <p className="font-semibold text-sm mb-4">Sessions par jour</p>
+              <p className="font-semibold text-sm mb-5">Visiteurs uniques par jour</p>
               {events.length === 0
                 ? <p className="text-sm text-center py-10 opacity-25">Aucune donnée pour cette période</p>
-                : <AreaChart data={chartSessions} color="var(--gold)" />
+                : <AreaChart data={chartVisitors} color="var(--gold)" />
               }
             </div>
             <div className="jc-card p-6">
-              <p className="font-semibold text-sm mb-4">Chiffre d'affaires par jour</p>
+              <p className="font-semibold text-sm mb-5">Chiffre d'affaires par jour</p>
               {events.length === 0
                 ? <p className="text-sm text-center py-10 opacity-25">Aucune donnée pour cette période</p>
-                : <AreaChart data={chartRevenue} color="#22c55e" fmt={v => fmtEur(v)} />
+                : <AreaChart data={chartRevenue} color="#22c55e" fmt={fmtEur} />
               }
             </div>
           </div>
@@ -359,11 +435,11 @@ export default function AnalytiquesPage() {
           <div className="jc-card p-6">
             <p className="font-semibold text-sm mb-5">Entonnoir de conversion</p>
             <div className="flex flex-col gap-4">
-              <FBar label="Sessions"      count={stats.sessions}     total={stats.sessions}     color="var(--gold)" />
-              <FBar label="Vues produit"  count={stats.pvSessions}   total={stats.sessions}     color="#6366f1" />
-              <FBar label="Ajout panier"  count={stats.cartSessions} total={stats.sessions}     color="#22c55e" />
-              <FBar label="Checkout"      count={stats.ckoutSessions}total={stats.sessions}     color="#8b5cf6" />
-              <FBar label="Ventes"        count={stats.salesCount}   total={stats.sessions}     color="#16a34a" />
+              <FBar label="Sessions"      count={stats.sessions}      total={stats.sessions} color="var(--gold)" />
+              <FBar label="Vues produit"  count={stats.pvSessions}    total={stats.sessions} color="#6366f1" />
+              <FBar label="Ajout panier"  count={stats.cartSessions}  total={stats.sessions} color="#22c55e" />
+              <FBar label="Checkout"      count={stats.ckoutSessions} total={stats.sessions} color="#8b5cf6" />
+              <FBar label="Ventes"        count={stats.salesCount}    total={stats.sessions} color="#16a34a" />
             </div>
             {stats.sessions === 0 && (
               <p className="text-xs text-center mt-4 opacity-30">Aucune session enregistrée</p>
@@ -430,7 +506,6 @@ export default function AnalytiquesPage() {
 
           {/* ── Top pages + Top produits ── */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {/* Top pages */}
             {stats.topPages.length > 0 && (
               <div className="jc-card p-6">
                 <div className="flex items-center gap-2 mb-4">
@@ -449,7 +524,6 @@ export default function AnalytiquesPage() {
               </div>
             )}
 
-            {/* Top produits */}
             {stats.topProducts.length > 0 && (
               <div className="jc-card p-6">
                 <div className="flex items-center gap-2 mb-4">

@@ -1,20 +1,16 @@
 'use client'
-import { useEffect } from 'react'
+import { Suspense, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { CheckCircle } from 'lucide-react'
 import { useCart } from '@/contexts/CartContext'
 import { trackEvent } from '@/lib/analytics'
 
-export default function MerciPage() {
-  const { clearCart } = useCart()
+function TrackPurchase() {
   const params = useSearchParams()
-
   useEffect(() => {
-    clearCart()
     const sessionId = params.get('session_id')
     if (!sessionId) return
-
     fetch(`/api/order-confirm?session_id=${sessionId}`)
       .then(r => r.ok ? r.json() : null)
       .then(data => {
@@ -27,9 +23,23 @@ export default function MerciPage() {
       .catch(() => {})
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+  return null
+}
+
+export default function MerciPage() {
+  const { clearCart } = useCart()
+
+  useEffect(() => {
+    clearCart()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <div className="py-32 text-center">
+      <Suspense>
+        <TrackPurchase />
+      </Suspense>
+
       <div className="mb-6 flex justify-center">
         <CheckCircle size={56} style={{ color: 'var(--success)' }} />
       </div>

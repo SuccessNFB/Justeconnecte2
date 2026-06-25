@@ -12,7 +12,7 @@ export default function Footer() {
           <div className="md:col-span-1">
             <p className="font-semibold text-sm mb-3">Juste Connecté</p>
             <p className="text-xs leading-relaxed opacity-50 mb-4">
-              Revendeur de smartphones authentiques en Guadeloupe, Martinique et Guyane. Livraison express, garantie constructeur, support réactif.
+              Revendeur de smartphones authentiques. Livraison express, garantie constructeur, support réactif.
             </p>
           </div>
 
@@ -33,7 +33,7 @@ export default function Footer() {
           <div>
             <p className="text-[10px] font-bold uppercase tracking-widest mb-4 opacity-40">Aide</p>
             <ul className="flex flex-col gap-2 text-sm opacity-60">
-              {['Livraison Guadeloupe et Martinique', 'Retours et garantie', 'Suivre ma commande', 'Contact'].map(l => (
+              {['Retours et garantie', 'Suivre ma commande', 'Contact'].map(l => (
                 <li key={l}><a href="#" className="hover:opacity-100 transition-opacity">{l}</a></li>
               ))}
             </ul>

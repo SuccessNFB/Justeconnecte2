@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, Trash2, ChevronDown, ChevronUp, X, Image as ImageIcon } from 'lucide-react'
+import { Plus, Trash2, ChevronDown, ChevronUp, X, Image as ImageIcon, Upload } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import { slugify } from '@/lib/utils'
 import type { Brand, Category, Zone, Product, ProductVariant, ProductZonePrice } from '@/lib/types'
@@ -158,20 +158,39 @@ export default function ProductForm({ product }: Props) {
     }))
   }
 
-  function updateVariantImage(vIdx: number, imgIdx: number, val: string) {
-    setVariants(prev => prev.map((v, i) => {
-      if (i !== vIdx) return v
-      const images = [...v.images]
-      images[imgIdx] = val
-      return { ...v, images }
-    }))
-  }
-
   function removeVariantImage(vIdx: number, imgIdx: number) {
     setVariants(prev => prev.map((v, i) => {
       if (i !== vIdx) return v
       return { ...v, images: v.images.filter((_, ii) => ii !== imgIdx) }
     }))
+  }
+
+  const [uploadingVariant, setUploadingVariant] = useState<Record<number, boolean>>({})
+
+  async function uploadVariantImages(vIdx: number, variant: VariantDraft, files: FileList | null) {
+    if (!files || files.length === 0) return
+    setUploadingVariant(s => ({ ...s, [vIdx]: true }))
+    try {
+      const folder      = slug || `draft-${vIdx}`
+      const variantKey  = variant.id || `variant-${vIdx}`
+      const urls: string[] = []
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i]
+        const ext  = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+        const path = `${folder}/${variantKey}/${Date.now()}-${i}.${ext}`
+        const { error } = await supabase.storage.from('products').upload(path, file, { upsert: true, contentType: file.type })
+        if (error) throw error
+        const { data } = supabase.storage.from('products').getPublicUrl(path)
+        urls.push(data.publicUrl)
+      }
+      setVariants(prev => prev.map((v, i) =>
+        i === vIdx ? { ...v, images: [...v.images.filter(Boolean), ...urls] } : v
+      ))
+    } catch (err) {
+      console.error('Upload photo variante échoué', err)
+    } finally {
+      setUploadingVariant(s => ({ ...s, [vIdx]: false }))
+    }
   }
 
   const HEX_RE  = /^#[0-9a-fA-F]{6}$/
@@ -491,44 +510,40 @@ export default function ProductForm({ product }: Props) {
                     <p className="text-xs font-bold uppercase tracking-widest opacity-40 mb-2">
                       Photos pour cette couleur
                     </p>
-                    <div className="flex flex-col gap-2">
-                      {v.images.map((url, urlIdx) => (
-                        <div key={urlIdx} className="flex items-center gap-2">
-                          <div
-                            className="w-10 h-10 rounded-lg overflow-hidden shrink-0 flex items-center justify-center"
-                            style={{ border: '1px solid var(--border)', background: 'var(--surface-soft)' }}
-                          >
-                            {url ? (
-                              /* eslint-disable-next-line @next/next/no-img-element */
-                              <img src={url} alt="" className="w-full h-full object-cover" />
-                            ) : (
-                              <ImageIcon size={14} className="opacity-20" />
-                            )}
-                          </div>
-                          <input
-                            className="jc-input text-xs flex-1"
-                            value={url}
-                            placeholder="https://cdn.exemple.com/photo.jpg"
-                            onChange={e => updateVariantImage(idx, urlIdx, e.target.value)}
-                          />
+                    <div className="flex flex-wrap gap-2">
+                      {v.images.filter(Boolean).map((url, urlIdx) => (
+                        <div key={urlIdx} className="relative group w-16 h-16 shrink-0">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={url} alt="" className="w-full h-full object-cover rounded-lg" style={{ border: '1px solid var(--border)' }} />
                           <button
                             type="button"
                             onClick={() => removeVariantImage(idx, urlIdx)}
-                            className="p-1.5 rounded-lg hover:bg-black/5 shrink-0"
-                            style={{ color: 'var(--destructive)' }}
+                            className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
                           >
-                            <X size={13} />
+                            <X size={9} />
                           </button>
                         </div>
                       ))}
+                      <label className="block cursor-pointer shrink-0">
+                        <input
+                          type="file"
+                          accept="image/jpeg,image/jpg,image/png,image/webp"
+                          multiple
+                          className="hidden"
+                          disabled={uploadingVariant[idx]}
+                          onChange={e => uploadVariantImages(idx, v, e.target.files)}
+                        />
+                        <div
+                          className="w-16 h-16 rounded-lg flex flex-col items-center justify-center gap-1 border-2 border-dashed transition-opacity text-xs"
+                          style={{ borderColor: 'var(--border-strong)', opacity: uploadingVariant[idx] ? 0.5 : 0.6 }}
+                        >
+                          {uploadingVariant[idx]
+                            ? <div className="w-4 h-4 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: 'var(--gold)' }} />
+                            : <><Upload size={14} /><span>Photo</span></>
+                          }
+                        </div>
+                      </label>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => updateVariant(idx, { images: [...v.images, ''] })}
-                      className="jc-btn-ghost text-xs mt-2"
-                    >
-                      <Plus size={13} /> Ajouter une photo
-                    </button>
                   </div>
 
                   {/* ── INFOS VARIANTE ── */}

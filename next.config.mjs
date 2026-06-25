@@ -6,6 +6,7 @@ const nextConfig = {
       // e.g. { protocol: 'https', hostname: 'abcdefghij.supabase.co' }
       { protocol: 'https', hostname: '*.supabase.co' },
       { protocol: 'https', hostname: 'images.unsplash.com' },
+      { protocol: 'https', hostname: 'cdn.shopify.com' },
     ],
   },
   // Prevent exposing the framework name in response headers

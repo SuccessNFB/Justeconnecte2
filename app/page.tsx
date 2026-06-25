@@ -36,7 +36,7 @@ async function getData() {
     if (newRes.error || bestRes.error) throw new Error('db')
 
     const contact = (contactRes.data ?? []) as SiteContent[]
-    const waNumber = contact.find(r => r.key === 'whatsapp_number')?.value ?? '596XXXXXXXXX'
+    const waNumber = contact.find(r => r.key === 'whatsapp_number')?.value ?? '33610750294'
 
     return {
       sections:     (sectionsRes.data ?? []) as SiteSection[],
@@ -51,7 +51,7 @@ async function getData() {
       brands:       DEMO_BRANDS,
       newProducts:  DEMO_PRODUCTS.filter(p => p.is_new) as unknown as FullProduct[],
       bestProducts: DEMO_PRODUCTS.filter(p => p.is_bestseller) as unknown as FullProduct[],
-      waNumber:     '596XXXXXXXXX',
+      waNumber:     '33610750294',
     }
   }
 }

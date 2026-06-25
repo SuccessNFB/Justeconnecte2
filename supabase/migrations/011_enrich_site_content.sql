@@ -4,7 +4,7 @@
 
 INSERT INTO public.site_content (page, section, key, value, type) VALUES
   -- Contact global (WhatsApp number used across the whole site)
-  ('global', 'contact', 'whatsapp_number',  '596XXXXXXXXX',                              'text'),
+  ('global', 'contact', 'whatsapp_number',  '33610750294',                              'text'),
   ('global', 'contact', 'whatsapp_label',   'Écrire sur WhatsApp',                       'text'),
   ('global', 'contact', 'response_time',    'Réponse en moins de 2 h · 7j/7 · 8h–20h',  'text'),
   -- Accueil · Barre de preuves sociales

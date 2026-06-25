@@ -18,10 +18,10 @@ type FullProduct = Product & {
 const PAYMENT = ['Visa', 'Mastercard', 'Apple Pay', 'Google Pay', 'Scalapay']
 
 const REVIEWS = [
-  { name: 'Marc S.',     note: 'Très satisfait',            body: 'Produit conforme à la description, emballage soigné. Impossible de distinguer du neuf.', rating: 5, date: 'il y a 2 jours' },
-  { name: 'Sandrine T.', note: 'Excellent service client',  body: 'Très réactif sur WhatsApp, réponse en moins d\'une heure. Je recommande sans hésiter.', rating: 5, date: 'il y a 5 jours' },
-  { name: 'Kevin M.',    note: 'Comme neuf',                body: 'Batterie à 98 %, pas une égratignure. Livraison dans les délais. Parfait.', rating: 5, date: 'il y a 1 semaine' },
-  { name: 'Lara D.',     note: 'Bon rapport qualité-prix',  body: 'Économie de 30 % par rapport au neuf pour une qualité identique. Très contente.', rating: 4, date: 'il y a 2 semaines' },
+  { name: 'Marc S.',     note: 'Très satisfait',            body: "Produit arrivé en 2 jours, emballage d'origine scellé, téléphone neuf et impeccable. Exactement ce que j'avais commandé.", rating: 5, date: 'il y a 2 jours' },
+  { name: 'Sandrine T.', note: 'Excellent service client',  body: "Très réactif sur WhatsApp, réponse en moins d'une heure. Je recommande sans hésiter.", rating: 5, date: 'il y a 5 jours' },
+  { name: 'Kevin M.',    note: 'Neuf et scellé',            body: "iPhone reçu dans son emballage d'origine intact. Livraison en 3 jours en Guadeloupe. Parfait.", rating: 5, date: 'il y a 1 semaine' },
+  { name: 'Lara D.',     note: 'Prix introuvable en local', body: 'Prix bien inférieur aux boutiques de Guyane pour le même smartphone neuf. Livraison rapide. Très contente.', rating: 4, date: 'il y a 2 semaines' },
 ]
 
 const RATING_BARS = [
@@ -33,14 +33,14 @@ const RATING_BARS = [
 ]
 
 const FAQ = [
-  { q: "Qu'est-ce qu'un smartphone reconditionné Grade A ?",
-    a: "Un appareil Grade A a été inspecté, nettoyé et testé. Il présente peu ou aucune trace d'usure, toutes ses fonctions sont 100 % opérationnelles — batterie, caméra, écran, boutons." },
+  { q: "Les appareils sont-ils vraiment neufs et scellés ?",
+    a: "Oui, tous nos smartphones sont neufs, sous emballage d'origine scellé en usine. Ils n'ont jamais été utilisés et bénéficient de la garantie constructeur complète." },
   { q: "Quelle est la politique de retour ?",
     a: "Vous disposez de 14 jours après réception pour retourner votre appareil sans justification. Le remboursement est effectué sous 5 jours ouvrés." },
-  { q: "La garantie couvre-t-elle la batterie ?",
-    a: "Oui. La garantie 12 mois inclut la batterie. Si la capacité descend sous 80 % dans l'année, nous la remplaçons sans frais." },
+  { q: "Comment fonctionne la garantie constructeur ?",
+    a: "Chaque appareil est couvert par la garantie officielle du fabricant (Apple, Samsung, Xiaomi…) pour 12 à 24 mois selon la marque. En cas de panne, contactez-nous ou directement le service après-vente constructeur." },
   { q: "Le téléphone est-il débloqué tout opérateur ?",
-    a: "Tous nos appareils sont débloqués et compatibles avec tous les opérateurs (Orange, SFR, Bouygues, Free et opérateurs locaux)." },
+    a: "Tous nos appareils sont débloqués et compatibles avec tous les opérateurs (Orange, SFR, Bouygues, Free et opérateurs locaux antillais)." },
   { q: "Comment fonctionne le paiement en 4 fois avec Scalapay ?",
     a: "Sélectionnez Scalapay au moment du paiement. Vous payez le premier quart immédiatement, puis 3 prélèvements à 30 jours d'intervalle. Zéro frais, zéro intérêt." },
 ]
@@ -98,12 +98,12 @@ function IconReturn() {
 }
 
 const BENEFITS = [
-  { icon: IconSavings,      title: 'Jusqu\'à −40 %',     body: 'Par rapport au prix neuf, à qualité équivalente.' },
-  { icon: IconCpu,          title: 'Performances neuves', body: 'Puce, écran, batterie — 100 % opérationnels.' },
-  { icon: IconLeaf,         title: '−70 % CO₂',          body: 'Empreinte carbone réduite vs fabrication neuf.' },
-  { icon: IconUnlock,       title: 'Débloqué',            body: 'Compatible tous opérateurs sans restriction.' },
-  { icon: IconShieldCheck,  title: 'Garantie 12 mois',   body: 'Garantie constructeur complète, batterie incluse.' },
-  { icon: IconReturn,       title: 'Retours 14 j',        body: 'Satisfait ou remboursé, sans condition.' },
+  { icon: IconSavings,      title: 'Prix compétitifs',       body: 'Meilleurs tarifs que les revendeurs locaux sur des appareils 100 % neufs.' },
+  { icon: IconCpu,          title: '100 % neuf',             body: "Jamais utilisé, emballage d'origine scellé — prêt à l'emploi dès l'ouverture." },
+  { icon: IconLeaf,         title: 'Livraison express',      body: 'Expédié depuis la France. Reçu en 2 à 5 jours en Guadeloupe, Martinique et Guyane.' },
+  { icon: IconUnlock,       title: 'Débloqué',               body: 'Compatible tous opérateurs sans restriction.' },
+  { icon: IconShieldCheck,  title: 'Garantie constructeur',  body: 'Garantie officielle 12 à 24 mois selon la marque. Batterie incluse.' },
+  { icon: IconReturn,       title: 'Retours 14 jours',       body: 'Satisfait ou remboursé, sans condition ni justification.' },
 ]
 
 function PhoneDisplay({ colorHex }: { colorHex: string }) {
@@ -606,11 +606,11 @@ export default function ProductDetail({ product, faq: faqProp }: { product: Full
           </div>
         )}
 
-        {/* ── POURQUOI RECONDITIONNÉ ── */}
+        {/* ── POURQUOI JUSTE CONNECTÉ ── */}
         <div className="mt-16 pt-10" style={{ borderTop: '1px solid var(--border)' }}>
           <div className="mb-8">
             <p className="jc-overline mb-2">Nos engagements</p>
-            <h2 className="font-bold text-2xl">Pourquoi choisir le reconditionné ?</h2>
+            <h2 className="font-bold text-2xl">Pourquoi choisir Juste Connecté ?</h2>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
             {BENEFITS.map(b => (
@@ -688,7 +688,15 @@ export default function ProductDetail({ product, faq: faqProp }: { product: Full
         {product.description && (
           <div className="mt-16 pt-10" style={{ borderTop: '1px solid var(--border)' }}>
             <h2 className="font-bold text-xl mb-4">Description</h2>
-            <p className="text-sm leading-relaxed opacity-55 max-w-2xl">{product.description}</p>
+            <div className="text-sm leading-relaxed opacity-55 max-w-2xl space-y-2">
+              {product.description
+                .replace(/[-—]{4,}/g, '\n')
+                .split('\n')
+                .map(l => l.trim())
+                .filter(Boolean)
+                .map((line, i) => <p key={i}>{line}</p>)
+              }
+            </div>
           </div>
         )}
       </div>

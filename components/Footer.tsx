@@ -71,7 +71,7 @@ export default function Footer() {
           <div className="md:col-span-1">
             <p className="font-semibold text-sm mb-3">Juste Connecté</p>
             <p className="text-xs leading-relaxed opacity-50 mb-4">
-              Revendeur de smartphones authentiques. Livraison express, garantie constructeur, support réactif.
+              Revendeur de smartphones authentiques. Livraison gratuite, taxe & octroi de mer offerts, garantie constructeur.
             </p>
           </div>
 

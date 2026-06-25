@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { Truck, Shield, CreditCard } from 'lucide-react'
 
 const MESSAGES = [
-  { icon: Truck,       text: 'Livraison express Antilles & Guyane — 2 à 5 jours ouvrés' },
+  { icon: Truck,       text: 'Livraison gratuite · Taxe et octroi de mer offerts' },
   { icon: Shield,      text: 'Garantie constructeur incluse sur tous les appareils' },
   { icon: CreditCard,  text: 'Paiement en 4× sans frais disponible dès 100 €' },
 ]

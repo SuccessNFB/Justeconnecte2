@@ -110,7 +110,7 @@ const HOMEPAGE_REVIEWS = [
     name: 'Kevin M.',
     location: 'Guadeloupe',
     rating: 5,
-    text: "Commande arrivée en 3 jours chrono, emballage d'origine scellé, iPhone 16 Pro Max neuf et impeccable. Service client ultra réactif. Je recommande sans hésiter.",
+    text: "Commande arrivée en 9 jours, emballage d'origine scellé, iPhone 16 Pro Max neuf et impeccable. Service client ultra réactif. Je recommande sans hésiter.",
     product: 'iPhone 16 Pro Max',
     initials: 'KM',
     color: '#c4922a',
@@ -148,7 +148,7 @@ function SocialProofStrip() {
   const stats = [
     { value: '1 200+',  label: 'commandes livrées' },
     { value: '4.8 / 5', label: '127 avis vérifiés'  },
-    { value: '2 à 5 j', label: 'délai de livraison' },
+    { value: 'Gratuite', label: 'livraison offerte' },
     { value: '3',        label: 'territoires couverts' },
   ]
   return (
@@ -413,7 +413,7 @@ function EngagementSection() {
                 {[
                   { icon: ShieldCheck,    label: 'Authentiques' },
                   { icon: Award,          label: 'Garantie officielle' },
-                  { icon: Truck,          label: 'Livraison express' },
+                  { icon: Truck,          label: 'Livraison gratuite' },
                   { icon: HeadphonesIcon, label: 'Support 2 h' },
                 ].map(({ icon: Icon, label }) => (
                   <div key={label} className="flex items-center gap-2.5 text-sm font-medium opacity-70">

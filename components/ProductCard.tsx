@@ -61,7 +61,7 @@ export default function ProductCard({ product }: Props) {
     ? 'jc-badge-best' : 'jc-badge-new'
 
   return (
-    <Link href={`/produits/${product.slug}`} className="block">
+    <Link href={`/boutique/${product.slug}`} className="block">
       <div className="jc-product-card">
 
         {/* ── Image zone ── */}

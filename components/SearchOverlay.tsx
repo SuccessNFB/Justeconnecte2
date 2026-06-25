@@ -113,7 +113,7 @@ export default function SearchOverlay({ open, onClose }: Props) {
         {hasResults && (
           <div className="py-1.5 max-h-80 overflow-y-auto">
             {results.map(p => (
-              <Link key={p.id} href={`/produits/${p.slug}`} onClick={onClose}
+              <Link key={p.id} href={`/boutique/${p.slug}`} onClick={onClose}
                 className="flex items-center justify-between px-5 py-3 hover:bg-black/[0.04] transition-colors group">
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-widest opacity-30 mb-0.5">

@@ -13,7 +13,7 @@ const BRANDS = [
     from: 1599,
     glow: 'rgba(196,146,42,0.22)',
     href: '/boutique?marque=apple',
-    productHref: '/produits/iphone-17-pro-max',
+    productHref: '/boutique/iphone-17-pro-max',
     badge: 'Nouveau · iPhone 17 Pro Max disponible',
     image: 'https://cdn.shopify.com/s/files/1/0952/4366/5698/files/IMG-9394.png?v=1776375420',
   },
@@ -25,7 +25,7 @@ const BRANDS = [
     from: 439,
     glow: 'rgba(0,120,255,0.12)',
     href: '/boutique?marque=samsung',
-    productHref: '/produits/samsung-galaxy-s26-ultra',
+    productHref: '/boutique/samsung-galaxy-s26-ultra',
     badge: 'Nouveau · Galaxy S26 Ultra disponible',
     image: 'https://cdn.shopify.com/s/files/1/0952/4366/5698/files/IMG-0062.png?v=1776374854',
   },
@@ -37,7 +37,7 @@ const BRANDS = [
     from: 389,
     glow: 'rgba(255,105,0,0.14)',
     href: '/boutique?marque=xiaomi',
-    productHref: '/produits/xiaomi-15',
+    productHref: '/boutique/xiaomi-15',
     badge: 'Prix malin · Xiaomi 15 en stock',
     image: 'https://cdn.shopify.com/s/files/1/0952/4366/5698/files/IMG-1012.webp?v=1776995420',
   },
@@ -141,10 +141,11 @@ export default function HeroInteractive() {
             </p>
 
             <p className="text-sm font-medium mb-7">
-              Livraison en{' '}
+              Livraison gratuite en{' '}
               <span className="font-bold" style={{ color: 'var(--gold)' }}>Guadeloupe / Martinique</span>
               {' & '}
               <span className="font-bold" style={{ color: 'var(--gold)' }}>Guyane</span>
+              {' '}· taxe & octroi de mer offerts
             </p>
 
             <div className="flex flex-wrap gap-2 mb-8">
@@ -178,7 +179,7 @@ export default function HeroInteractive() {
             <div className="flex flex-wrap gap-5 text-xs opacity-40 font-medium">
               <span className="flex items-center gap-1.5"><CheckCircle size={12} /> Authentiques</span>
               <span className="flex items-center gap-1.5"><CheckCircle size={12} /> Garantie constructeur</span>
-              <span className="flex items-center gap-1.5"><CheckCircle size={12} /> Livraison express</span>
+              <span className="flex items-center gap-1.5"><CheckCircle size={12} /> Livraison gratuite</span>
             </div>
           </div>
 

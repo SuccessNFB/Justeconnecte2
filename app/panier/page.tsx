@@ -64,7 +64,7 @@ export default function PanierPage() {
   }
 
   const subtotal = enriched.reduce((s, i) => s + getPrice(i.variant) * i.quantity, 0)
-  const shipping = zone ? (subtotal > 0 ? 9.9 : 0) : 0
+  const shipping = 0
 
   if (loading) return (
     <div className="py-24 text-center" style={{ color: 'oklch(0.18 0.004 264 / 0.4)' }}>Chargement…</div>
@@ -160,8 +160,8 @@ export default function PanierPage() {
                   <span className="font-medium">{formatPrice(subtotal)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span style={{ color: 'oklch(0.18 0.004 264 / 0.6)' }}>Livraison</span>
-                  <span className="font-medium">{formatPrice(shipping)}</span>
+                  <span style={{ color: 'oklch(0.18 0.004 264 / 0.6)' }}>Livraison · taxe & octroi de mer</span>
+                  <span className="font-medium" style={{ color: 'var(--success)' }}>Gratuit</span>
                 </div>
                 <div
                   className="flex justify-between pt-3 font-bold text-base"

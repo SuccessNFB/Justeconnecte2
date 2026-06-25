@@ -12,7 +12,7 @@ type ProductRow = {
   name: string
   image_url: string | null
   images: string[] | null
-  brands: { name: string } | null
+  brands: { name: string }[] | null
 }
 
 type UploadState = 'idle' | 'uploading' | 'done' | 'error'
@@ -220,7 +220,7 @@ function ProductImageCard({
       {/* Info + upload */}
       <div className="p-3">
         <p className="text-[10px] font-semibold uppercase tracking-widest opacity-40 mb-0.5">
-          {product.brands?.name}
+          {product.brands?.[0]?.name}
         </p>
         <p className="font-semibold text-sm leading-snug mb-3">{product.name}</p>
 

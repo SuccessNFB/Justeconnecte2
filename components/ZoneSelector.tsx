@@ -1,15 +1,28 @@
 'use client'
+import { useEffect, useState } from 'react'
 import { X } from 'lucide-react'
 import { useZone } from '@/contexts/ZoneContext'
+import { createClient } from '@/lib/supabase'
 import type { Zone } from '@/lib/types'
 
-const ZONES: Omit<Zone, 'id' | 'tax_rate' | 'sort_order'>[] = [
-  { name: 'martinique-guadeloupe', label: 'Martinique / Guadeloupe' },
-  { name: 'guyane',                label: 'Guyane' },
-]
+const ZONE_FLAGS: Record<string, string> = {
+  'martinique-guadeloupe': '🇲🇶🇬🇵',
+  'guyane': '🇬🇫',
+}
 
 export default function ZoneSelector() {
   const { showSelector, setShowSelector, setZone } = useZone()
+  const [zones, setZones] = useState<Zone[]>([])
+
+  useEffect(() => {
+    const supabase = createClient()
+    supabase
+      .from('zones')
+      .select('*')
+      .order('sort_order')
+      .then(({ data }) => { if (data) setZones(data) })
+  }, [])
+
   if (!showSelector) return null
 
   return (
@@ -35,19 +48,17 @@ export default function ZoneSelector() {
         </p>
 
         <div className="flex flex-col gap-2">
-          {ZONES.map(z => (
+          {zones.map(z => (
             <button
-              key={z.name}
-              onClick={() =>
-                setZone({ id: '', name: z.name, label: z.label, tax_rate: 0, sort_order: 0 })
-              }
+              key={z.id}
+              onClick={() => setZone(z)}
               className="w-full text-left px-4 py-3 rounded-xl font-medium text-sm transition-all duration-150 hover:scale-[1.01]"
               style={{
                 border: '1.5px solid var(--border)',
                 background: 'var(--surface-soft)',
               }}
             >
-              {z.name === 'martinique-guadeloupe' ? '🇲🇶🇬🇵' : '🇬🇫'} {z.label}
+              {ZONE_FLAGS[z.name] ?? ''} {z.label}
             </button>
           ))}
         </div>

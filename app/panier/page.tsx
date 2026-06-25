@@ -122,16 +122,26 @@ export default function PanierPage() {
               const priceStr = price !== null ? formatPrice(price * item.quantity) : '—'
               return (
                 <div key={item.variantId} className="jc-card p-5 flex gap-5">
-                  {/* Phone mini-svg */}
-                  <div
-                    className="shrink-0 w-20 h-20 rounded-xl flex items-center justify-center"
-                    style={{ background: 'var(--surface-soft)' }}
-                  >
-                    <svg viewBox="0 0 60 100" className="w-10 h-auto" fill="none">
-                      <rect x="5" y="2" width="50" height="96" rx="8" fill={item.variant.color_hex} opacity="0.9"/>
-                      <rect x="9" y="8" width="42" height="72" rx="4" fill="oklch(0.88 0.002 247)"/>
-                    </svg>
-                  </div>
+                  {/* Product image */}
+                  {(() => {
+                    const img = (item.variant.images ?? []).find(Boolean)
+                      ?? (item.variant as any).products?.image_url
+                    return img ? (
+                      <div className="shrink-0 w-20 h-20 rounded-xl overflow-hidden" style={{ background: 'var(--surface-soft)' }}>
+                        <img src={img} alt="" className="w-full h-full object-cover" />
+                      </div>
+                    ) : (
+                      <div
+                        className="shrink-0 w-20 h-20 rounded-xl flex items-center justify-center"
+                        style={{ background: 'var(--surface-soft)' }}
+                      >
+                        <svg viewBox="0 0 60 100" className="w-10 h-auto" fill="none">
+                          <rect x="5" y="2" width="50" height="96" rx="8" fill={item.variant.color_hex} opacity="0.9"/>
+                          <rect x="9" y="8" width="42" height="72" rx="4" fill="oklch(0.88 0.002 247)"/>
+                        </svg>
+                      </div>
+                    )
+                  })()}
 
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-semibold mb-0.5" style={{ color: 'var(--gold-deep)' }}>

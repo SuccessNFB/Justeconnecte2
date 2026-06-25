@@ -20,7 +20,7 @@ export default function Footer() {
           <div>
             <p className="text-[10px] font-bold uppercase tracking-widest mb-4 opacity-40">Boutique</p>
             <ul className="flex flex-col gap-2 text-sm opacity-60">
-              {['Apple', 'Samsung', 'Xiaomi', 'Google Pixel', 'Tout le catalogue'].map(l => (
+              {['Apple', 'Samsung', 'Xiaomi', 'GoPro', 'Tout le catalogue'].map(l => (
                 <li key={l}>
                   <Link href={`/boutique${l !== 'Tout le catalogue' ? `?marque=${l.toLowerCase()}` : ''}`}
                     className="hover:opacity-100 transition-opacity">{l}</Link>

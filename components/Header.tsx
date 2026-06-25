@@ -48,7 +48,7 @@ export default function Header() {
               { href: '/boutique?marque=apple',       label: 'Apple' },
               { href: '/boutique?marque=samsung',     label: 'Samsung' },
               { href: '/boutique?marque=xiaomi',      label: 'Xiaomi' },
-              { href: '/boutique?marque=google',      label: 'Google' },
+              { href: '/boutique?marque=gopro',       label: 'GoPro' },
             ].map(({ href, label }) => (
               <Link key={href} href={href} className="transition-opacity hover:opacity-60">
                 {label}

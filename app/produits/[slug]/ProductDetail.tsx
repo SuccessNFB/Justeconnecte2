@@ -177,6 +177,43 @@ export default function ProductDetail({ product, faq: faqProp }: { product: Full
   const storages      = colorVariants.map(v => v.storage)
   const [selectedStorage, setSelectedStorage] = useState<string>(storages[0] ?? '')
 
+  // Gallery carousel state
+  const galleryImages: string[] = product.images?.length
+    ? product.images
+    : product.image_url
+      ? [product.image_url]
+      : []
+  const [currentSlide, setCurrentSlide] = useState(0)
+  const touchStartX = useRef<number>(0)
+  const dragStartX  = useRef<number>(0)
+  const isDragging  = useRef(false)
+
+  function handleTouchStart(e: React.TouchEvent) {
+    touchStartX.current = e.touches[0].clientX
+  }
+  function handleTouchEnd(e: React.TouchEvent) {
+    const dx = e.changedTouches[0].clientX - touchStartX.current
+    if (Math.abs(dx) > 40 && galleryImages.length > 1) {
+      setCurrentSlide(s => dx < 0
+        ? (s + 1) % galleryImages.length
+        : (s - 1 + galleryImages.length) % galleryImages.length)
+    }
+  }
+  function handleMouseDown(e: React.MouseEvent) {
+    isDragging.current = true
+    dragStartX.current = e.clientX
+  }
+  function handleMouseUp(e: React.MouseEvent) {
+    if (!isDragging.current) return
+    isDragging.current = false
+    const dx = e.clientX - dragStartX.current
+    if (Math.abs(dx) > 40 && galleryImages.length > 1) {
+      setCurrentSlide(s => dx < 0
+        ? (s + 1) % galleryImages.length
+        : (s - 1 + galleryImages.length) % galleryImages.length)
+    }
+  }
+
   const selectedVariant  = colorVariants.find(v => v.storage === selectedStorage) ?? colorVariants[0]
   const zonePrice        = selectedVariant?.product_zone_prices?.find(p => zone ? p.zone_id === zone.id : false)
                         ?? selectedVariant?.product_zone_prices?.[0]
@@ -237,33 +274,123 @@ export default function ProductDetail({ product, faq: faqProp }: { product: Full
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 lg:gap-20">
 
           {/* ── GALERIE ── */}
-          <div className="flex flex-col gap-4">
-            {/* Main image */}
+          <div className="flex flex-col gap-3">
+            {/* Main carousel */}
             <div
-              className="rounded-3xl relative overflow-hidden flex items-center justify-center"
+              className="rounded-3xl overflow-hidden relative select-none"
               style={{
                 background: 'linear-gradient(160deg,#f9f5ee 0%,#ede5d4 100%)',
                 border: '1px solid var(--border)',
                 aspectRatio: '4/5',
+                cursor: galleryImages.length > 1 ? 'grab' : 'default',
               }}
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+              onMouseDown={handleMouseDown}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={() => { isDragging.current = false }}
             >
-              {product.image_url ? (
-                <Image
-                  src={product.image_url}
-                  alt={product.name}
-                  fill
-                  className="object-contain p-8 drop-shadow-xl"
-                  sizes="(max-width: 1024px) 90vw, 45vw"
-                  priority
-                />
+              {galleryImages.length > 0 ? (
+                <>
+                  <div
+                    className="flex h-full"
+                    style={{
+                      width: `${galleryImages.length * 100}%`,
+                      transform: `translateX(-${(currentSlide * 100) / galleryImages.length}%)`,
+                      transition: 'transform 0.4s cubic-bezier(0.4,0,0.2,1)',
+                    }}
+                  >
+                    {galleryImages.map((img, i) => (
+                      <div
+                        key={i}
+                        className="relative flex-shrink-0"
+                        style={{ width: `${100 / galleryImages.length}%`, height: '100%' }}
+                      >
+                        <Image
+                          src={img}
+                          alt={`${product.name} — photo ${i + 1}`}
+                          fill
+                          className="object-contain p-4 drop-shadow-xl"
+                          sizes="(max-width: 1024px) 90vw, 45vw"
+                          priority={i === 0}
+                          draggable={false}
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  {galleryImages.length > 1 && (
+                    <>
+                      {/* Dot indicators */}
+                      <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-10">
+                        {galleryImages.map((_, i) => (
+                          <button
+                            key={i}
+                            onClick={() => setCurrentSlide(i)}
+                            className="rounded-full transition-all duration-300"
+                            style={{
+                              width: i === currentSlide ? '20px' : '6px',
+                              height: '6px',
+                              background: i === currentSlide ? 'var(--gold)' : 'rgba(0,0,0,0.25)',
+                            }}
+                          />
+                        ))}
+                      </div>
+
+                      {/* Arrow navigation */}
+                      <button
+                        onClick={() => setCurrentSlide(s => (s - 1 + galleryImages.length) % galleryImages.length)}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded-full z-10 transition-all hover:scale-110"
+                        style={{ background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(8px)', boxShadow: '0 2px 8px rgba(0,0,0,0.12)' }}
+                        aria-label="Photo précédente"
+                      >
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                          <path d="M9 2.5L5 7L9 11.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </button>
+                      <button
+                        onClick={() => setCurrentSlide(s => (s + 1) % galleryImages.length)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded-full z-10 transition-all hover:scale-110"
+                        style={{ background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(8px)', boxShadow: '0 2px 8px rgba(0,0,0,0.12)' }}
+                        aria-label="Photo suivante"
+                      >
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                          <path d="M5 2.5L9 7L5 11.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </button>
+                    </>
+                  )}
+                </>
               ) : (
-                <div className="p-10 w-full h-full flex items-center justify-center">
+                <div className="w-full h-full flex items-center justify-center p-8">
                   <PhoneDisplay colorHex={selectedColor} />
                 </div>
               )}
             </div>
 
-            {/* Color thumbnails */}
+            {/* Thumbnail strip */}
+            {galleryImages.length > 1 && (
+              <div className="flex gap-2 overflow-x-auto pb-0.5">
+                {galleryImages.map((img, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setCurrentSlide(i)}
+                    className="relative flex-shrink-0 rounded-xl overflow-hidden"
+                    style={{
+                      width: '64px',
+                      height: '64px',
+                      border: `2px solid ${i === currentSlide ? 'var(--gold)' : 'var(--border)'}`,
+                      background: 'linear-gradient(160deg,#f9f5ee 0%,#ede5d4 100%)',
+                      transition: 'border-color 0.2s ease',
+                    }}
+                  >
+                    <Image src={img} alt={`Miniature ${i + 1}`} fill className="object-contain p-1" sizes="64px" />
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Color swatches */}
             {colors.length > 1 && (
               <div className="flex gap-3">
                 {colors.slice(0, 5).map(v => (
@@ -279,10 +406,7 @@ export default function ProductDetail({ product, faq: faqProp }: { product: Full
                   >
                     <span
                       className="w-5 h-5 rounded-full"
-                      style={{
-                        background: v.color_hex,
-                        boxShadow: '0 0 0 1.5px rgba(0,0,0,.12)',
-                      }}
+                      style={{ background: v.color_hex, boxShadow: '0 0 0 1.5px rgba(0,0,0,.12)' }}
                     />
                     <span className="text-[9px] font-medium opacity-50 leading-none">{v.color_name}</span>
                   </button>

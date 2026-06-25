@@ -65,28 +65,32 @@ export default function ProductCard({ product }: Props) {
       <div className="jc-product-card">
 
         {/* ── Image zone ── */}
-        <div className="relative flex items-center justify-center pt-8 pb-6 px-6 overflow-hidden"
-          style={{ background: 'linear-gradient(160deg, #faf8f5 0%, #f0ece4 100%)' }}>
-
+        <div
+          className="relative overflow-hidden"
+          style={{
+            background: 'linear-gradient(160deg, #faf8f5 0%, #f0ece4 100%)',
+            aspectRatio: '3/4',
+          }}
+        >
           {badge && (
             <span className={`${badgeClass} absolute top-3 left-3 z-10`}>{badge}</span>
           )}
 
-          {/* Phone with spring-scale on hover */}
-          <div className="jc-phone-wrap">
-            {product.image_url ? (
+          {product.image_url ? (
+            <div className="jc-phone-wrap absolute inset-0">
               <Image
                 src={product.image_url}
                 alt={product.name}
-                width={200}
-                height={200}
-                className="w-36 h-36 object-contain drop-shadow-md"
-                sizes="160px"
+                fill
+                className="object-contain p-4 drop-shadow-md"
+                sizes="(max-width: 640px) 50vw, (max-width: 1280px) 33vw, 280px"
               />
-            ) : (
+            </div>
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center p-6">
               <PhoneIllustration colorHex={colorHex} />
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Gold radial glow */}
           <div className="jc-img-glow absolute inset-0 pointer-events-none"

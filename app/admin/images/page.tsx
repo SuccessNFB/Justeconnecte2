@@ -253,10 +253,10 @@ function ProductImageCard({
             {uploadState === 'done' && <Check size={14} />}
             {uploadState === 'idle' && <Upload size={14} />}
             {uploadState === 'error' && <Upload size={14} />}
-            {uploadState === 'uploading' ? 'Upload…' :
-             uploadState === 'done' ? 'Uploadé !' :
+            {uploadState === 'uploading' ? 'Envoi…' :
+             uploadState === 'done' ? 'Envoyé !' :
              uploadState === 'error' ? 'Réessayer' :
-             product.image_url ? 'Ajouter des photos' : 'Uploader des photos'}
+             product.image_url ? 'Ajouter des photos' : 'Envoyer des photos'}
           </span>
         </label>
 

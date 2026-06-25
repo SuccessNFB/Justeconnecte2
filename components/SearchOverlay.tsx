@@ -16,7 +16,7 @@ interface Props {
   onClose: () => void
 }
 
-const SUGGESTIONS = ['iPhone 13', 'iPhone 14', 'Samsung Galaxy S22', 'Google Pixel 7']
+const SUGGESTIONS = ['iPhone 15', 'iPhone 16', 'Samsung Galaxy S24', 'Xiaomi 14']
 
 export default function SearchOverlay({ open, onClose }: Props) {
   const [query, setQuery]     = useState('')

@@ -43,20 +43,39 @@ const BRANDS = [
   },
 ]
 
-type Brand = typeof BRANDS[0]
+const INTERVAL_MS = 5500
+const EXIT_MS     = 220
 
+/* Spring-like enter (overshoots slightly) / sharp exit */
+const SPRING = 'cubic-bezier(0.16, 1, 0.3, 1)'
+const SHARP  = 'cubic-bezier(0.4, 0, 1, 1)'
+
+function t(prop: string, ms: number, delay: number, ease: string) {
+  return `${prop} ${ms}ms ${delay}ms ${ease}`
+}
+function enter(...props: string[]) {
+  return (delay = 0, ms = 520) =>
+    props.map(p => t(p, ms, delay, SPRING)).join(', ')
+}
+function exit(...props: string[]) {
+  return () => props.map(p => t(p, EXIT_MS, 0, SHARP)).join(', ')
+}
+
+const enterOpacityTransform = enter('opacity', 'transform')
+const exitOpacityTransform  = exit('opacity', 'transform')
+
+/* ─ TiltCard ─────────────────────────────────────────────────────────────── */
 function TiltCard({ children, glow }: { children: React.ReactNode; glow: string }) {
-  const ref = useRef<HTMLDivElement>(null)
-  const [tilt, setTilt] = useState({ x: 0, y: 0 })
+  const ref  = useRef<HTMLDivElement>(null)
+  const [tilt, setTilt]       = useState({ x: 0, y: 0 })
   const [hovered, setHovered] = useState(false)
 
   function onMove(e: React.MouseEvent) {
-    const el = ref.current
-    if (!el) return
-    const r = el.getBoundingClientRect()
+    const el = ref.current; if (!el) return
+    const r  = el.getBoundingClientRect()
     const dx = (e.clientX - r.left - r.width  / 2) / (r.width  / 2)
     const dy = (e.clientY - r.top  - r.height / 2) / (r.height / 2)
-    setTilt({ x: dx * 8, y: -dy * 8 })
+    setTilt({ x: dx * 7, y: -dy * 7 })
   }
 
   return (
@@ -67,14 +86,23 @@ function TiltCard({ children, glow }: { children: React.ReactNode; glow: string 
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => { setTilt({ x: 0, y: 0 }); setHovered(false) }}
       style={{
-        transform: `perspective(900px) rotateY(${tilt.x}deg) rotateX(${tilt.y}deg) scale(${hovered ? 1.02 : 1})`,
-        transition: 'transform 0.18s ease',
+        transform: `perspective(900px) rotateY(${tilt.x}deg) rotateX(${tilt.y}deg) scale(${hovered ? 1.015 : 1})`,
+        transition: hovered
+          ? 'transform 0.1s linear'
+          : `transform 0.6s ${SPRING}`,
         transformStyle: 'preserve-3d',
+        willChange: 'transform',
       }}
     >
       <div
-        className="absolute rounded-full pointer-events-none transition-all duration-700"
-        style={{ inset: '-20%', background: glow, filter: 'blur(70px)', opacity: hovered ? 1 : 0.55 }}
+        className="absolute rounded-full pointer-events-none"
+        style={{
+          inset: '-25%',
+          background: glow,
+          filter: 'blur(80px)',
+          opacity: hovered ? 1 : 0.6,
+          transition: 'opacity 0.7s ease',
+        }}
       />
       {children}
     </div>
@@ -84,36 +112,77 @@ function TiltCard({ children, glow }: { children: React.ReactNode; glow: string 
 const fmt = (p: number) =>
   new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(p)
 
+/* ─ Main ─────────────────────────────────────────────────────────────────── */
 export default function HeroInteractive() {
   const [activeIdx, setActiveIdx] = useState(0)
-  const [visible, setVisible]     = useState(true)
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const [entering, setEntering]   = useState(true)
+  const [progress, setProgress]   = useState(0)
+
+  const timerRef    = useRef<ReturnType<typeof setInterval> | null>(null)
+  const progressRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const activeRef   = useRef(0)          /* always current without stale closure */
+
   const brand = BRANDS[activeIdx]
 
-  const startTimer = useCallback(() => {
-    if (timerRef.current) clearInterval(timerRef.current)
-    timerRef.current = setInterval(() => {
-      setVisible(false)
-      setTimeout(() => { setActiveIdx(p => (p + 1) % BRANDS.length); setVisible(true) }, 350)
-    }, 5000)
+  /* ── Progress bar ── */
+  const startProgress = useCallback(() => {
+    if (progressRef.current) clearInterval(progressRef.current)
+    setProgress(0)
+    const tick = 100 / (INTERVAL_MS / 50)
+    progressRef.current = setInterval(() => {
+      setProgress(p => { if (p + tick >= 100) { clearInterval(progressRef.current!); return 100 } return p + tick })
+    }, 50)
   }, [])
 
+  /* ── Switch logic ── */
+  const advance = useCallback((nextIdx: number) => {
+    setEntering(false)
+    if (progressRef.current) clearInterval(progressRef.current)
+    setTimeout(() => {
+      activeRef.current = nextIdx
+      setActiveIdx(nextIdx)
+      setEntering(true)
+      startProgress()
+    }, EXIT_MS + 40)
+  }, [startProgress])
+
+  const resetTimer = useCallback((fromIdx?: number) => {
+    if (timerRef.current) clearInterval(timerRef.current)
+    timerRef.current = setInterval(() => {
+      advance((activeRef.current + 1) % BRANDS.length)
+    }, INTERVAL_MS)
+    if (fromIdx === undefined) startProgress()
+  }, [advance, startProgress])
+
   useEffect(() => {
-    startTimer()
-    return () => { if (timerRef.current) clearInterval(timerRef.current) }
-  }, [startTimer])
+    resetTimer()
+    return () => {
+      if (timerRef.current)    clearInterval(timerRef.current)
+      if (progressRef.current) clearInterval(progressRef.current)
+    }
+  }, [resetTimer])
 
   function switchTo(idx: number) {
-    if (idx === activeIdx) return
-    setVisible(false)
-    setTimeout(() => { setActiveIdx(idx); setVisible(true) }, 350)
-    startTimer()
+    if (idx === activeRef.current) return
+    advance(idx)
+    resetTimer(idx)
   }
 
-  const transStyle = {
-    opacity: visible ? 1 : 0,
-    transform: visible ? 'translateY(0)' : 'translateY(10px)',
-    transition: 'opacity 0.35s ease, transform 0.35s ease',
+  /* ── Animated style helpers ── */
+  function style(
+    entering: boolean,
+    enterProps: { opacity?: number; transform?: string; delay?: number; ms?: number },
+    exitProps:  { opacity?: number; transform?: string },
+  ): React.CSSProperties {
+    const { opacity = 1, transform = 'translateY(0) scale(1)', delay = 0, ms = 520 } = entering ? enterProps : {}
+    const exitOpacity   = exitProps.opacity   ?? 0
+    const exitTransform = exitProps.transform ?? 'translateY(6px) scale(0.97)'
+    return {
+      opacity:    entering ? (enterProps.opacity  ?? 1)  : exitOpacity,
+      transform:  entering ? (enterProps.transform ?? 'translateY(0) scale(1)') : exitTransform,
+      transition: entering ? enterOpacityTransform(delay, ms) : exitOpacityTransform(),
+      willChange: 'opacity, transform',
+    }
   }
 
   return (
@@ -121,14 +190,23 @@ export default function HeroInteractive() {
       <div className="jc-container">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-0 items-center">
 
-          {/* ── TEXT ── */}
+          {/* ── TEXT COLUMN ── */}
           <div className="animate-fade-up">
+
+            {/* Badge */}
             <div
               className="inline-flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-full mb-8"
-              style={{ border: '1px solid var(--border-strong)', color: 'var(--gold)' }}
+              style={{
+                border: '1px solid var(--border-strong)',
+                color: 'var(--gold)',
+                ...style(entering,
+                  { opacity: 1, transform: 'translateY(0) scale(1)', delay: 0 },
+                  { opacity: 0, transform: 'translateY(-5px) scale(0.96)' }
+                ),
+              }}
             >
               <span className="w-1.5 h-1.5 rounded-full flex-shrink-0 animate-pulse" style={{ background: 'var(--gold)' }} />
-              <span style={transStyle}>{brand.badge}</span>
+              {brand.badge}
             </div>
 
             <h1 className="font-bold leading-[1.1] mb-5">
@@ -136,7 +214,14 @@ export default function HeroInteractive() {
               <span className="block jc-gold-text" style={{ fontSize: 'clamp(2.6rem,6vw,4.4rem)' }}>simplement.</span>
             </h1>
 
-            <p className="text-sm sm:text-base leading-relaxed mb-3 max-w-lg" style={{ ...transStyle, opacity: visible ? 0.6 : 0 }}>
+            {/* Tagline */}
+            <p
+              className="text-sm sm:text-base leading-relaxed mb-3 max-w-lg"
+              style={style(entering,
+                { opacity: 0.6, transform: 'translateY(0)', delay: 60 },
+                { opacity: 0, transform: 'translateY(8px)' }
+              )}
+            >
               {brand.tagline}
             </p>
 
@@ -148,18 +233,20 @@ export default function HeroInteractive() {
               {' '}· taxe & octroi de mer offerts
             </p>
 
+            {/* Brand selector pills */}
             <div className="flex flex-wrap gap-2 mb-8">
               {BRANDS.map((b, i) => (
                 <button
                   key={b.id}
                   onClick={() => switchTo(i)}
-                  className="text-xs font-semibold px-3.5 py-1.5 rounded-full transition-all duration-200"
+                  className="text-xs font-semibold px-3.5 py-1.5 rounded-full"
                   style={{
                     border: i === activeIdx ? '1.5px solid var(--gold)' : '1.5px solid var(--border-strong)',
                     background: i === activeIdx ? 'var(--gold-bg)' : 'transparent',
                     color: i === activeIdx ? 'var(--gold-deep)' : 'inherit',
                     opacity: i === activeIdx ? 1 : 0.45,
-                    transform: i === activeIdx ? 'scale(1.04)' : 'scale(1)',
+                    transform: i === activeIdx ? 'scale(1.05)' : 'scale(1)',
+                    transition: `all 0.35s ${SPRING}`,
                   }}
                 >
                   {b.name}
@@ -167,8 +254,15 @@ export default function HeroInteractive() {
               ))}
             </div>
 
-            <div className="flex flex-wrap gap-3 mb-10">
-              <Link href={brand.href} className="jc-btn-dark text-base px-7 py-3" style={transStyle}>
+            {/* CTA buttons */}
+            <div
+              className="flex flex-wrap gap-3 mb-10"
+              style={style(entering,
+                { opacity: 1, transform: 'translateY(0)', delay: 100 },
+                { opacity: 0, transform: 'translateY(5px)' }
+              )}
+            >
+              <Link href={brand.href} className="jc-btn-dark text-base px-7 py-3">
                 Voir les {brand.name} →
               </Link>
               <button className="jc-btn-ghost text-base px-7 py-3">
@@ -183,26 +277,31 @@ export default function HeroInteractive() {
             </div>
           </div>
 
-          {/* ── PHONE IMAGE ── */}
+          {/* ── PHONE COLUMN ── */}
           <div className="flex justify-center lg:justify-end">
             <TiltCard glow={brand.glow}>
               <div className="relative" style={{ width: 'clamp(280px, 44vw, 420px)' }}>
 
-                {/* Phone — no card, floats freely */}
+                {/* Phone image */}
                 <Link
                   href={brand.productHref}
-                  className="group relative block"
-                  style={{ ...transStyle, height: 'clamp(440px, 66vw, 640px)' }}
+                  className="group relative block animate-float"
+                  style={{
+                    height: 'clamp(440px, 66vw, 640px)',
+                    ...style(entering,
+                      { opacity: 1, transform: 'scale(1) translateY(0)', delay: 30, ms: 580 },
+                      { opacity: 0, transform: 'scale(0.95) translateY(8px)' }
+                    ),
+                  }}
                 >
                   <Image
                     src={brand.image}
                     alt={brand.model}
                     fill
-                    className="object-contain drop-shadow-2xl transition-transform duration-500 group-hover:scale-[1.04]"
+                    className="object-contain drop-shadow-2xl transition-transform duration-500 group-hover:scale-[1.03]"
                     sizes="(max-width: 640px) 70vw, 420px"
                     priority={activeIdx === 0}
                   />
-                  {/* Hover label */}
                   <div className="absolute inset-0 flex items-end justify-center pb-6 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
                     <span className="text-[11px] font-semibold px-3.5 py-1.5 rounded-full text-white"
                       style={{ background: 'rgba(17,17,17,0.74)', backdropFilter: 'blur(8px)' }}>
@@ -213,14 +312,15 @@ export default function HeroInteractive() {
 
                 {/* Floating price badge */}
                 <div
-                  className="absolute -right-4 sm:-right-8 top-1/3 rounded-2xl px-4 py-3 shadow-xl pointer-events-none"
+                  className="absolute -right-4 sm:-right-8 top-1/3 rounded-2xl px-4 py-3 pointer-events-none"
                   style={{
                     background: 'var(--surface)',
                     border: '1px solid var(--border)',
-                    opacity: visible ? 1 : 0,
-                    transform: visible ? 'translateX(0)' : 'translateX(10px)',
-                    transition: 'opacity 0.4s 0.12s ease, transform 0.4s 0.12s ease',
                     boxShadow: '0 8px 32px rgba(0,0,0,0.10)',
+                    ...style(entering,
+                      { opacity: 1, transform: 'translateX(0) scale(1)', delay: 180, ms: 500 },
+                      { opacity: 0, transform: 'translateX(10px) scale(0.94)' }
+                    ),
                   }}
                 >
                   <p className="text-[10px] font-semibold uppercase tracking-wider opacity-40 mb-0.5 whitespace-nowrap">À partir de</p>
@@ -229,22 +329,35 @@ export default function HeroInteractive() {
                 </div>
 
                 {/* Progress dots */}
-                <div className="flex justify-center gap-1.5 mt-4">
+                <div className="flex justify-center gap-1.5 mt-5">
                   {BRANDS.map((_, i) => (
                     <button
                       key={i}
                       onClick={() => switchTo(i)}
                       aria-label={`Voir ${BRANDS[i].name}`}
-                      className="rounded-full transition-all duration-300"
+                      className="relative overflow-hidden rounded-full"
                       style={{
-                        width: i === activeIdx ? '20px' : '6px',
-                        height: '6px',
-                        background: i === activeIdx ? 'var(--gold)' : 'var(--border-strong)',
-                        opacity: i === activeIdx ? 1 : 0.35,
+                        width: i === activeIdx ? '28px' : '6px',
+                        height: '4px',
+                        background: 'var(--border-strong)',
+                        opacity: i === activeIdx ? 1 : 0.3,
+                        transition: `width 0.4s ${SPRING}, opacity 0.3s ease`,
                       }}
-                    />
+                    >
+                      {i === activeIdx && (
+                        <span
+                          className="absolute inset-y-0 left-0 rounded-full"
+                          style={{
+                            width: `${progress}%`,
+                            background: 'var(--gold)',
+                            transition: 'width 0.05s linear',
+                          }}
+                        />
+                      )}
+                    </button>
                   ))}
                 </div>
+
               </div>
             </TiltCard>
           </div>

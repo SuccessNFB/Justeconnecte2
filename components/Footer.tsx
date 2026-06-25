@@ -92,9 +92,8 @@ export default function Footer() {
           <div>
             <p className="text-[10px] font-bold uppercase tracking-widest mb-4 opacity-40">Aide</p>
             <ul className="flex flex-col gap-2 text-sm opacity-60">
-              {['Retours et garantie', 'Suivre ma commande', 'Contact'].map(l => (
-                <li key={l}><a href="#" className="hover:opacity-100 transition-opacity">{l}</a></li>
-              ))}
+              <li><Link href="/retours-garantie" className="hover:opacity-100 transition-opacity">Retours et garantie</Link></li>
+              <li><Link href="/contact" className="hover:opacity-100 transition-opacity">Contact</Link></li>
             </ul>
           </div>
 
@@ -111,9 +110,9 @@ export default function Footer() {
         >
           <p>&copy; {year} Juste Connecté · Tous droits réservés</p>
           <div className="flex gap-4">
-            <a href="#">Mentions légales</a>
-            <a href="#">CGV</a>
-            <a href="#">Confidentialité</a>
+            <Link href="/mentions-legales">Mentions légales</Link>
+            <Link href="/cgv">CGV</Link>
+            <Link href="/confidentialite">Confidentialité</Link>
           </div>
         </div>
       </div>

@@ -15,7 +15,7 @@ const makePrice = (variantId: string, price: number, compare: number): ProductZo
 
 const makeVariant = (productId: string, id: string, colorName: string, colorHex: string, storage: string, sku: string, stock: number): ProductVariant & { product_zone_prices: ProductZonePrice[] } => ({
   id, product_id: productId, color_name: colorName, color_hex: colorHex,
-  storage, sku, stock, is_active: true, sort_order: 0,
+  storage, sku, stock, is_active: true, out_of_stock: false, sort_order: 0, images: [],
   product_zone_prices: [makePrice(id, 529, 699)],
 })
 

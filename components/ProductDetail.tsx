@@ -177,12 +177,18 @@ export default function ProductDetail({ product, faq: faqProp }: { product: Full
   const storages      = colorVariants.map(v => v.storage)
   const [selectedStorage, setSelectedStorage] = useState<string>(storages[0] ?? '')
 
-  // Gallery carousel state
-  const galleryImages: string[] = product.images?.length
-    ? product.images
-    : product.image_url
-      ? [product.image_url]
-      : []
+  const selectedVariant = colorVariants.find(v => v.storage === selectedStorage) ?? colorVariants[0]
+
+  // Gallery images: prefer variant-level images (per colour), fall back to product-level
+  const variantImages  = (selectedVariant?.images ?? []).filter(Boolean)
+  const galleryImages: string[] = variantImages.length
+    ? variantImages
+    : product.images?.length
+      ? product.images
+      : product.image_url
+        ? [product.image_url]
+        : []
+
   const [currentSlide, setCurrentSlide] = useState(0)
   const carouselRef  = useRef<HTMLDivElement>(null)
   const slideCount   = useRef(galleryImages.length)
@@ -239,10 +245,10 @@ export default function ProductDetail({ product, faq: faqProp }: { product: Full
     }
   }
 
-  const selectedVariant  = colorVariants.find(v => v.storage === selectedStorage) ?? colorVariants[0]
-  const zonePrice        = selectedVariant?.product_zone_prices?.find(p => zone ? p.zone_id === zone.id : false)
-                        ?? selectedVariant?.product_zone_prices?.[0]
-  const stockStatus      = selectedVariant ? getStockStatus(selectedVariant.stock) : 'out_of_stock'
+  const zonePrice         = selectedVariant?.product_zone_prices?.find(p => zone ? p.zone_id === zone.id : false)
+                         ?? selectedVariant?.product_zone_prices?.[0]
+  const isOutOfStock      = selectedVariant?.out_of_stock ?? false
+  const stockStatus       = isOutOfStock ? 'out_of_stock' : (selectedVariant ? getStockStatus(selectedVariant.stock) : 'out_of_stock')
   const selectedColorName = variants.find(v => v.color_hex === selectedColor)?.color_name ?? ''
   const scalapay  = zonePrice ? (zonePrice.price / 4).toFixed(2).replace('.', ',') : null
   const discount  = zonePrice?.compare_at_price
@@ -252,6 +258,7 @@ export default function ProductDetail({ product, faq: faqProp }: { product: Full
     setSelectedColor(hex)
     const newStorages = variants.filter(v => v.color_hex === hex).map(v => v.storage)
     if (!newStorages.includes(selectedStorage)) setSelectedStorage(newStorages[0] ?? '')
+    setCurrentSlide(0)
   }
 
   const canBuy = stockStatus !== 'out_of_stock' && !!selectedVariant
@@ -478,16 +485,30 @@ export default function ProductDetail({ product, faq: faqProp }: { product: Full
                 Couleur : <span className="font-normal opacity-50">{selectedColorName}</span>
               </p>
               <div className="flex gap-2.5 flex-wrap">
-                {colors.map(v => (
-                  <button key={v.color_hex} onClick={() => handleColorSelect(v.color_hex)} title={v.color_name}
-                    className="w-8 h-8 rounded-full transition-all"
-                    style={{
-                      background: v.color_hex,
-                      boxShadow: selectedColor === v.color_hex
-                        ? `0 0 0 2px var(--surface), 0 0 0 4px ${v.color_hex}`
-                        : '0 0 0 1.5px rgba(0,0,0,.12)',
-                    }} />
-                ))}
+                {colors.map(v => {
+                  const oos = v.out_of_stock ?? false
+                  return (
+                    <button
+                      key={v.color_hex}
+                      onClick={() => handleColorSelect(v.color_hex)}
+                      title={oos ? `${v.color_name} — Rupture de stock` : v.color_name}
+                      className="relative w-8 h-8 rounded-full transition-all"
+                      style={{
+                        background: v.color_hex,
+                        opacity: oos ? 0.45 : 1,
+                        boxShadow: selectedColor === v.color_hex
+                          ? `0 0 0 2px var(--surface), 0 0 0 4px ${v.color_hex}`
+                          : '0 0 0 1.5px rgba(0,0,0,.12)',
+                      }}
+                    >
+                      {oos && (
+                        <svg viewBox="0 0 32 32" className="absolute inset-0 w-full h-full" aria-hidden>
+                          <line x1="6" y1="6" x2="26" y2="26" stroke="rgba(255,255,255,0.75)" strokeWidth="2.5" strokeLinecap="round"/>
+                        </svg>
+                      )}
+                    </button>
+                  )
+                })}
               </div>
             </div>
 

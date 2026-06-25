@@ -68,7 +68,9 @@ export interface ProductVariant {
   sku: string
   stock: number
   is_active: boolean
+  out_of_stock: boolean
   sort_order: number
+  images: string[]
   product_zone_prices?: ProductZonePrice[]
 }
 

@@ -184,21 +184,46 @@ export default function ProductDetail({ product, faq: faqProp }: { product: Full
       ? [product.image_url]
       : []
   const [currentSlide, setCurrentSlide] = useState(0)
-  const touchStartX = useRef<number>(0)
-  const dragStartX  = useRef<number>(0)
-  const isDragging  = useRef(false)
+  const carouselRef  = useRef<HTMLDivElement>(null)
+  const slideCount   = useRef(galleryImages.length)
+  const touchStartX  = useRef(0)
+  const touchStartY  = useRef(0)
+  const dragStartX   = useRef(0)
+  const isDragging   = useRef(false)
+  slideCount.current = galleryImages.length
 
-  function handleTouchStart(e: React.TouchEvent) {
-    touchStartX.current = e.touches[0].clientX
-  }
-  function handleTouchEnd(e: React.TouchEvent) {
-    const dx = e.changedTouches[0].clientX - touchStartX.current
-    if (Math.abs(dx) > 40 && galleryImages.length > 1) {
-      setCurrentSlide(s => dx < 0
-        ? (s + 1) % galleryImages.length
-        : (s - 1 + galleryImages.length) % galleryImages.length)
+  // Native touch listeners with non-passive touchmove so we can
+  // call preventDefault and stop the page scrolling during a horizontal swipe
+  useEffect(() => {
+    const el = carouselRef.current
+    if (!el) return
+    function onTouchStart(e: TouchEvent) {
+      touchStartX.current = e.touches[0].clientX
+      touchStartY.current = e.touches[0].clientY
     }
-  }
+    function onTouchMove(e: TouchEvent) {
+      const dx = Math.abs(e.touches[0].clientX - touchStartX.current)
+      const dy = Math.abs(e.touches[0].clientY - touchStartY.current)
+      if (dx > dy && slideCount.current > 1) e.preventDefault()
+    }
+    function onTouchEnd(e: TouchEvent) {
+      const dx = e.changedTouches[0].clientX - touchStartX.current
+      if (Math.abs(dx) > 40 && slideCount.current > 1) {
+        setCurrentSlide(s => dx < 0
+          ? (s + 1) % slideCount.current
+          : (s - 1 + slideCount.current) % slideCount.current)
+      }
+    }
+    el.addEventListener('touchstart',  onTouchStart, { passive: true  })
+    el.addEventListener('touchmove',   onTouchMove,  { passive: false })
+    el.addEventListener('touchend',    onTouchEnd,   { passive: true  })
+    return () => {
+      el.removeEventListener('touchstart', onTouchStart)
+      el.removeEventListener('touchmove',  onTouchMove)
+      el.removeEventListener('touchend',   onTouchEnd)
+    }
+  }, [])
+
   function handleMouseDown(e: React.MouseEvent) {
     isDragging.current = true
     dragStartX.current = e.clientX
@@ -277,6 +302,7 @@ export default function ProductDetail({ product, faq: faqProp }: { product: Full
           <div className="flex flex-col gap-3">
             {/* Main carousel */}
             <div
+              ref={carouselRef}
               className="rounded-3xl overflow-hidden relative select-none"
               style={{
                 background: 'linear-gradient(160deg,#f9f5ee 0%,#ede5d4 100%)',
@@ -284,8 +310,6 @@ export default function ProductDetail({ product, faq: faqProp }: { product: Full
                 aspectRatio: '4/5',
                 cursor: galleryImages.length > 1 ? 'grab' : 'default',
               }}
-              onTouchStart={handleTouchStart}
-              onTouchEnd={handleTouchEnd}
               onMouseDown={handleMouseDown}
               onMouseUp={handleMouseUp}
               onMouseLeave={() => { isDragging.current = false }}
@@ -368,7 +392,7 @@ export default function ProductDetail({ product, faq: faqProp }: { product: Full
               )}
             </div>
 
-            {/* Thumbnail strip */}
+            {/* Thumbnail strip — visible when product has multiple images */}
             {galleryImages.length > 1 && (
               <div className="flex gap-2 overflow-x-auto pb-0.5">
                 {galleryImages.map((img, i) => (
@@ -385,30 +409,6 @@ export default function ProductDetail({ product, faq: faqProp }: { product: Full
                     }}
                   >
                     <Image src={img} alt={`Miniature ${i + 1}`} fill className="object-contain p-1" sizes="64px" />
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Color swatches */}
-            {colors.length > 1 && (
-              <div className="flex gap-3">
-                {colors.slice(0, 5).map(v => (
-                  <button
-                    key={v.color_hex}
-                    onClick={() => handleColorSelect(v.color_hex)}
-                    title={v.color_name}
-                    className="rounded-xl flex-1 flex flex-col items-center justify-center gap-1.5 py-3 transition-all"
-                    style={{
-                      border: `2px solid ${selectedColor === v.color_hex ? 'var(--gold)' : 'var(--border)'}`,
-                      background: selectedColor === v.color_hex ? 'var(--gold-bg)' : 'var(--surface-soft)',
-                    }}
-                  >
-                    <span
-                      className="w-5 h-5 rounded-full"
-                      style={{ background: v.color_hex, boxShadow: '0 0 0 1.5px rgba(0,0,0,.12)' }}
-                    />
-                    <span className="text-[9px] font-medium opacity-50 leading-none">{v.color_name}</span>
                   </button>
                 ))}
               </div>

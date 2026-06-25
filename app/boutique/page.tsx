@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase-server'
 import ProductCard from '@/components/ProductCard'
 import ScrollReveal from '@/components/ScrollReveal'
+import BoutiqueFilters from '@/components/BoutiqueFilters'
 import type { Brand, Category, Product, ProductVariant, ProductZonePrice } from '@/lib/types'
 import { DEMO_BRANDS, DEMO_PRODUCTS } from '@/lib/demo-data'
 
@@ -11,6 +12,17 @@ export const metadata: Metadata = {
 }
 
 interface SearchParams { marque?: string; categorie?: string; stockage?: string; tri?: string }
+
+type ProductRow = Product & {
+  brands: Brand
+  product_variants: (ProductVariant & { product_zone_prices: ProductZonePrice[] })[]
+}
+
+function getMinPrice(product: ProductRow): number {
+  const prices = product.product_variants
+    ?.flatMap(v => v.product_zone_prices?.map(p => p.price) ?? []) ?? []
+  return prices.length > 0 ? Math.min(...prices) : Infinity
+}
 
 async function getData(params: SearchParams) {
   try {
@@ -24,15 +36,8 @@ async function getData(params: SearchParams) {
     if (brandsRes.error || productsRes.error) throw new Error('db')
 
     const allCategories = (categoriesRes.data ?? []) as Category[]
+    const allProducts   = (productsRes.data ?? []) as ProductRow[]
 
-    type ProductRow = Product & {
-      brands: Brand
-      product_variants: (ProductVariant & { product_zone_prices: ProductZonePrice[] })[]
-    }
-
-    const allProducts = (productsRes.data ?? []) as ProductRow[]
-
-    // Only show brands/categories that have at least one active product
     const brandIdsWithProducts = new Set(allProducts.map(p => p.brand_id).filter(Boolean))
     const catIdsWithProducts   = new Set(allProducts.map(p => p.category_id).filter(Boolean))
 
@@ -40,20 +45,18 @@ async function getData(params: SearchParams) {
     const activeCategories = allCategories.filter(c => catIdsWithProducts.has(c.id))
 
     let products = [...allProducts]
-    if (params.marque) products = products.filter(p => p.brands?.slug === params.marque)
+    if (params.marque)    products = products.filter(p => p.brands?.slug === params.marque)
     if (params.categorie) {
       const cat = allCategories.find(c => c.slug === params.categorie)
       if (cat) products = products.filter(p => p.category_id === cat.id)
     }
-    if (params.stockage) products = products.filter(p => p.product_variants?.some(v => v.storage === params.stockage))
-    if (params.tri === 'new') products = products.filter(p => p.is_new)
+    if (params.stockage)         products = products.filter(p => p.product_variants?.some(v => v.storage === params.stockage))
+    if (params.tri === 'new')        products = products.filter(p => p.is_new)
     if (params.tri === 'bestseller') products = products.filter(p => p.is_bestseller)
+    if (params.tri === 'prix-asc')   products.sort((a, b) => getMinPrice(a) - getMinPrice(b))
+    if (params.tri === 'prix-desc')  products.sort((a, b) => getMinPrice(b) - getMinPrice(a))
 
-    return {
-      brands: activeBrands,
-      categories: activeCategories,
-      products,
-    }
+    return { brands: activeBrands, categories: activeCategories, products }
   } catch {
     let products = DEMO_PRODUCTS as typeof DEMO_PRODUCTS
     if (params.marque) products = products.filter(p => p.brands?.slug === params.marque)
@@ -63,58 +66,23 @@ async function getData(params: SearchParams) {
 
 export default async function BoutiquePage({ searchParams }: { searchParams: SearchParams }) {
   const { brands, categories, products } = await getData(searchParams)
-  const activeMarque = searchParams.marque
+  const activeMarque    = searchParams.marque
   const activeCategorie = searchParams.categorie
+  const activeTri       = searchParams.tri
 
   return (
     <div className="py-10 min-h-screen">
       <div className="jc-container">
         <div className="flex flex-col lg:flex-row gap-10">
-          {/* ── SIDEBAR ── */}
-          <aside className="lg:w-48 shrink-0">
-            <div className="sticky top-20 flex flex-col gap-6">
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest mb-4 opacity-40">Catégorie</p>
-                <div className="flex flex-col gap-0.5">
-                  <SidebarLink
-                    href={activeMarque ? `/boutique?marque=${activeMarque}` : '/boutique'}
-                    active={!activeCategorie}
-                  >
-                    Tout
-                  </SidebarLink>
-                  {categories.map(c => (
-                    <SidebarLink
-                      key={c.id}
-                      href={activeMarque ? `/boutique?marque=${activeMarque}&categorie=${c.slug}` : `/boutique?categorie=${c.slug}`}
-                      active={activeCategorie === c.slug}
-                    >
-                      {c.name}
-                    </SidebarLink>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest mb-4 opacity-40">Marque</p>
-                <div className="flex flex-col gap-0.5">
-                  <SidebarLink
-                    href={activeCategorie ? `/boutique?categorie=${activeCategorie}` : '/boutique'}
-                    active={!activeMarque}
-                  >
-                    Toutes les marques
-                  </SidebarLink>
-                  {brands.map(b => (
-                    <SidebarLink
-                      key={b.id}
-                      href={activeCategorie ? `/boutique?categorie=${activeCategorie}&marque=${b.slug}` : `/boutique?marque=${b.slug}`}
-                      active={activeMarque === b.slug}
-                    >
-                      {b.name}
-                    </SidebarLink>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </aside>
+
+          {/* Filtres : barre compacte mobile + sidebar desktop */}
+          <BoutiqueFilters
+            brands={brands}
+            categories={categories}
+            activeMarque={activeMarque}
+            activeCategorie={activeCategorie}
+            activeTri={activeTri}
+          />
 
           {/* ── GRILLE ── */}
           <div className="flex-1">
@@ -146,24 +114,9 @@ export default async function BoutiquePage({ searchParams }: { searchParams: Sea
               </div>
             )}
           </div>
+
         </div>
       </div>
     </div>
-  )
-}
-
-function SidebarLink({ href, active, children }: { href: string; active: boolean; children: React.ReactNode }) {
-  return (
-    <a href={href}
-      className="block px-3 py-2 rounded-lg text-sm transition-all"
-      style={{
-        fontWeight: active ? 600 : 400,
-        background: active ? 'var(--surface)' : 'transparent',
-        color: active ? 'var(--foreground)' : 'inherit',
-        opacity: active ? 1 : 0.5,
-        border: active ? '1px solid var(--border)' : '1px solid transparent',
-      }}>
-      {children}
-    </a>
   )
 }

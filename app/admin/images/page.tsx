@@ -54,7 +54,7 @@ export default function AdminImagesPage() {
   )
 
   const withImages    = products.filter(p => p.image_url || (p.images?.length ?? 0) > 0)
-  const withoutImages = products.filter(p => !p.image_url && !(p.images?.length ?? 0))
+  const withoutImages = products.filter(p => !p.image_url && !(p.images?.length))
 
   return (
     <div>
@@ -109,8 +109,17 @@ function ProductImageSection({
   const [uploadState, setUploadState] = useState<Record<string, UploadState>>({})
   const [errors, setErrors]         = useState<Record<string, string>>({})
 
+  // Normalize: merge image_url into images[] so both sources are visible
+  const productImages: string[] = (() => {
+    const arr = product.images ?? []
+    if (product.image_url && !arr.includes(product.image_url)) {
+      return [product.image_url, ...arr]
+    }
+    return arr
+  })()
+
   const totalImages =
-    (product.images?.length ?? 0) +
+    productImages.length +
     product.product_variants.reduce((s, v) => s + (v.images?.length ?? 0), 0)
 
   const brandName: string =
@@ -149,20 +158,21 @@ function ProductImageSection({
 
   // ── Product-level helpers ──
   async function saveProductImages(newUrls: string[]) {
-    const all = [...(product.images ?? []), ...newUrls]
-    const primaryUrl = product.image_url ?? newUrls[0]
-    const { error } = await supabase.from('products').update({ image_url: primaryUrl, images: all }).eq('id', product.id)
+    const all = [...productImages, ...newUrls]
+    const image_url = all[0] ?? null
+    const { error } = await supabase.from('products').update({ image_url, images: all }).eq('id', product.id)
     if (error) throw new Error(error.message)
-    onUpdate({ ...product, image_url: primaryUrl, images: all })
+    onUpdate({ ...product, image_url, images: all })
   }
 
   async function reorderProductImages(images: string[]) {
-    const { error } = await supabase.from('products').update({ image_url: images[0] ?? null, images }).eq('id', product.id)
-    if (!error) onUpdate({ ...product, image_url: images[0] ?? null, images })
+    const image_url = images[0] ?? null
+    const { error } = await supabase.from('products').update({ image_url, images }).eq('id', product.id)
+    if (!error) onUpdate({ ...product, image_url, images })
   }
 
   async function deleteProductImage(url: string) {
-    const images = (product.images ?? []).filter(u => u !== url)
+    const images = productImages.filter(u => u !== url)
     const image_url = images[0] ?? null
     const { error } = await supabase.from('products').update({ image_url, images }).eq('id', product.id)
     if (!error) onUpdate({ ...product, image_url, images })
@@ -232,7 +242,7 @@ function ProductImageSection({
               Photos générales du produit
             </p>
             <ImageGallery
-              images={product.images ?? []}
+              images={productImages}
               uploadState={uploadState['main'] ?? 'idle'}
               error={errors['main'] ?? ''}
               onUpload={files => handleUpload('main', `${product.slug}/main`, files, saveProductImages)}

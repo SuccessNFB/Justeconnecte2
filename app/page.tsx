@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase-server'
 import ProductCard from '@/components/ProductCard'
 import ProductCarousel from '@/components/ProductCarousel'
@@ -394,23 +395,14 @@ function EngagementSection() {
           <ScrollReveal direction="left" duration={750}>
             <div className="flex justify-center">
               <div className="relative w-80">
-                <div className="rounded-3xl overflow-hidden"
-                  style={{ background: 'linear-gradient(135deg,#f5f0e8,#ede5d4)' }}>
-                  <div className="relative w-full max-w-sm mx-auto">
-                    <div className="relative z-10 w-52 ml-0">
-                      <svg viewBox="0 0 160 280" fill="none" className="w-full drop-shadow-2xl">
-                        <rect x="6" y="4" width="148" height="272" rx="26" fill="#c8b89a"/>
-                        <rect x="10" y="8" width="140" height="264" rx="23" fill="#d4c4a8"/>
-                        <rect x="14" y="24" width="132" height="226" rx="14" fill="#e8e0d0" opacity="0.85"/>
-                        <rect x="60" y="28" width="40" height="12" rx="6" fill="#b8a888"/>
-                        <rect x="20" y="32" width="44" height="44" rx="12" fill="#b8a888" opacity="0.5"/>
-                        <circle cx="31" cy="47" r="9" fill="#1a1a1a" opacity="0.7"/>
-                        <circle cx="51" cy="47" r="9" fill="#1a1a1a" opacity="0.7"/>
-                        <circle cx="41" cy="66" r="4" fill="#1a1a1a" opacity="0.4"/>
-                        <rect x="60" y="255" width="40" height="5" rx="2.5" fill="#b8a888" opacity="0.6"/>
-                      </svg>
-                    </div>
-                  </div>
+                <div className="rounded-3xl overflow-hidden shadow-xl">
+                  <Image
+                    src="/engagement.png"
+                    alt="Juste Connecté — livraison smartphone"
+                    width={640}
+                    height={640}
+                    className="w-full h-auto object-cover"
+                  />
                 </div>
               </div>
             </div>

@@ -513,7 +513,7 @@ export default function ProductDetail({ product, faq: faqProp }: { product: Full
             {selectedVariant && (
               <div>
                 <div className="flex items-center gap-2 text-sm font-medium">
-                  {stockStatus === 'in_stock'     && <><CheckCircle size={15} style={{ color: 'var(--success)' }} /><span style={{ color: 'var(--success)' }}>En stock · Expédié sous 24-48 h</span></>}
+                  {stockStatus === 'in_stock'     && <><CheckCircle size={15} style={{ color: 'var(--success)' }} /><span style={{ color: 'var(--success)' }}>En stock · Expédié sous 24 à 48 h</span></>}
                   {stockStatus === 'low_stock'    && <><AlertTriangle size={15} style={{ color: 'var(--warning)' }} /><span style={{ color: 'var(--warning)' }}>⚡ Plus que {selectedVariant.stock} en stock — dépêchez-vous !</span></>}
                   {stockStatus === 'out_of_stock' && <><XCircle size={15} style={{ color: 'var(--destructive)' }} /><span style={{ color: 'var(--destructive)' }}>Rupture de stock</span></>}
                 </div>

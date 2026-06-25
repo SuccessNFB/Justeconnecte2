@@ -23,16 +23,26 @@ async function getData(params: SearchParams) {
 
     if (brandsRes.error || productsRes.error) throw new Error('db')
 
-    const categories = (categoriesRes.data ?? []) as Category[]
+    const allCategories = (categoriesRes.data ?? []) as Category[]
 
-    let products = (productsRes.data ?? []) as (Product & {
+    type ProductRow = Product & {
       brands: Brand
       product_variants: (ProductVariant & { product_zone_prices: ProductZonePrice[] })[]
-    })[]
+    }
 
+    const allProducts = (productsRes.data ?? []) as ProductRow[]
+
+    // Only show brands/categories that have at least one active product
+    const brandIdsWithProducts = new Set(allProducts.map(p => p.brand_id).filter(Boolean))
+    const catIdsWithProducts   = new Set(allProducts.map(p => p.category_id).filter(Boolean))
+
+    const activeBrands     = ((brandsRes.data ?? []) as Brand[]).filter(b => brandIdsWithProducts.has(b.id))
+    const activeCategories = allCategories.filter(c => catIdsWithProducts.has(c.id))
+
+    let products = [...allProducts]
     if (params.marque) products = products.filter(p => p.brands?.slug === params.marque)
     if (params.categorie) {
-      const cat = categories.find(c => c.slug === params.categorie)
+      const cat = allCategories.find(c => c.slug === params.categorie)
       if (cat) products = products.filter(p => p.category_id === cat.id)
     }
     if (params.stockage) products = products.filter(p => p.product_variants?.some(v => v.storage === params.stockage))
@@ -40,8 +50,8 @@ async function getData(params: SearchParams) {
     if (params.tri === 'bestseller') products = products.filter(p => p.is_bestseller)
 
     return {
-      brands: (brandsRes.data ?? []) as Brand[],
-      categories,
+      brands: activeBrands,
+      categories: activeCategories,
       products,
     }
   } catch {

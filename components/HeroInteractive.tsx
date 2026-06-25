@@ -10,9 +10,10 @@ const BRANDS = [
     name: 'Apple',
     tagline: 'iPhone 17 Pro Max — appareil photo cinématique, puce A19 Pro, titanium.',
     model: 'iPhone 17 Pro Max',
-    from: 899,
+    from: 1599,
     glow: 'rgba(196,146,42,0.22)',
     href: '/boutique?marque=apple',
+    productHref: '/produits/iphone-17-pro-max',
     badge: 'Nouveau · iPhone 17 Pro Max disponible',
     image: 'https://cdn.shopify.com/s/files/1/0952/4366/5698/files/IMG-9394.png?v=1776375420',
   },
@@ -24,6 +25,7 @@ const BRANDS = [
     from: 439,
     glow: 'rgba(0,120,255,0.12)',
     href: '/boutique?marque=samsung',
+    productHref: '/produits/samsung-galaxy-s26-ultra',
     badge: 'Nouveau · Galaxy S26 Ultra disponible',
     image: 'https://cdn.shopify.com/s/files/1/0952/4366/5698/files/IMG-0062.png?v=1776374854',
   },
@@ -35,6 +37,7 @@ const BRANDS = [
     from: 389,
     glow: 'rgba(255,105,0,0.14)',
     href: '/boutique?marque=xiaomi',
+    productHref: '/produits/xiaomi-15',
     badge: 'Prix malin · Xiaomi 15 en stock',
     image: 'https://cdn.shopify.com/s/files/1/0952/4366/5698/files/IMG-1012.webp?v=1776995420',
   },
@@ -184,8 +187,9 @@ export default function HeroInteractive() {
             <TiltCard glow={brand.glow}>
               <div className="relative w-52 sm:w-64">
 
-                <div
-                  className="relative rounded-3xl overflow-hidden flex items-center justify-center"
+                <Link
+                  href={brand.productHref}
+                  className="group relative block rounded-3xl overflow-hidden"
                   style={{
                     ...transStyle,
                     height: '380px',
@@ -197,11 +201,17 @@ export default function HeroInteractive() {
                     src={brand.image}
                     alt={brand.model}
                     fill
-                    className="object-contain p-6 drop-shadow-2xl"
+                    className="object-contain p-6 drop-shadow-2xl transition-transform duration-500 group-hover:scale-105"
                     sizes="(max-width: 640px) 208px, 256px"
                     priority={activeIdx === 0}
                   />
-                </div>
+                  <div className="absolute inset-0 flex items-end justify-center pb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                    <span className="text-[11px] font-semibold px-3.5 py-1.5 rounded-full text-white"
+                      style={{ background: 'rgba(17,17,17,0.74)', backdropFilter: 'blur(8px)' }}>
+                      Voir le produit →
+                    </span>
+                  </div>
+                </Link>
 
                 {/* Floating price badge */}
                 <div

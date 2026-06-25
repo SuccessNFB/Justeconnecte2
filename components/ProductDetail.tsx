@@ -44,9 +44,10 @@ function hashSlug(slug: string): number {
 
 function getReviews(slug: string) {
   const seed = hashSlug(slug)
+  const count = 2 + (seed % 5) // 2 to 6 reviews per product
   const pool = [...REVIEW_POOL]
   const picked = []
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < count; i++) {
     const idx = (seed * (i + 1) * 2654435761) % pool.length >>> 0
     picked.push(pool.splice(idx % pool.length, 1)[0])
   }
@@ -588,9 +589,9 @@ export default function ProductDetail({ product, faq: faqProp }: { product: Full
                   <button key={s} onClick={() => setSelectedStorage(s)}
                     className="px-5 py-2 rounded-full text-sm font-semibold transition-all"
                     style={{
-                      background: selectedStorage === s ? 'var(--primary)' : 'var(--surface)',
-                      color:      selectedStorage === s ? '#fff' : 'inherit',
-                      border:     `1.5px solid ${selectedStorage === s ? 'var(--primary)' : 'var(--border-strong)'}`,
+                      background: selectedStorage === s ? 'var(--gold-bg)' : 'transparent',
+                      color:      selectedStorage === s ? 'var(--gold-deep)' : 'inherit',
+                      border:     `1.5px solid ${selectedStorage === s ? 'var(--gold)' : 'var(--border-strong)'}`,
                     }}>
                     {s}
                   </button>

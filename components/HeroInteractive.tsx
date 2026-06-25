@@ -123,7 +123,8 @@ export default function HeroInteractive({ brandPrices = {} }: { brandPrices?: Re
   const activeRef   = useRef(0)          /* always current without stale closure */
 
   const brand    = BRANDS[activeIdx]
-  const fromPrice = brandPrices[brand.id] ?? brand.from
+  const productSlug = brand.productHref.split('/').pop() ?? ''
+  const fromPrice = brandPrices[productSlug] ?? brand.from
 
   /* ── Progress bar ── */
   const startProgress = useCallback(() => {

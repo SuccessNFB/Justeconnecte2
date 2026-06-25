@@ -79,20 +79,20 @@ async function getData() {
       supabase.from('products').select(`*, brands(*), product_variants(*, product_zone_prices(*))`).eq('is_new', true).eq('is_active', true).limit(4),
       supabase.from('products').select(`*, brands(*), product_variants(*, product_zone_prices(*))`).eq('is_bestseller', true).eq('is_active', true).limit(4),
       supabase.from('site_content').select('*').eq('page', 'global').eq('section', 'contact'),
-      supabase.from('products').select('brands(slug), product_variants(product_zone_prices(price))').eq('is_active', true),
+      supabase.from('products').select('slug, product_variants(product_zone_prices(price))')
+        .in('slug', ['iphone-17-pro-max', 'samsung-galaxy-s26-ultra', 'xiaomi-15'])
+        .eq('is_active', true),
     ])
     if (newRes.error || bestRes.error) throw new Error('db')
 
-    // Compute minimum price per brand slug across all active products/variants/zones
+    // Minimum price per hero product slug (not brand-wide min, to avoid other models polluting the price)
     const brandPrices: Record<string, number> = {}
     for (const p of (allRes.data ?? [])) {
-      const slug = (p.brands as any)?.slug as string | undefined
-      if (!slug) continue
       const prices = ((p.product_variants ?? []) as any[])
         .flatMap((v: any) => (v.product_zone_prices ?? []).map((pr: any) => pr.price as number))
         .filter((n: number) => Number.isFinite(n) && n > 0)
       const min = prices.length ? Math.min(...prices) : null
-      if (min !== null && (!brandPrices[slug] || min < brandPrices[slug])) brandPrices[slug] = min
+      if (min !== null) brandPrices[p.slug] = min
     }
 
     const contact = (contactRes.data ?? []) as SiteContent[]

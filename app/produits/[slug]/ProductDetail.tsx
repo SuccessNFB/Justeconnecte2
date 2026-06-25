@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { ShoppingCart, Zap, Award, CheckCircle, AlertTriangle, XCircle, ChevronDown, Heart } from 'lucide-react'
 import { useZone } from '@/contexts/ZoneContext'
 import { useCart } from '@/contexts/CartContext'
@@ -237,36 +238,57 @@ export default function ProductDetail({ product, faq: faqProp }: { product: Full
 
           {/* ── GALERIE ── */}
           <div className="flex flex-col gap-4">
+            {/* Main image */}
             <div
-              className="rounded-3xl aspect-[4/5] flex items-center justify-center p-10 relative overflow-hidden"
-              style={{ background: 'linear-gradient(160deg,#f9f5ee 0%,#ede5d4 100%)', border: '1px solid var(--border)' }}
+              className="rounded-3xl relative overflow-hidden flex items-center justify-center"
+              style={{
+                background: 'linear-gradient(160deg,#f9f5ee 0%,#ede5d4 100%)',
+                border: '1px solid var(--border)',
+                aspectRatio: '4/5',
+              }}
             >
-              {/* Grade badge */}
-              <div className="absolute top-4 left-4 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold"
-                style={{ background: 'var(--gold-bg)', border: '1px solid rgba(196,146,42,0.3)', color: 'var(--gold-deep)' }}>
-                ✓ Grade A — Comme neuf
+              {product.image_url ? (
+                <Image
+                  src={product.image_url}
+                  alt={product.name}
+                  fill
+                  className="object-contain p-8 drop-shadow-xl"
+                  sizes="(max-width: 1024px) 90vw, 45vw"
+                  priority
+                />
+              ) : (
+                <div className="p-10 w-full h-full flex items-center justify-center">
+                  <PhoneDisplay colorHex={selectedColor} />
+                </div>
+              )}
+            </div>
+
+            {/* Color thumbnails */}
+            {colors.length > 1 && (
+              <div className="flex gap-3">
+                {colors.slice(0, 5).map(v => (
+                  <button
+                    key={v.color_hex}
+                    onClick={() => handleColorSelect(v.color_hex)}
+                    title={v.color_name}
+                    className="rounded-xl flex-1 flex flex-col items-center justify-center gap-1.5 py-3 transition-all"
+                    style={{
+                      border: `2px solid ${selectedColor === v.color_hex ? 'var(--gold)' : 'var(--border)'}`,
+                      background: selectedColor === v.color_hex ? 'var(--gold-bg)' : 'var(--surface-soft)',
+                    }}
+                  >
+                    <span
+                      className="w-5 h-5 rounded-full"
+                      style={{
+                        background: v.color_hex,
+                        boxShadow: '0 0 0 1.5px rgba(0,0,0,.12)',
+                      }}
+                    />
+                    <span className="text-[9px] font-medium opacity-50 leading-none">{v.color_name}</span>
+                  </button>
+                ))}
               </div>
-              <PhoneDisplay colorHex={selectedColor} />
-            </div>
-            {/* Thumbnails */}
-            <div className="flex gap-3">
-              {colors.slice(0, 4).map(v => (
-                <button
-                  key={v.color_hex}
-                  onClick={() => handleColorSelect(v.color_hex)}
-                  className="rounded-xl p-2.5 flex-1 flex items-center justify-center transition-all"
-                  style={{
-                    border: `2px solid ${selectedColor === v.color_hex ? 'var(--gold)' : 'var(--border)'}`,
-                    background: selectedColor === v.color_hex ? 'var(--gold-bg)' : 'var(--surface-soft)',
-                  }}
-                >
-                  <svg viewBox="0 0 60 100" className="w-8 h-auto">
-                    <rect x="5" y="2" width="50" height="96" rx="10" fill={v.color_hex} opacity="0.85"/>
-                    <rect x="9" y="10" width="42" height="72" rx="6" fill="#eee" opacity="0.7"/>
-                  </svg>
-                </button>
-              ))}
-            </div>
+            )}
           </div>
 
           {/* ── INFOS ── */}

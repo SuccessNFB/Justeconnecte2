@@ -111,12 +111,8 @@ export default function ProductCarousel({ title, products, href }: Props) {
             <div
               key={p.id}
               data-card
-              style={{
-                scrollSnapAlign: 'start',
-                flex: '0 0 auto',
-                // Mobile: ~1.15 cards visible; tablet: ~2; desktop: ~4
-                width: 'clamp(68%, 42%, 23%)',
-              }}
+              className="w-[78vw] sm:w-[44vw] md:w-[30vw] lg:w-[22vw] flex-shrink-0 max-w-[300px]"
+              style={{ scrollSnapAlign: 'start' }}
             >
               <ProductCard product={p} />
             </div>

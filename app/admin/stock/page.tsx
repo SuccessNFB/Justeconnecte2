@@ -37,8 +37,16 @@ export default function AdminStock() {
     setUpdating(null)
   }
 
-  const outOfStock = rows.filter(r => r.stock === 0)
-  const lowStock   = rows.filter(r => r.stock > 0 && r.stock <= 5)
+  async function toggleOutOfStock(id: string, current: boolean) {
+    setUpdating(id)
+    const out_of_stock = !current
+    await supabase.from('product_variants').update({ out_of_stock }).eq('id', id)
+    setRows(prev => prev.map(r => r.id === id ? { ...r, out_of_stock } : r))
+    setUpdating(null)
+  }
+
+  const outOfStock = rows.filter(r => r.out_of_stock || r.stock === 0)
+  const lowStock   = rows.filter(r => !r.out_of_stock && r.stock > 0 && r.stock <= 5)
 
   const filtered = rows.filter(r => {
     if (filter === 'out' && r.stock !== 0) return false
@@ -66,14 +74,38 @@ export default function AdminStock() {
     return 'oklch(0.72 0.18 145 / 0.1)'
   }
 
-  function StockBadge({ stock }: { stock: number }) {
+  function StockBadge({ row }: { row: Row }) {
+    const oos = row.out_of_stock || row.stock === 0
+    const low = !oos && row.stock <= 5
     const props = {
       className: 'inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full whitespace-nowrap',
-      style: { background: stockBg(stock), color: stockColor(stock) },
+      style: {
+        background: oos ? stockBg(0) : low ? stockBg(3) : stockBg(10),
+        color:      oos ? stockColor(0) : low ? stockColor(3) : stockColor(10),
+      },
     }
-    if (stock === 0) return <span {...props}><XCircle size={11} /> Rupture</span>
-    if (stock <= 5)  return <span {...props}><AlertTriangle size={11} /> Faible</span>
-    return <span {...props}><CheckCircle size={11} /> {stock} unités</span>
+    if (oos) return <span {...props}><XCircle size={11} /> Rupture</span>
+    if (low) return <span {...props}><AlertTriangle size={11} /> Faible</span>
+    return <span {...props}><CheckCircle size={11} /> {row.stock} unités</span>
+  }
+
+  function OosToggle({ row }: { row: Row }) {
+    const busy = updating === row.id
+    const isOos = row.out_of_stock
+    return (
+      <button
+        onClick={() => toggleOutOfStock(row.id, isOos)}
+        disabled={busy}
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all disabled:opacity-50 whitespace-nowrap"
+        style={{
+          background: isOos ? 'oklch(0.72 0.18 145 / 0.1)' : 'oklch(0.62 0.22 27 / 0.08)',
+          color:      isOos ? 'var(--success)'               : 'var(--destructive)',
+          border:     `1px solid ${isOos ? 'oklch(0.72 0.18 145 / 0.2)' : 'oklch(0.62 0.22 27 / 0.15)'}`,
+        }}
+      >
+        {busy ? '…' : isOos ? <><CheckCircle size={11} /> Remettre en stock</> : <><XCircle size={11} /> Forcer rupture</>}
+      </button>
+    )
   }
 
   function Stepper({ row }: { row: Row }) {
@@ -167,7 +199,7 @@ export default function AdminStock() {
             <table className="w-full text-sm">
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--border)', background: 'var(--surface-soft)' }}>
-                  {['Produit', 'Couleur', 'Stockage', 'SKU', 'Stock', 'Statut'].map(h => (
+                  {['Produit', 'Couleur', 'Stockage', 'SKU', 'Stock', 'Statut', 'Disponibilité'].map(h => (
                     <th key={h} className="text-left px-5 py-3 font-semibold text-xs uppercase tracking-wide"
                       style={{ color: 'oklch(0.18 0.004 264 / 0.5)' }}>{h}</th>
                   ))}
@@ -187,7 +219,8 @@ export default function AdminStock() {
                     <td className="px-5 py-3">{row.storage}</td>
                     <td className="px-5 py-3 font-mono text-xs opacity-40">{row.sku}</td>
                     <td className="px-5 py-3"><Stepper row={row} /></td>
-                    <td className="px-5 py-3"><StockBadge stock={row.stock} /></td>
+                    <td className="px-5 py-3"><StockBadge row={row} /></td>
+                    <td className="px-5 py-3"><OosToggle row={row} /></td>
                   </tr>
                 ))}
               </tbody>
@@ -210,12 +243,17 @@ export default function AdminStock() {
                     </div>
                     <p className="text-[10px] font-mono opacity-30 mt-0.5">{row.sku}</p>
                   </div>
-                  <StockBadge stock={row.stock} />
+                  <StockBadge row={row} />
                 </div>
                 <div className="flex items-center justify-between pt-3"
                   style={{ borderTop: '1px solid var(--border)' }}>
                   <p className="text-xs font-medium opacity-40">Quantité en stock</p>
                   <Stepper row={row} />
+                </div>
+                <div className="flex items-center justify-between pt-3"
+                  style={{ borderTop: '1px solid var(--border)' }}>
+                  <p className="text-xs font-medium opacity-40">Disponibilité</p>
+                  <OosToggle row={row} />
                 </div>
               </div>
             ))}

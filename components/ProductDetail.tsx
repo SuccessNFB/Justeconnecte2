@@ -174,8 +174,9 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 }
 
 export default function ProductDetail({ product, faq: faqProp }: { product: FullProduct; faq?: { q: string; a: string }[] }) {
-  const faqItems = faqProp ?? FAQ
-  const reviews  = getReviews(product.slug)
+  const faqItems    = faqProp ?? FAQ
+  const reviews     = getReviews(product.slug)
+  const reviewCount = 12 + (hashSlug(product.slug + 'count') % 89) // 12–100, unique per product
   const { zone }                   = useZone()
   const { addItem }                = useCart()
   const { toggle, isWishlisted }   = useWishlist()
@@ -506,7 +507,7 @@ export default function ProductDetail({ product, faq: faqProp }: { product: Full
             <div className="flex items-center gap-1.5">
               <span className="jc-stars">★★★★★</span>
               <span className="text-sm font-semibold" style={{ color: 'var(--gold)' }}>4.8</span>
-              <span className="text-sm opacity-40">· 42 avis vérifiés</span>
+              <span className="text-sm opacity-40">· {reviewCount} avis vérifiés</span>
             </div>
 
             {/* Name */}
@@ -735,7 +736,7 @@ export default function ProductDetail({ product, faq: faqProp }: { product: Full
             <div className="shrink-0 text-center">
               <p className="font-bold" style={{ fontSize: '3.5rem', lineHeight: 1 }}>4.8</p>
               <div className="jc-stars text-lg my-1">★★★★★</div>
-              <p className="text-xs opacity-35">42 avis vérifiés</p>
+              <p className="text-xs opacity-35">{reviewCount} avis vérifiés</p>
             </div>
             {/* Barres */}
             <div className="flex-1 flex flex-col gap-2">

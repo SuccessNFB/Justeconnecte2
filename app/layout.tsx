@@ -4,6 +4,7 @@ import './globals.css'
 import { ZoneProvider } from '@/contexts/ZoneContext'
 import { CartProvider } from '@/contexts/CartContext'
 import { WishlistProvider } from '@/contexts/WishlistContext'
+import { ToastProvider } from '@/contexts/ToastContext'
 import SiteShell from '@/components/SiteShell'
 import AnalyticsTracker from '@/components/AnalyticsTracker'
 
@@ -44,8 +45,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ZoneProvider>
           <CartProvider>
             <WishlistProvider>
-              <AnalyticsTracker />
-              <SiteShell>{children}</SiteShell>
+              <ToastProvider>
+                <AnalyticsTracker />
+                <SiteShell>{children}</SiteShell>
+              </ToastProvider>
             </WishlistProvider>
           </CartProvider>
         </ZoneProvider>

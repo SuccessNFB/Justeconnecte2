@@ -57,9 +57,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  function persist(next: CartItem[]) {
-    setItems(next)
+  function save(next: CartItem[]) {
     localStorage.setItem('jc-cart', JSON.stringify(next))
+    return next
   }
 
   function addItem(variantId: string, quantity = 1) {
@@ -77,22 +77,24 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         if (prev.length >= MAX_CART_LINES) return prev
         next = [...prev, { variantId, quantity: Math.min(quantity, MAX_QUANTITY) }]
       }
-      localStorage.setItem('jc-cart', JSON.stringify(next))
-      return next
+      return save(next)
     })
   }
 
   function removeItem(variantId: string) {
-    persist(items.filter(i => i.variantId !== variantId))
+    setItems(prev => save(prev.filter(i => i.variantId !== variantId)))
   }
 
   function updateQuantity(variantId: string, quantity: number) {
     if (quantity <= 0) { removeItem(variantId); return }
     const clamped = Math.min(Math.max(1, quantity), MAX_QUANTITY)
-    persist(items.map(i => i.variantId === variantId ? { ...i, quantity: clamped } : i))
+    setItems(prev => save(prev.map(i => i.variantId === variantId ? { ...i, quantity: clamped } : i)))
   }
 
-  function clearCart() { persist([]) }
+  function clearCart() {
+    setItems([])
+    localStorage.setItem('jc-cart', JSON.stringify([]))
+  }
 
   return (
     <CartContext.Provider value={{

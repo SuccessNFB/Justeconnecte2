@@ -6,6 +6,7 @@ import { ShoppingCart, Zap, Award, CheckCircle, AlertTriangle, XCircle, ChevronD
 import { useZone } from '@/contexts/ZoneContext'
 import { useCart } from '@/contexts/CartContext'
 import { useWishlist } from '@/contexts/WishlistContext'
+import { useToast } from '@/contexts/ToastContext'
 import { formatPrice, getStockStatus } from '@/lib/utils'
 import { trackEvent } from '@/lib/analytics'
 import type { Brand, Product, ProductVariant, ProductZonePrice } from '@/lib/types'
@@ -148,6 +149,7 @@ export default function ProductDetail({ product, faq: faqProp }: { product: Full
   const { zone }                   = useZone()
   const { addItem }                = useCart()
   const { toggle, isWishlisted }   = useWishlist()
+  const { showToast }              = useToast()
   const router                     = useRouter()
   const ctaRef                     = useRef<HTMLDivElement>(null)
   const [stickyVisible, setStickyVisible] = useState(false)
@@ -261,6 +263,18 @@ export default function ProductDetail({ product, faq: faqProp }: { product: Full
     setCurrentSlide(0)
   }
 
+  function handleAddToCart(andBuy = false) {
+    if (!selectedVariant) return
+    addItem(selectedVariant.id)
+    trackEvent('add_to_cart', { productSlug: product.slug, variantId: selectedVariant.id, zone: zone?.name })
+    showToast({
+      title:    product.name,
+      subtitle: [selectedColorName, selectedStorage].filter(Boolean).join(' · '),
+      image:    galleryImages[0] || product.image_url || undefined,
+    })
+    if (andBuy) router.push('/panier')
+  }
+
   const canBuy = stockStatus !== 'out_of_stock' && !!selectedVariant
 
   return (
@@ -285,7 +299,7 @@ export default function ProductDetail({ product, faq: faqProp }: { product: Full
           <div className="flex gap-2 ml-auto">
             <button
               disabled={!canBuy}
-              onClick={() => { if (selectedVariant) { addItem(selectedVariant.id); trackEvent('add_to_cart', { productSlug: product.slug, variantId: selectedVariant.id, zone: zone?.name }) } }}
+              onClick={() => handleAddToCart()}
               className="jc-btn-primary px-6 py-2.5 text-sm"
             >
               <ShoppingCart size={15} />
@@ -293,7 +307,7 @@ export default function ProductDetail({ product, faq: faqProp }: { product: Full
             </button>
             <button
               disabled={!canBuy}
-              onClick={() => { if (selectedVariant) { addItem(selectedVariant.id); trackEvent('add_to_cart', { productSlug: product.slug, variantId: selectedVariant.id, zone: zone?.name }); router.push('/panier') } }}
+              onClick={() => handleAddToCart(true)}
               className="jc-btn-ghost px-5 py-2.5 text-sm"
             >
               Acheter maintenant
@@ -560,7 +574,7 @@ export default function ProductDetail({ product, faq: faqProp }: { product: Full
             <div ref={ctaRef} className="flex gap-3">
               <button
                 disabled={!canBuy}
-                onClick={() => { if (selectedVariant) { addItem(selectedVariant.id); trackEvent('add_to_cart', { productSlug: product.slug, variantId: selectedVariant.id, zone: zone?.name }) } }}
+                onClick={() => handleAddToCart()}
                 className="jc-btn-primary flex-1 py-3.5 text-sm"
               >
                 <ShoppingCart size={16} />
@@ -568,7 +582,7 @@ export default function ProductDetail({ product, faq: faqProp }: { product: Full
               </button>
               <button
                 disabled={!canBuy}
-                onClick={() => { if (selectedVariant) { addItem(selectedVariant.id); trackEvent('add_to_cart', { productSlug: product.slug, variantId: selectedVariant.id, zone: zone?.name }); router.push('/panier') } }}
+                onClick={() => handleAddToCart(true)}
                 className="jc-btn-ghost flex-1 py-3.5 text-sm"
               >
                 <Zap size={16} /> Acheter maintenant

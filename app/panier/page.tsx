@@ -199,7 +199,7 @@ export default function PanierPage() {
                   <span className="font-medium">{formatPrice(subtotal)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span style={{ color: 'oklch(0.18 0.004 264 / 0.6)' }}>Livraison · taxe & octroi de mer</span>
+                  <span style={{ color: 'oklch(0.18 0.004 264 / 0.6)' }}>Livraison · Taxes et octroi de mer inclus</span>
                   <span className="font-medium" style={{ color: 'var(--success)' }}>Gratuit</span>
                 </div>
                 <div

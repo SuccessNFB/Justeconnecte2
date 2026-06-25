@@ -101,7 +101,7 @@ function IconReturn() {
 const BENEFITS = [
   { icon: IconSavings,      title: 'Prix compétitifs',       body: 'Meilleurs tarifs que les revendeurs locaux sur des appareils 100 % neufs.' },
   { icon: IconCpu,          title: '100 % neuf',             body: "Jamais utilisé, emballage d'origine scellé — prêt à l'emploi dès l'ouverture." },
-  { icon: IconLeaf,         title: 'Livraison gratuite',     body: 'Expédié depuis la France. Livraison offerte en Guadeloupe, Martinique et Guyane — taxe & octroi de mer inclus.' },
+  { icon: IconLeaf,         title: 'Livraison gratuite',     body: 'Expédié depuis la France. Livraison offerte en Guadeloupe, Martinique et Guyane — Taxes et octroi de mer inclus.' },
   { icon: IconUnlock,       title: 'Débloqué',               body: 'Compatible tous opérateurs sans restriction.' },
   { icon: IconShieldCheck,  title: 'Garantie constructeur',  body: 'Garantie officielle 12 à 24 mois selon la marque. Batterie incluse.' },
   { icon: IconReturn,       title: 'Retours 14 jours',       body: 'Satisfait ou remboursé, sans condition ni justification.' },

@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { Truck, Shield, CreditCard } from 'lucide-react'
 
 const MESSAGES = [
-  { icon: Truck,       text: 'Livraison gratuite · Taxe et octroi de mer offerts' },
+  { icon: Truck,       text: 'Livraison gratuite · Taxes et octroi de mer inclus' },
   { icon: Shield,      text: 'Garantie constructeur incluse sur tous les appareils' },
   { icon: CreditCard,  text: 'Paiement en 4× sans frais avec Scalapay — sans condition de montant minimum' },
 ]

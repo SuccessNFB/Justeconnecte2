@@ -230,7 +230,7 @@ export default function HeroInteractive() {
               <span className="font-bold" style={{ color: 'var(--gold)' }}>Guadeloupe / Martinique</span>
               {' & '}
               <span className="font-bold" style={{ color: 'var(--gold)' }}>Guyane</span>
-              {' '}· taxe & octroi de mer offerts
+              {' '}· Taxes et octroi de mer inclus
             </p>
 
             {/* Brand selector pills */}

@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
     },
     custom_text: {
       shipping_address: {
-        message: 'Livraison gratuite · Taxe & octroi de mer offerts en Guadeloupe, Martinique et Guyane.',
+        message: 'Livraison gratuite · Taxes et octroi de mer inclus en Guadeloupe, Martinique et Guyane.',
       },
     },
     success_url: `${origin}/merci?session_id={CHECKOUT_SESSION_ID}`,

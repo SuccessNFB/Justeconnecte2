@@ -9,6 +9,7 @@ import { useWishlist } from '@/contexts/WishlistContext'
 import { useToast } from '@/contexts/ToastContext'
 import { formatPrice, getStockStatus } from '@/lib/utils'
 import { trackEvent } from '@/lib/analytics'
+import { createClient } from '@/lib/supabase'
 import type { Brand, Product, ProductVariant, ProductZonePrice } from '@/lib/types'
 
 type FullProduct = Product & {
@@ -161,7 +162,6 @@ export default function ProductDetail({ product, faq: faqProp }: { product: Full
   }, [product.slug])
 
   useEffect(() => {
-    setViewers(Math.floor(Math.random() * 8) + 4)
     const observer = new IntersectionObserver(
       ([entry]) => setStickyVisible(!entry.isIntersecting),
       { threshold: 0 }
@@ -169,6 +169,23 @@ export default function ProductDetail({ product, faq: faqProp }: { product: Full
     if (ctaRef.current) observer.observe(ctaRef.current)
     return () => observer.disconnect()
   }, [])
+
+  // Realtime presence — count real visitors on this product page
+  useEffect(() => {
+    const supabase = createClient()
+    const channel = supabase.channel(`viewers:${product.slug}`, {
+      config: { presence: { key: Math.random().toString(36).slice(2) } },
+    })
+    channel
+      .on('presence', { event: 'sync' }, () => {
+        const count = Object.keys(channel.presenceState()).length
+        setViewers(count > 1 ? count : 0)
+      })
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') await channel.track({ ts: Date.now() })
+      })
+    return () => { supabase.removeChannel(channel) }
+  }, [product.slug])
 
   const variants = product.product_variants ?? []
   const colorMap  = new Map(variants.map(v => [v.color_hex, v]))

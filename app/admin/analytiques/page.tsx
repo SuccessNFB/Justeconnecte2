@@ -2,7 +2,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import {
   TrendingUp, Users, Eye, ShoppingCart, CreditCard,
-  Activity, BarChart2, MapPin, Smartphone, Monitor,
+  Activity, BarChart2, MapPin, Smartphone, Monitor, Trash2,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 
@@ -157,11 +157,20 @@ const ZONE_LABEL: Record<string, string> = {
 }
 
 export default function AnalytiquesPage() {
-  const [period, setPeriod] = useState(7)
-  const [events, setEvents] = useState<AEvent[]>([])
+  const [period, setPeriod]   = useState(7)
+  const [events, setEvents]   = useState<AEvent[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError]     = useState(false)
+  const [resetting, setResetting] = useState(false)
   const supabase = createClient()
+
+  async function handleReset() {
+    if (!confirm('Supprimer toutes les données analytiques ? Cette action est irréversible.')) return
+    setResetting(true)
+    await supabase.from('analytics_events').delete().lte('created_at', new Date().toISOString())
+    setEvents([])
+    setResetting(false)
+  }
 
   useEffect(() => {
     setLoading(true)
@@ -270,20 +279,32 @@ export default function AnalytiquesPage() {
             Comportement des visiteurs sur la boutique
           </p>
         </div>
-        <div className="flex items-center gap-1 p-1 rounded-xl" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
-          {PERIODS.map(p => (
-            <button
-              key={p.days}
-              onClick={() => setPeriod(p.days)}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
-              style={{
-                background: period === p.days ? 'var(--primary)' : 'transparent',
-                color:      period === p.days ? '#fff' : 'oklch(0.18 0.004 264 / 0.5)',
-              }}
-            >
-              {p.label}
-            </button>
-          ))}
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 p-1 rounded-xl" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+            {PERIODS.map(p => (
+              <button
+                key={p.days}
+                onClick={() => setPeriod(p.days)}
+                className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+                style={{
+                  background: period === p.days ? 'var(--primary)' : 'transparent',
+                  color:      period === p.days ? '#fff' : 'oklch(0.18 0.004 264 / 0.5)',
+                }}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={handleReset}
+            disabled={resetting}
+            title="Réinitialiser les données"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all disabled:opacity-50"
+            style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--destructive)' }}
+          >
+            <Trash2 size={12} />
+            {resetting ? 'Suppression…' : 'Réinitialiser'}
+          </button>
         </div>
       </div>
 

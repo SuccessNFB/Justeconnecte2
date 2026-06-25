@@ -6,8 +6,8 @@ import type { Brand, Category, Product, ProductVariant, ProductZonePrice } from 
 import { DEMO_BRANDS, DEMO_PRODUCTS } from '@/lib/demo-data'
 
 export const metadata: Metadata = {
-  title: 'Boutique',
-  description: 'Tous nos smartphones disponibles aux Antilles et en Guyane.',
+  title: 'Boutique — Smartphones neufs iPhone, Samsung, Xiaomi',
+  description: 'Découvrez notre catalogue de smartphones neufs : iPhone, Samsung Galaxy, Xiaomi — livrés en Guadeloupe, Martinique et Guyane. Garantie constructeur, paiement en 4× sans frais.',
 }
 
 interface SearchParams { marque?: string; categorie?: string; stockage?: string; tri?: string }

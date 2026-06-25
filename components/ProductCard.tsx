@@ -107,28 +107,22 @@ export default function ProductCard({ product }: Props) {
 
         {/* ── Info ── */}
         <div className="jc-card-info px-4 pb-4 pt-3">
-          <p className="text-[10px] font-semibold uppercase tracking-widest mb-1 opacity-40">
+          <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--gold-deep)', opacity: 0.7 }}>
             {product.brands?.name}
           </p>
-          <h3 className="font-semibold text-sm leading-snug mb-1.5">{product.name}</h3>
-
-          <div className="flex items-center gap-1.5 mb-2">
-            <span className="jc-stars text-xs">★★★★★</span>
-            <span className="text-[11px] font-medium" style={{ color: 'var(--gold)' }}>4.8</span>
-            <span className="text-[11px] opacity-40">· 42 avis</span>
-          </div>
+          <h3 className="font-semibold text-sm leading-snug mb-2" style={{ letterSpacing: '-0.01em' }}>{product.name}</h3>
 
           {minPrice !== null && (
             <div>
               <div className="flex items-baseline gap-2">
-                <span className="font-bold text-base">{formatPrice(minPrice)}</span>
+                <span className="font-bold text-base jc-price" data-price>{formatPrice(minPrice)}</span>
                 {comparePrice && (
-                  <span className="text-xs line-through opacity-35">{formatPrice(comparePrice)}</span>
+                  <span className="text-xs line-through opacity-30">{formatPrice(comparePrice)}</span>
                 )}
               </div>
               {scalapayInstalment && (
-                <p className="text-[11px] mt-0.5 opacity-45">
-                  ou 4× {scalapayInstalment}&nbsp;€ avec Scalapay
+                <p className="text-[10px] mt-0.5" style={{ opacity: 0.4 }}>
+                  ou 4× <span className="font-medium">{scalapayInstalment}&nbsp;€</span> sans frais
                 </p>
               )}
             </div>

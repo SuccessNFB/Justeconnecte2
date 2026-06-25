@@ -1,15 +1,13 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --background: #f9f9f9;
-  --foreground: #111111;
+  --background: #f8f7f5;
+  --foreground: #0f0f0f;
   --surface: #ffffff;
-  --surface-soft: #f4f4f4;
-  --primary: #111111;
+  --surface-soft: #f2f1ef;
+  --primary: #0f0f0f;
   --gold: #c4922a;
   --gold-light: #d4a84b;
   --gold-deep: #a67820;
@@ -17,24 +15,58 @@
   --success: #22c55e;
   --warning: #f59e0b;
   --destructive: #ef4444;
-  --border: rgba(17,17,17,0.09);
-  --border-strong: rgba(17,17,17,0.15);
+  --border: rgba(15,15,15,0.08);
+  --border-strong: rgba(15,15,15,0.14);
   --gradient-gold: linear-gradient(135deg, #a67820, #c4922a, #d4a84b);
   --radius: 14px;
   --radius-sm: 8px;
   --radius-full: 999px;
+  --font-body: var(--font-outfit), 'Outfit', system-ui, sans-serif;
 }
 
 @layer base {
   * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
   body {
     background-color: var(--background);
     color: var(--foreground);
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
-  h1,h2,h3,h4 { letter-spacing: -0.02em; }
+
+  h1, h2, h3, h4 {
+    letter-spacing: -0.025em;
+    line-height: 1.15;
+    text-wrap: balance;
+    font-weight: 700;
+  }
+
+  p { text-wrap: pretty; }
+
+  /* Tabular numbers for prices */
+  [data-price], .price, .jc-price {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+
+  /* Focus rings */
+  :focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Smooth scrollbar */
+  @media (pointer: fine) {
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 99px; }
+  }
 }
 
 @layer components {

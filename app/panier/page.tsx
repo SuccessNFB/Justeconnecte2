@@ -57,21 +57,21 @@ export default function PanierPage() {
       })
   }, [items])
 
-  function getPrice(v: EnrichedItem['variant']): number {
+  function getPrice(v: EnrichedItem['variant']): number | null {
     const p = zone
-      ? v.product_zone_prices.find(p => p.zone_id === zone.id)
+      ? (v.product_zone_prices.find(p => p.zone_id === zone.id) ?? v.product_zone_prices[0])
       : v.product_zone_prices[0]
-    return p?.price ?? 0
+    return p?.price ?? null
   }
 
-  const subtotal = enriched.reduce((s, i) => s + getPrice(i.variant) * i.quantity, 0)
+  const subtotal = enriched.reduce((s, i) => s + (getPrice(i.variant) ?? 0) * i.quantity, 0)
   const shipping = 0
 
   async function handleCheckout() {
     setCheckingOut(true)
     const lineItems = enriched.map(item => ({
       name: `${(item.variant as any).products?.name ?? 'Produit'} · ${item.variant.color_name} · ${item.variant.storage}`,
-      price: Math.round(getPrice(item.variant) * 100),
+      price: Math.round((getPrice(item.variant) ?? 0) * 100),
       quantity: item.quantity,
       image: (item.variant as any).products?.image_url ?? undefined,
     }))
@@ -119,6 +119,7 @@ export default function PanierPage() {
           <div className="lg:col-span-2 flex flex-col gap-4">
             {enriched.map(item => {
               const price = getPrice(item.variant)
+              const priceStr = price !== null ? formatPrice(price * item.quantity) : '—'
               return (
                 <div key={item.variantId} className="jc-card p-5 flex gap-5">
                   {/* Phone mini-svg */}
@@ -162,7 +163,7 @@ export default function PanierPage() {
                       </div>
 
                       <div className="flex items-center gap-4">
-                        <span className="font-bold">{formatPrice(price * item.quantity)}</span>
+                        <span className="font-bold">{priceStr}</span>
                         <button
                           onClick={() => removeItem(item.variantId)}
                           className="p-1.5 rounded-lg opacity-30 hover:opacity-100 transition-opacity"

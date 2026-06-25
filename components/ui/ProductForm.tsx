@@ -205,6 +205,26 @@ export default function ProductForm({ product }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-8 max-w-3xl">
+
+      {/* ── BARRE STICKY ── */}
+      <div
+        className="sticky top-0 z-20 flex items-center justify-between gap-3 px-4 py-3 rounded-xl"
+        style={{ background: 'var(--surface)', border: '1px solid var(--border)', backdropFilter: 'blur(10px)' }}
+      >
+        <div className="min-w-0">
+          <p className="font-semibold text-sm truncate">{product ? product.name : 'Nouveau produit'}</p>
+          {error && <p className="text-xs mt-0.5" style={{ color: 'var(--destructive)' }}>{error}</p>}
+        </div>
+        <div className="flex gap-2 shrink-0">
+          <button type="button" onClick={() => router.push('/admin/produits')} className="jc-btn-ghost py-2 text-sm">
+            Annuler
+          </button>
+          <button type="submit" disabled={saving} className="jc-btn-primary py-2 text-sm">
+            {saving ? 'Enregistrement…' : product ? 'Mettre à jour' : 'Créer'}
+          </button>
+        </div>
+      </div>
+
       {/* ── INFOS DE BASE ── */}
       <section className="jc-card p-6">
         <h2 className="font-bold text-base mb-5">Informations générales</h2>
@@ -394,9 +414,7 @@ export default function ProductForm({ product }: Props) {
         </button>
       </section>
 
-      {error && <p className="text-sm font-medium" style={{ color: 'var(--destructive)' }}>{error}</p>}
-
-      <div className="flex gap-3">
+      <div className="flex gap-3 pb-2">
         <button type="submit" disabled={saving} className="jc-btn-primary">
           {saving ? 'Enregistrement…' : product ? 'Mettre à jour' : 'Créer le produit'}
         </button>

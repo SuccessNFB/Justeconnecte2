@@ -19,12 +19,39 @@ type FullProduct = Product & {
 
 const PAYMENT = ['Visa', 'Mastercard', 'Apple Pay', 'Google Pay', 'Scalapay']
 
-const REVIEWS = [
-  { name: 'Marc S.',     note: 'Très satisfait',            body: "Produit arrivé en 9 jours, emballage d'origine scellé, téléphone neuf et impeccable. Exactement ce que j'avais commandé.", rating: 5, date: 'il y a 2 semaines' },
-  { name: 'Sandrine T.', note: 'Excellent service client',  body: "Très réactif sur WhatsApp, réponse en moins d'une heure. Je recommande sans hésiter.", rating: 5, date: 'il y a 3 semaines' },
-  { name: 'Kevin M.',    note: 'Neuf et scellé',            body: "iPhone reçu dans son emballage d'origine intact. Livraison en 8 jours en Guadeloupe. Parfait.", rating: 5, date: 'il y a 1 mois' },
-  { name: 'Lara D.',     note: 'Prix introuvable en local', body: 'Prix bien inférieur aux boutiques de Guyane pour le même smartphone neuf. Livraison en 10 jours sans frais. Très contente.', rating: 4, date: 'il y a 1 mois' },
+const REVIEW_POOL = [
+  { name: 'Marc S.',      note: 'Très satisfait',             body: "Produit arrivé en 9 jours, emballage d'origine scellé, téléphone neuf et impeccable. Exactement ce que j'avais commandé.", rating: 5, date: 'il y a 2 semaines',  location: 'Guadeloupe'  },
+  { name: 'Sandrine T.',  note: 'Excellent service client',   body: "Très réactif sur WhatsApp, réponse en moins d'une heure. Livraison rapide et soignée. Je recommande sans hésiter.",        rating: 5, date: 'il y a 3 semaines', location: 'Martinique'  },
+  { name: 'Kevin M.',     note: 'Neuf et scellé',             body: "Reçu dans son emballage d'origine intact. Livraison en 8 jours en Guadeloupe. Tous les accessoires présents. Parfait.",    rating: 5, date: 'il y a 1 mois',     location: 'Guadeloupe'  },
+  { name: 'Lara D.',      note: 'Prix introuvable en local',  body: 'Prix bien inférieur aux boutiques de Guyane pour le même smartphone neuf. Livraison en 10 jours sans frais. Très contente.', rating: 4, date: 'il y a 1 mois',   location: 'Guyane'      },
+  { name: 'Jérémy C.',    note: 'Rapide et fiable',           body: "Commande passée le lundi, reçue le mercredi suivant en Martinique. Emballage nickel, téléphone impeccable. Rien à redire.", rating: 5, date: 'il y a 5 jours',    location: 'Martinique'  },
+  { name: 'Nadia F.',     note: 'Exactement comme décrit',    body: "Produit conforme à l'annonce, aucune mauvaise surprise. Le service client a répondu en 30 min à ma question. Super expérience.", rating: 5, date: 'il y a 1 semaine', location: 'Guadeloupe' },
+  { name: 'Thomas R.',    note: 'Paiement en 4× top',         body: "J'ai utilisé Scalapay pour étaler le paiement. Tout s'est passé sans accroc. Le téléphone est arrivé scellé, parfait état.",  rating: 5, date: 'il y a 2 semaines', location: 'Réunion'    },
+  { name: 'Claudine M.',  note: 'Livraison express',          body: "Surprise par la rapidité. 7 jours seulement depuis la commande jusqu'à ma porte en Guyane. Emballage soigné, téléphone neuf.", rating: 5, date: 'il y a 3 semaines', location: 'Guyane'    },
+  { name: 'Florian B.',   note: 'Meilleur prix du marché',    body: "J'ai comparé partout avant d'acheter. C'est ici que j'ai trouvé le meilleur rapport qualité-prix pour un smartphone neuf.",   rating: 5, date: 'il y a 3 semaines', location: 'Martinique' },
+  { name: 'Isabelle K.',  note: 'Service au top',             body: "Première commande ici et je ne suis pas déçue. Téléphone arrivé neuf et scellé, correspondance WhatsApp très agréable.",      rating: 5, date: 'il y a 1 mois',     location: 'Guadeloupe'  },
+  { name: 'Dylan P.',     note: 'Recommande vivement',        body: "Très bonne expérience d'achat. Le smartphone était dans un emballage parfait, batterie à 100 %, tout fonctionnel dès l'allumage.", rating: 5, date: 'il y a 1 mois',  location: 'Martinique' },
+  { name: 'Astrid V.',    note: 'Parfait pour la Guyane',     body: "Enfin un site qui livre correctement en Guyane sans frais énormes. Délai tenu, produit nickel. Je reviendrai pour le prochain.", rating: 4, date: 'il y a 6 semaines', location: 'Guyane'   },
+  { name: 'Romain L.',    note: 'Aucune mauvaise surprise',   body: "Commande reçue conforme, sans aucun problème. Le suivi par e-mail était clair et le téléphone est authentique.",               rating: 5, date: 'il y a 5 semaines', location: 'Guadeloupe' },
+  { name: 'Priscilla N.', note: 'Très bonne qualité',         body: "Emballage d'origine, garantie constructeur incluse, prix imbattable. Service client disponible et sympa. Parfait.",            rating: 5, date: 'il y a 2 mois',     location: 'Martinique'  },
 ]
+
+function hashSlug(slug: string): number {
+  let h = 0
+  for (let i = 0; i < slug.length; i++) h = (Math.imul(31, h) + slug.charCodeAt(i)) | 0
+  return Math.abs(h)
+}
+
+function getReviews(slug: string) {
+  const seed = hashSlug(slug)
+  const pool = [...REVIEW_POOL]
+  const picked = []
+  for (let i = 0; i < 4; i++) {
+    const idx = (seed * (i + 1) * 2654435761) % pool.length >>> 0
+    picked.push(pool.splice(idx % pool.length, 1)[0])
+  }
+  return picked
+}
 
 const RATING_BARS = [
   { stars: 5, pct: 78 },
@@ -147,6 +174,7 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 
 export default function ProductDetail({ product, faq: faqProp }: { product: FullProduct; faq?: { q: string; a: string }[] }) {
   const faqItems = faqProp ?? FAQ
+  const reviews  = getReviews(product.slug)
   const { zone }                   = useZone()
   const { addItem }                = useCart()
   const { toggle, isWishlisted }   = useWishlist()
@@ -725,7 +753,7 @@ export default function ProductDetail({ product, faq: faqProp }: { product: Full
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {REVIEWS.map(r => (
+            {reviews.map(r => (
               <div key={r.name} className="rounded-2xl p-5"
                 style={{ border: '1px solid var(--border)', background: 'var(--surface)' }}>
                 <div className="flex items-start justify-between mb-2">

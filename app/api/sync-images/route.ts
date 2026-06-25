@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-const SUPABASE_URL = 'https://qyvhkpyshkvodgcsbzst.supabase.co'
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'https://qyvhkpyshkvogdcsbzst.supabase.co'
 
 const UPDATES: { slug: string; image_url: string }[] = [
   { slug: 'iphone-17',               image_url: 'https://cdn.shopify.com/s/files/1/0952/4366/5698/files/IMG-1311.jpg?v=1778781337' },

@@ -22,6 +22,17 @@ type AEvent = {
   created_at:   string
 }
 
+// period stored as hours; 0 = All Time
+type PeriodOption = { label: string; hours: number }
+
+const PERIODS: PeriodOption[] = [
+  { label: '24h',      hours: 24   },
+  { label: '7 jours',  hours: 168  },
+  { label: '30 jours', hours: 720  },
+  { label: '90 jours', hours: 2160 },
+  { label: 'All Time', hours: 0    },
+]
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const uniq = <T,>(a: T[]): T[] => a.filter((v, i) => a.indexOf(v) === i)
@@ -36,23 +47,50 @@ function relTime(iso: string) {
 }
 
 /**
- * Builds daily chart data.
- * - type 'visitors': counts unique visitor_id per day (localStorage-based, ignores repeat sessions)
- * - type 'revenue':  sums purchase amounts per day
- * - period 0 = All Time (no date cap, range derived from data)
+ * Builds chart data synchronized with the selected period.
+ * - 24h  → 24 hourly buckets
+ * - other → daily buckets for the full period
+ * - 0 (All Time) → daily buckets from first event to now
+ * 'visitors' counts unique visitor_id per bucket (no duplicate counting)
+ * 'revenue'  sums purchase amounts per bucket
  */
 function buildChartData(
   events: AEvent[],
-  period: number,
+  hours: number,
   type: 'visitors' | 'revenue',
 ): { label: string; value: number }[] {
   if (events.length === 0) return []
 
-  const now = new Date()
-  now.setHours(23, 59, 59, 999)
+  // ── 24h: hourly buckets ─────────────────────────────────────────────────────
+  if (hours === 24) {
+    const now = new Date()
+    return Array.from({ length: 24 }, (_, i) => {
+      const slotStart = new Date(now)
+      slotStart.setMinutes(0, 0, 0)
+      slotStart.setHours(slotStart.getHours() - (23 - i))
+      const slotEnd = new Date(slotStart)
+      slotEnd.setHours(slotEnd.getHours() + 1)
+
+      const label = `${String(slotStart.getHours()).padStart(2, '0')}h`
+      const slotEvts = events.filter(e => {
+        const t = new Date(e.created_at).getTime()
+        return t >= slotStart.getTime() && t < slotEnd.getTime()
+      })
+      const value = type === 'visitors'
+        ? uniq(slotEvts.filter(e => e.visitor_id).map(e => e.visitor_id as string)).length
+        : slotEvts.filter(e => e.event_type === 'purchase')
+            .reduce((s, e) => s + (e.metadata?.amount ?? 0), 0)
+      return { label, value }
+    })
+  }
+
+  // ── Daily buckets ─────────────────────────────────────────────────────────
+  const endDate = new Date()
+  endDate.setHours(23, 59, 59, 999)
 
   let startDate: Date
-  if (period === 0) {
+  if (hours === 0) {
+    // All Time: derive from data
     const oldest = events.reduce(
       (min, e) => (e.created_at < min ? e.created_at : min),
       events[0].created_at,
@@ -60,14 +98,12 @@ function buildChartData(
     startDate = new Date(oldest)
     startDate.setHours(0, 0, 0, 0)
   } else {
-    startDate = new Date()
-    startDate.setDate(startDate.getDate() - (period - 1))
+    startDate = new Date(Date.now() - hours * 3_600_000)
     startDate.setHours(0, 0, 0, 0)
   }
 
-  const totalDays = Math.ceil((now.getTime() - startDate.getTime()) / 86400000) + 1
+  const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / 86_400_000) + 1
 
-  // Group events by ISO date key
   const byDay: Record<string, AEvent[]> = {}
   events.forEach(e => {
     const key = e.created_at.slice(0, 10)
@@ -78,14 +114,13 @@ function buildChartData(
   return Array.from({ length: totalDays }, (_, i) => {
     const d = new Date(startDate)
     d.setDate(d.getDate() + i)
-    const key      = d.toISOString().slice(0, 10)
-    const label    = d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
-    const dayEvts  = byDay[key] ?? []
-
+    const key   = d.toISOString().slice(0, 10)
+    const label = d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+    const dayEvts = byDay[key] ?? []
     const value = type === 'visitors'
       ? uniq(dayEvts.filter(e => e.visitor_id).map(e => e.visitor_id as string)).length
-      : dayEvts.filter(e => e.event_type === 'purchase').reduce((s, e) => s + (e.metadata?.amount ?? 0), 0)
-
+      : dayEvts.filter(e => e.event_type === 'purchase')
+          .reduce((s, e) => s + (e.metadata?.amount ?? 0), 0)
     return { label, value }
   })
 }
@@ -116,33 +151,24 @@ function AreaChart({ data, color = 'var(--gold)', fmt }: {
   const gradId = `cg-${color.replace(/[^a-z0-9]/gi, 'x')}`
   const fmtV  = fmt ?? ((v: number) => v.toLocaleString('fr-FR'))
 
-  // Grid Y positions for max, mid, 0
   const gridY = [
-    H - (1)   * H * 0.82 + 4,  // max
-    H - (0.5) * H * 0.82 + 4,  // mid
-    H - (0)   * H * 0.82 + 4,  // 0 (bottom)
+    H - 1   * H * 0.82 + 4,
+    H - 0.5 * H * 0.82 + 4,
+    H - 0   * H * 0.82 + 4,
   ]
 
   return (
     <div className="flex gap-2 items-start">
-      {/* Y-axis labels aligned with grid lines */}
+      {/* Y-axis */}
       <div className="relative shrink-0 text-right" style={{ width: 46, height: 100 }}>
         {[fmtV(max), fmtV(mid), '0'].map((label, i) => (
-          <span
-            key={i}
-            className="absolute right-0 text-[9px] leading-none"
-            style={{
-              top: gridY[i],
-              transform: 'translateY(-50%)',
-              opacity: 0.35,
-            }}
-          >
+          <span key={i} className="absolute right-0 text-[9px] leading-none"
+            style={{ top: gridY[i], transform: 'translateY(-50%)', opacity: 0.35 }}>
             {label}
           </span>
         ))}
       </div>
-
-      {/* Chart + X-axis */}
+      {/* Chart */}
       <div className="flex-1 min-w-0">
         <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="w-full" style={{ height: 100 }}>
           <defs>
@@ -151,7 +177,6 @@ function AreaChart({ data, color = 'var(--gold)', fmt }: {
               <stop offset="100%" stopColor={color} stopOpacity="0"    />
             </linearGradient>
           </defs>
-          {/* Horizontal grid lines */}
           {gridY.map((y, i) => (
             <line key={i} x1="0" y1={y.toFixed(1)} x2={W} y2={y.toFixed(1)}
               stroke="currentColor" strokeOpacity="0.07" strokeWidth="1" />
@@ -162,7 +187,7 @@ function AreaChart({ data, color = 'var(--gold)', fmt }: {
             data[i].value > 0 && <circle key={i} cx={p.x} cy={p.y} r="3" fill={color} />
           )}
         </svg>
-        {/* X-axis labels */}
+        {/* X-axis */}
         <div className="flex justify-between mt-1 px-0.5">
           {data.map((d, i) => i % step === 0 && (
             <span key={i} className="text-[9px]" style={{ opacity: 0.3 }}>{d.label}</span>
@@ -187,7 +212,8 @@ function FBar({ label, count, total, color }: { label: string; count: number; to
         </span>
       </div>
       <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--border)' }}>
-        <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, background: color }} />
+        <div className="h-full rounded-full transition-all duration-700"
+          style={{ width: `${pct}%`, background: color }} />
       </div>
     </div>
   )
@@ -230,27 +256,34 @@ function KpiCard({ icon: Icon, label, value, sub, color }: {
   )
 }
 
-// ─── Main page ────────────────────────────────────────────────────────────────
+// ─── Period badge (shown in section headers for clarity) ─────────────────────
 
-const PERIODS = [
-  { label: '7 jours',  days: 7  },
-  { label: '30 jours', days: 30 },
-  { label: '90 jours', days: 90 },
-  { label: 'All Time', days: 0  },
-]
+function PBadge({ label }: { label: string }) {
+  return (
+    <span className="ml-auto text-[10px] font-semibold px-2 py-0.5 rounded-full"
+      style={{ background: 'var(--gold-bg)', color: 'var(--gold-deep)' }}>
+      {label}
+    </span>
+  )
+}
 
 const ZONE_LABEL: Record<string, string> = {
   'martinique-guadeloupe': '🇲🇶🇬🇵 Martinique / Guadeloupe',
   'guyane':                '🇬🇫 Guyane',
 }
 
+// ─── Main page ────────────────────────────────────────────────────────────────
+
 export default function AnalytiquesPage() {
-  const [period, setPeriod]   = useState(7)
-  const [events, setEvents]   = useState<AEvent[]>([])
+  const [hours, setHours]   = useState(168) // default 7j
+  const [events, setEvents] = useState<AEvent[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError]     = useState(false)
+  const [error, setError]   = useState(false)
   const supabase = createClient()
 
+  const currentPeriod = PERIODS.find(p => p.hours === hours) ?? PERIODS[1]
+
+  // ── Fetch — always derived from `hours`, never stale ─────────────────────
   useEffect(() => {
     setLoading(true)
     setError(false)
@@ -261,10 +294,8 @@ export default function AnalytiquesPage() {
       .order('created_at', { ascending: false })
       .limit(10000)
 
-    if (period > 0) {
-      const from = new Date()
-      from.setDate(from.getDate() - period)
-      from.setHours(0, 0, 0, 0)
+    if (hours > 0) {
+      const from = new Date(Date.now() - hours * 3_600_000)
       query = query.gte('created_at', from.toISOString())
     }
 
@@ -274,11 +305,11 @@ export default function AnalytiquesPage() {
       setLoading(false)
     })
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [period])
+  }, [hours])
 
+  // ── All stats derived from same `events` — perfectly synchronized ─────────
   const stats = useMemo(() => {
     const sessions      = uniq(events.map(e => e.session_id))
-    // Unique visitors by localStorage visitor_id — does not count the same person twice
     const visitors      = uniq(events.filter(e => e.visitor_id).map(e => e.visitor_id as string))
     const pageViews     = events.filter(e => e.event_type === 'page_view')
     const pvSessions    = uniq(events.filter(e => e.event_type === 'product_view').map(e => e.session_id))
@@ -351,34 +382,34 @@ export default function AnalytiquesPage() {
     }
   }, [events])
 
-  // Charts use buildChartData with the full period (no 30-day cap)
-  const chartVisitors = useMemo(() => buildChartData(events, period, 'visitors'), [events, period])
-  const chartRevenue  = useMemo(() => buildChartData(events, period, 'revenue'),  [events, period])
+  const chartVisitors = useMemo(() => buildChartData(events, hours, 'visitors'), [events, hours])
+  const chartRevenue  = useMemo(() => buildChartData(events, hours, 'revenue'),  [events, hours])
 
   const totalDev = Object.values(stats.dmap).reduce((s, n) => s + n, 0)
   const devColors: Record<string, string> = { mobile: 'var(--gold)', tablet: '#6366f1', desktop: '#22c55e' }
 
-  const periodLabel = PERIODS.find(p => p.days === period)?.label ?? ''
+  const pLabel = currentPeriod.label
 
   return (
     <div>
-      {/* Header */}
+      {/* Header + period selector */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-2xl font-bold">Analytiques</h1>
           <p className="text-sm mt-0.5" style={{ opacity: 0.45 }}>
-            Comportement des visiteurs sur la boutique
+            Comportement des visiteurs · <span style={{ color: 'var(--gold)' }}>{pLabel}</span>
           </p>
         </div>
-        <div className="flex items-center gap-1 p-1 rounded-xl" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+        <div className="flex items-center gap-1 p-1 rounded-xl"
+          style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
           {PERIODS.map(p => (
             <button
-              key={p.days}
-              onClick={() => setPeriod(p.days)}
+              key={p.hours}
+              onClick={() => setHours(p.hours)}
               className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
               style={{
-                background: period === p.days ? 'var(--primary)' : 'transparent',
-                color:      period === p.days ? '#fff' : 'oklch(0.18 0.004 264 / 0.5)',
+                background: hours === p.hours ? 'var(--primary)' : 'transparent',
+                color:      hours === p.hours ? '#fff' : 'oklch(0.18 0.004 264 / 0.5)',
               }}
             >
               {p.label}
@@ -390,15 +421,20 @@ export default function AnalytiquesPage() {
       {/* Error */}
       {error && (
         <div className="jc-card p-6 mb-6 text-center" style={{ borderColor: 'var(--destructive)' }}>
-          <p className="font-semibold text-sm mb-1" style={{ color: 'var(--destructive)' }}>Table analytics_events introuvable</p>
-          <p className="text-xs opacity-50">Appliquez la migration <code>004_analytics.sql</code> dans Supabase → SQL Editor.</p>
+          <p className="font-semibold text-sm mb-1" style={{ color: 'var(--destructive)' }}>
+            Table analytics_events introuvable
+          </p>
+          <p className="text-xs opacity-50">
+            Appliquez la migration <code>004_analytics.sql</code> dans Supabase → SQL Editor.
+          </p>
         </div>
       )}
 
       {/* Loading */}
       {loading && (
         <div className="flex items-center justify-center py-32">
-          <div className="w-6 h-6 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: 'var(--gold)' }} />
+          <div className="w-6 h-6 rounded-full border-2 border-t-transparent animate-spin"
+            style={{ borderColor: 'var(--gold)' }} />
         </div>
       )}
 
@@ -407,25 +443,39 @@ export default function AnalytiquesPage() {
 
           {/* ── KPIs ── */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <KpiCard icon={TrendingUp}  color="var(--gold-deep)" label="Sessions"           value={stats.sessions.toLocaleString('fr-FR')}  sub={`visites — ${periodLabel}`} />
-            <KpiCard icon={Users}       color="#6366f1"           label="Visiteurs uniques"  value={stats.visitors.toLocaleString('fr-FR')}   sub="sans doublons (cookie)" />
-            <KpiCard icon={ShoppingCart}color="#22c55e"           label="Ventes confirmées"  value={stats.salesCount.toLocaleString('fr-FR')} sub="paiements Stripe" />
-            <KpiCard icon={CreditCard}  color="var(--gold)"       label="Chiffre d'affaires" value={fmtEur(stats.revenue)}                    sub={`revenus — ${periodLabel}`} />
+            <KpiCard icon={TrendingUp}   color="var(--gold-deep)" label="Sessions"
+              value={stats.sessions.toLocaleString('fr-FR')}  sub={`visites — ${pLabel}`} />
+            <KpiCard icon={Users}        color="#6366f1"           label="Visiteurs uniques"
+              value={stats.visitors.toLocaleString('fr-FR')}  sub={`sans doublons — ${pLabel}`} />
+            <KpiCard icon={ShoppingCart} color="#22c55e"           label="Ventes confirmées"
+              value={stats.salesCount.toLocaleString('fr-FR')} sub="paiements Stripe" />
+            <KpiCard icon={CreditCard}   color="var(--gold)"       label="Chiffre d'affaires"
+              value={fmtEur(stats.revenue)}                    sub={`revenus — ${pLabel}`} />
           </div>
 
           {/* ── Charts ── */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div className="jc-card p-6">
-              <p className="font-semibold text-sm mb-5">Visiteurs uniques par jour</p>
+              <div className="flex items-center gap-2 mb-5">
+                <p className="font-semibold text-sm">
+                  {hours === 24 ? 'Visiteurs uniques par heure' : 'Visiteurs uniques par jour'}
+                </p>
+                <PBadge label={pLabel} />
+              </div>
               {events.length === 0
-                ? <p className="text-sm text-center py-10 opacity-25">Aucune donnée pour cette période</p>
+                ? <p className="text-sm text-center py-10 opacity-25">Aucune donnée</p>
                 : <AreaChart data={chartVisitors} color="var(--gold)" />
               }
             </div>
             <div className="jc-card p-6">
-              <p className="font-semibold text-sm mb-5">Chiffre d'affaires par jour</p>
+              <div className="flex items-center gap-2 mb-5">
+                <p className="font-semibold text-sm">
+                  {hours === 24 ? "CA par heure" : "Chiffre d'affaires par jour"}
+                </p>
+                <PBadge label={pLabel} />
+              </div>
               {events.length === 0
-                ? <p className="text-sm text-center py-10 opacity-25">Aucune donnée pour cette période</p>
+                ? <p className="text-sm text-center py-10 opacity-25">Aucune donnée</p>
                 : <AreaChart data={chartRevenue} color="#22c55e" fmt={fmtEur} />
               }
             </div>
@@ -433,13 +483,16 @@ export default function AnalytiquesPage() {
 
           {/* ── Funnel ── */}
           <div className="jc-card p-6">
-            <p className="font-semibold text-sm mb-5">Entonnoir de conversion</p>
+            <div className="flex items-center gap-2 mb-5">
+              <p className="font-semibold text-sm">Entonnoir de conversion</p>
+              <PBadge label={pLabel} />
+            </div>
             <div className="flex flex-col gap-4">
-              <FBar label="Sessions"      count={stats.sessions}      total={stats.sessions} color="var(--gold)" />
-              <FBar label="Vues produit"  count={stats.pvSessions}    total={stats.sessions} color="#6366f1" />
-              <FBar label="Ajout panier"  count={stats.cartSessions}  total={stats.sessions} color="#22c55e" />
-              <FBar label="Checkout"      count={stats.ckoutSessions} total={stats.sessions} color="#8b5cf6" />
-              <FBar label="Ventes"        count={stats.salesCount}    total={stats.sessions} color="#16a34a" />
+              <FBar label="Sessions"     count={stats.sessions}      total={stats.sessions} color="var(--gold)" />
+              <FBar label="Vues produit" count={stats.pvSessions}    total={stats.sessions} color="#6366f1" />
+              <FBar label="Ajout panier" count={stats.cartSessions}  total={stats.sessions} color="#22c55e" />
+              <FBar label="Checkout"     count={stats.ckoutSessions} total={stats.sessions} color="#8b5cf6" />
+              <FBar label="Ventes"       count={stats.salesCount}    total={stats.sessions} color="#16a34a" />
             </div>
             {stats.sessions === 0 && (
               <p className="text-xs text-center mt-4 opacity-30">Aucune session enregistrée</p>
@@ -452,6 +505,7 @@ export default function AnalytiquesPage() {
               <div className="flex items-center gap-2 mb-5">
                 <MapPin size={14} style={{ color: 'var(--gold)' }} />
                 <p className="font-semibold text-sm">Zones géographiques</p>
+                <PBadge label={pLabel} />
               </div>
               {stats.zones.length === 0 ? (
                 <p className="text-sm opacity-30">Aucune zone détectée</p>
@@ -465,7 +519,10 @@ export default function AnalytiquesPage() {
                       </div>
                       <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--border)' }}>
                         <div className="h-full rounded-full"
-                          style={{ width: `${Math.round((z.count / stats.sessions) * 100)}%`, background: i === 0 ? 'var(--gold)' : '#6366f1' }} />
+                          style={{
+                            width: `${Math.round((z.count / stats.sessions) * 100)}%`,
+                            background: i === 0 ? 'var(--gold)' : '#6366f1',
+                          }} />
                       </div>
                     </div>
                   ))}
@@ -477,6 +534,7 @@ export default function AnalytiquesPage() {
               <div className="flex items-center gap-2 mb-5">
                 <Smartphone size={14} style={{ color: 'var(--gold)' }} />
                 <p className="font-semibold text-sm">Appareils</p>
+                <PBadge label={pLabel} />
               </div>
               {totalDev === 0 ? (
                 <p className="text-sm opacity-30">Aucune donnée</p>
@@ -494,7 +552,8 @@ export default function AnalytiquesPage() {
                           <span className="font-bold">{n} <span className="opacity-40">({pct}%)</span></span>
                         </div>
                         <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--border)' }}>
-                          <div className="h-full rounded-full" style={{ width: `${pct}%`, background: devColors[dev] ?? 'var(--gold)' }} />
+                          <div className="h-full rounded-full"
+                            style={{ width: `${pct}%`, background: devColors[dev] ?? 'var(--gold)' }} />
                         </div>
                       </div>
                     )
@@ -511,6 +570,7 @@ export default function AnalytiquesPage() {
                 <div className="flex items-center gap-2 mb-4">
                   <Eye size={14} style={{ color: 'var(--gold)' }} />
                   <p className="font-semibold text-sm">Pages les plus visitées</p>
+                  <PBadge label={pLabel} />
                 </div>
                 <div className="flex flex-col">
                   {stats.topPages.map((p, i) => (
@@ -529,6 +589,7 @@ export default function AnalytiquesPage() {
                 <div className="flex items-center gap-2 mb-4">
                   <BarChart2 size={14} style={{ color: 'var(--gold)' }} />
                   <p className="font-semibold text-sm">Top produits</p>
+                  <PBadge label={pLabel} />
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-xs">
@@ -541,7 +602,8 @@ export default function AnalytiquesPage() {
                     </thead>
                     <tbody>
                       {stats.topProducts.map((p, i) => (
-                        <tr key={p.slug} style={{ borderBottom: i < stats.topProducts.length - 1 ? '1px solid var(--border)' : 'none' }}>
+                        <tr key={p.slug}
+                          style={{ borderBottom: i < stats.topProducts.length - 1 ? '1px solid var(--border)' : 'none' }}>
                           <td className="py-2.5 font-medium truncate max-w-[140px]">
                             <span className="font-mono opacity-25 mr-1.5">{String(i + 1).padStart(2, '0')}</span>
                             {p.slug}
@@ -568,7 +630,8 @@ export default function AnalytiquesPage() {
             <div className="flex items-center gap-2 mb-4">
               <Activity size={14} style={{ color: 'var(--gold)' }} />
               <p className="font-semibold text-sm">Activité récente</p>
-              <span className="ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse"
+              <PBadge label={pLabel} />
+              <span className="ml-2 text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse"
                 style={{ background: 'rgba(34,197,94,0.12)', color: '#22c55e' }}>
                 ● Live
               </span>

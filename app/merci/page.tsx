@@ -19,6 +19,24 @@ function TrackPurchase() {
           zone: data.zone ?? undefined,
           metadata: { amount: data.amount, items: data.items, currency: data.currency },
         })
+        // Meta Pixel — Purchase
+        if (typeof window !== 'undefined' && (window as any).fbq) {
+          (window as any).fbq('track', 'Purchase', {
+            value: (data.amount ?? 0) / 100,
+            currency: data.currency ?? 'EUR',
+          })
+        }
+        // Google Ads — conversion
+        if (typeof window !== 'undefined' && (window as any).dataLayer) {
+          (window as any).dataLayer.push({
+            event: 'purchase',
+            ecommerce: {
+              transaction_id: sessionId,
+              value: (data.amount ?? 0) / 100,
+              currency: data.currency ?? 'EUR',
+            },
+          })
+        }
       })
       .catch(() => {})
   // eslint-disable-next-line react-hooks/exhaustive-deps

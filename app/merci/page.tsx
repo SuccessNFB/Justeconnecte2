@@ -26,15 +26,12 @@ function TrackPurchase() {
             currency: data.currency ?? 'EUR',
           })
         }
-        // Google Ads — conversion
-        if (typeof window !== 'undefined' && (window as any).dataLayer) {
-          (window as any).dataLayer.push({
-            event: 'purchase',
-            ecommerce: {
-              transaction_id: sessionId,
-              value: (data.amount ?? 0) / 100,
-              currency: data.currency ?? 'EUR',
-            },
+        // Google Tag — événement conversion
+        if (typeof window !== 'undefined' && typeof (window as any).gtag === 'function') {
+          ;(window as any).gtag('event', 'purchase', {
+            transaction_id: sessionId,
+            value: (data.amount ?? 0) / 100,
+            currency: data.currency ?? 'EUR',
           })
         }
       })

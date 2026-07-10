@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
             </table>
 
             <div style="margin-top:28px;text-align:center">
-              <a href="https://justeconnecte2.vercel.app/admin/analytiques"
+              <a href="https://justeconnecte.fr/admin/analytiques"
                 style="display:inline-block;background:#c4922a;color:#fff;font-size:13px;font-weight:700;padding:12px 28px;border-radius:50px;text-decoration:none">
                 Voir le dashboard →
               </a>

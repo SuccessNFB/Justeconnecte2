@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   },
   description: 'Achetez votre smartphone neuf — iPhone, Samsung, Xiaomi — livré en Guadeloupe, Martinique et Guyane. Prix compétitifs, garantie constructeur, paiement en 4× sans frais.',
   keywords: ['smartphone neuf', 'iPhone Antilles', 'Samsung Guadeloupe', 'Xiaomi Martinique', 'téléphone Guyane', 'livraison Antilles', 'paiement 4 fois'],
-  metadataBase: new URL('https://justeconnecte2.vercel.app'),
+  metadataBase: new URL('https://justeconnecte.fr'),
   openGraph: {
     siteName: 'Juste Connecté',
     locale: 'fr_FR',

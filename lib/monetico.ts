@@ -1,22 +1,8 @@
 import crypto from 'crypto'
 
 function usableKey(hexKey: string): Buffer {
-  // Algorithmme officiel Monetico (port du PHP de référence)
-  // La clé Monetico fait exactement 40 chars hex — on tronque si collée en double
-  const key       = hexKey.trim().substring(0, 40)
-  const hexStrKey = key.substring(0, 38)
-  const hexFinal  = key.substring(38, 40) + '00'
-  const cca0      = hexFinal.charCodeAt(0)
-
-  let finalHex: string
-  if (cca0 > 70 && cca0 < 97) {
-    finalHex = hexStrKey + String.fromCharCode(cca0 - 23) + hexFinal[1]
-  } else {
-    finalHex = hexFinal[1] === 'M'
-      ? hexStrKey + hexFinal[0] + '0'
-      : hexStrKey + hexFinal.substring(0, 2)
-  }
-  return Buffer.from(finalHex, 'hex')
+  // Clé Monetico fournie en hex (40 ou 80 chars) → Buffer binaire
+  return Buffer.from(hexKey.trim(), 'hex')
 }
 
 function hmacSha1(key: Buffer, data: string): string {

@@ -2,7 +2,8 @@ import crypto from 'crypto'
 
 function usableKey(hexKey: string): Buffer {
   // Algorithmme officiel Monetico (port du PHP de référence)
-  const key       = hexKey.trim()
+  // La clé Monetico fait exactement 40 chars hex — on tronque si collée en double
+  const key       = hexKey.trim().substring(0, 40)
   const hexStrKey = key.substring(0, 38)
   const hexFinal  = key.substring(38, 40) + '00'
   const cca0      = hexFinal.charCodeAt(0)

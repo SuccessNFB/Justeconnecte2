@@ -8,36 +8,39 @@ import { trackEvent } from '@/lib/analytics'
 
 function TrackPurchase() {
   const params = useSearchParams()
+
   useEffect(() => {
-    const sessionId = params.get('session_id')
-    if (!sessionId) return
-    fetch(`/api/order-confirm?session_id=${sessionId}`)
-      .then(r => r.ok ? r.json() : null)
-      .then(data => {
-        if (!data || data.error) return
-        trackEvent('purchase', {
-          zone: data.zone ?? undefined,
-          metadata: { amount: data.amount, items: data.items, currency: data.currency },
-        })
-        // Meta Pixel — Purchase
-        if (typeof window !== 'undefined' && (window as any).fbq) {
-          (window as any).fbq('track', 'Purchase', {
-            value: (data.amount ?? 0) / 100,
-            currency: data.currency ?? 'EUR',
-          })
-        }
-        // Google Tag — événement conversion
-        if (typeof window !== 'undefined' && typeof (window as any).gtag === 'function') {
-          ;(window as any).gtag('event', 'purchase', {
-            transaction_id: sessionId,
-            value: (data.amount ?? 0) / 100,
-            currency: data.currency ?? 'EUR',
-          })
-        }
+    // Récupère ref + montant stockés au moment du checkout
+    let ref:    string | null = null
+    let amount: number        = 0
+    try {
+      ref    = sessionStorage.getItem('jc_ref')
+      amount = parseFloat(sessionStorage.getItem('jc_amount') ?? '0') || 0
+      if (ref) { sessionStorage.removeItem('jc_ref'); sessionStorage.removeItem('jc_amount') }
+    } catch {}
+
+    if (!ref) return
+
+    trackEvent('purchase', {
+      metadata: { reference: ref, amount, currency: 'EUR' },
+    })
+
+    // Meta Pixel — Purchase
+    if (typeof window !== 'undefined' && (window as any).fbq) {
+      ;(window as any).fbq('track', 'Purchase', { value: amount, currency: 'EUR' })
+    }
+
+    // Google Tag — conversion
+    if (typeof window !== 'undefined' && typeof (window as any).gtag === 'function') {
+      ;(window as any).gtag('event', 'purchase', {
+        transaction_id: ref,
+        value:          amount,
+        currency:       'EUR',
       })
-      .catch(() => {})
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
   return null
 }
 
@@ -70,7 +73,7 @@ export default function MerciPage() {
           Continuer mes achats
         </Link>
         <Link href="/" className="jc-btn-ghost">
-          Retour à l'accueil
+          Retour à l&apos;accueil
         </Link>
       </div>
     </div>

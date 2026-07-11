@@ -70,20 +70,39 @@ export default function PanierPage() {
   async function handleCheckout() {
     setCheckingOut(true)
     const lineItems = enriched.map(item => ({
-      name: `${(item.variant as any).products?.name ?? 'Produit'} · ${item.variant.color_name} · ${item.variant.storage}`,
-      price: Math.round((getPrice(item.variant) ?? 0) * 100),
+      name:     `${(item.variant as any).products?.name ?? 'Produit'} · ${item.variant.color_name} · ${item.variant.storage}`,
+      price:    Math.round((getPrice(item.variant) ?? 0) * 100),
       quantity: item.quantity,
-      image: (item.variant as any).products?.image_url ?? undefined,
+      image:    (item.variant as any).products?.image_url ?? undefined,
     }))
     try {
       const res  = await fetch('/api/checkout', {
-        method: 'POST',
+        method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items: lineItems, zone: zone?.name }),
+        body:    JSON.stringify({ items: lineItems, zone: zone?.name }),
       })
       const data = await res.json()
-      if (data.url) {
-        window.location.href = data.url
+
+      if (data.action && data.fields) {
+        // Monetico — stocker le montant pour la page merci
+        if (data.reference) {
+          try { sessionStorage.setItem('jc_ref', data.reference) } catch {}
+          try { sessionStorage.setItem('jc_amount', (subtotal).toFixed(2)) } catch {}
+        }
+        // Soumettre le formulaire Monetico (POST requis)
+        const form = document.createElement('form')
+        form.method = 'POST'
+        form.action = data.action
+        form.style.display = 'none'
+        Object.entries(data.fields as Record<string, string>).forEach(([name, value]) => {
+          const input = document.createElement('input')
+          input.type  = 'hidden'
+          input.name  = name
+          input.value = value
+          form.appendChild(input)
+        })
+        document.body.appendChild(form)
+        form.submit()
       } else {
         alert(data.error ?? 'Une erreur est survenue.')
         setCheckingOut(false)

@@ -1,7 +1,21 @@
 import crypto from 'crypto'
 
 function usableKey(hexKey: string): Buffer {
-  return Buffer.from(hexKey, 'hex')
+  // Algorithmme officiel Monetico (port du PHP de référence)
+  const key       = hexKey.trim()
+  const hexStrKey = key.substring(0, 38)
+  const hexFinal  = key.substring(38, 40) + '00'
+  const cca0      = hexFinal.charCodeAt(0)
+
+  let finalHex: string
+  if (cca0 > 70 && cca0 < 97) {
+    finalHex = hexStrKey + String.fromCharCode(cca0 - 23) + hexFinal[1]
+  } else {
+    finalHex = hexFinal[1] === 'M'
+      ? hexStrKey + hexFinal[0] + '0'
+      : hexStrKey + hexFinal.substring(0, 2)
+  }
+  return Buffer.from(finalHex, 'hex')
 }
 
 function hmacSha1(key: Buffer, data: string): string {
@@ -59,6 +73,7 @@ export function buildPaymentForm(opts: {
 
   // MAC = HMAC-SHA1 of all fields as "key=value" pairs joined by "*", sorted ASCII order
   const macStr = Object.keys(fields).sort().map(k => `${k}=${fields[k]}`).join('*')
+  console.log('[monetico] KEY_LEN=%d KEY_HEX=%s MAC_STR=%s', hexKey.trim().length, /^[0-9a-fA-F]+$/.test(hexKey.trim()), macStr)
   fields.MAC = hmacSha1(usableKey(hexKey), macStr)
 
   return { action: url, fields }

@@ -8,11 +8,6 @@ function hmacSha1(key: Buffer, data: string): string {
   return crypto.createHmac('sha1', key).update(data).digest('hex').toLowerCase()
 }
 
-// Fields included in the payment request MAC (in order)
-const PAYMENT_MAC_FIELDS = [
-  'TPE', 'date', 'montant', 'reference', 'texte-libre', 'version', 'lgue', 'societe', 'mail',
-]
-
 // Fields included in the notification MAC (in order)
 const NOTIFY_MAC_FIELDS = [
   'TPE', 'date', 'montant', 'reference', 'texte-libre', 'code-retour',
@@ -62,7 +57,8 @@ export function buildPaymentForm(opts: {
     url_retour_err: opts.cancelUrl,
   }
 
-  const macStr = PAYMENT_MAC_FIELDS.map(f => fields[f] ?? '').join('*')
+  // MAC = HMAC-SHA1 of all fields as "key=value" pairs joined by "*", sorted ASCII order
+  const macStr = Object.keys(fields).sort().map(k => `${k}=${fields[k]}`).join('*')
   fields.MAC = hmacSha1(usableKey(hexKey), macStr)
 
   return { action: url, fields }

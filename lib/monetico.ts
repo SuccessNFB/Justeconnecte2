@@ -60,6 +60,7 @@ export function buildPaymentForm(opts: {
 
   // MAC = HMAC-SHA1 of all fields as "key=value" pairs joined by "*", sorted ASCII order
   const macStr = Object.keys(fields).sort().map(k => `${k}=${fields[k]}`).join('*')
+  console.log('[monetico] societe=%s tpe=%s montant=%s mac_str=%s', societe, tpe, fields.montant, macStr)
   fields.MAC = hmacSha1(usableKey(hexKey), macStr)
 
   return { action: url, fields }

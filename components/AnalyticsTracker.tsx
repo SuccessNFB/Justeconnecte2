@@ -10,6 +10,7 @@ export default function AnalyticsTracker() {
   useEffect(() => {
     if (pathname === prev.current) return
     prev.current = pathname
+    if (pathname.startsWith('/admin')) return
     trackEvent('page_view')
   }, [pathname])
 

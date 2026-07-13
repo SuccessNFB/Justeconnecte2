@@ -30,6 +30,7 @@ export async function trackEvent(
   } = {}
 ) {
   if (typeof window === 'undefined') return
+  if (window.location.pathname.startsWith('/admin')) return
   try {
     await createClient().from('analytics_events').insert({
       session_id:   getOrCreate(sessionStorage, 'jc_sid'),

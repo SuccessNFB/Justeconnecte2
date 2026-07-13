@@ -55,6 +55,8 @@ export function buildPaymentForm(opts: {
     societe,
     url_retour_ok:  opts.successUrl,
     url_retour_err: opts.cancelUrl,
+    // Required for v3.0 (3DS v2 context)
+    contexte_commande: Buffer.from(JSON.stringify({ billing: {} })).toString('base64'),
   }
   if (opts.email) fields.mail = opts.email
 

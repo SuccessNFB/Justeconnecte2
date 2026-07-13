@@ -2,7 +2,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import {
   TrendingUp, Users, Eye, ShoppingCart, CreditCard,
-  Activity, BarChart2, MapPin, Smartphone, Monitor,
+  Activity, BarChart2, MapPin, Smartphone, Monitor, Trash2,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 
@@ -274,10 +274,12 @@ const ZONE_LABEL: Record<string, string> = {
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function AnalytiquesPage() {
-  const [hours, setHours]   = useState(24) // default Jour
-  const [events, setEvents] = useState<AEvent[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError]   = useState(false)
+  const [hours,     setHours]     = useState(24) // default Jour
+  const [events,    setEvents]    = useState<AEvent[]>([])
+  const [loading,   setLoading]   = useState(true)
+  const [error,     setError]     = useState(false)
+  const [resetting, setResetting] = useState(false)
+  const [resetConfirm, setResetConfirm] = useState(false)
   const supabase = createClient()
 
   const currentPeriod = PERIODS.find(p => p.hours === hours) ?? PERIODS[1]
@@ -389,6 +391,15 @@ export default function AnalytiquesPage() {
 
   const pLabel = currentPeriod.label
 
+  async function handleReset() {
+    if (!resetConfirm) { setResetConfirm(true); return }
+    setResetting(true)
+    setResetConfirm(false)
+    await fetch('/api/admin/reset-analytics', { method: 'POST' })
+    setEvents([])
+    setResetting(false)
+  }
+
   return (
     <div>
       {/* Header + period selector */}
@@ -399,21 +410,52 @@ export default function AnalytiquesPage() {
             Comportement des visiteurs · <span style={{ color: 'var(--gold)' }}>{pLabel}</span>
           </p>
         </div>
-        <div className="flex items-center gap-1 p-1 rounded-xl"
-          style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
-          {PERIODS.map(p => (
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-1 p-1 rounded-xl"
+            style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+            {PERIODS.map(p => (
+              <button
+                key={p.hours}
+                onClick={() => setHours(p.hours)}
+                className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+                style={{
+                  background: hours === p.hours ? 'var(--primary)' : 'transparent',
+                  color:      hours === p.hours ? '#fff' : 'oklch(0.18 0.004 264 / 0.5)',
+                }}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+
+          {resetConfirm ? (
+            <div className="flex items-center gap-1">
+              <button
+                onClick={handleReset}
+                disabled={resetting}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold"
+                style={{ background: 'var(--destructive)', color: '#fff' }}
+              >
+                <Trash2 size={12} /> Confirmer
+              </button>
+              <button
+                onClick={() => setResetConfirm(false)}
+                className="px-3 py-1.5 rounded-xl text-xs font-semibold hover:bg-black/5"
+                style={{ border: '1px solid var(--border)' }}
+              >
+                Annuler
+              </button>
+            </div>
+          ) : (
             <button
-              key={p.hours}
-              onClick={() => setHours(p.hours)}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
-              style={{
-                background: hours === p.hours ? 'var(--primary)' : 'transparent',
-                color:      hours === p.hours ? '#fff' : 'oklch(0.18 0.004 264 / 0.5)',
-              }}
+              onClick={handleReset}
+              disabled={resetting}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors hover:bg-black/5"
+              style={{ border: '1px solid var(--border)', color: 'oklch(0.18 0.004 264 / 0.45)' }}
             >
-              {p.label}
+              <Trash2 size={12} /> Réinitialiser
             </button>
-          ))}
+          )}
         </div>
       </div>
 

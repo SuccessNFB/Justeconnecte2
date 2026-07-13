@@ -23,6 +23,7 @@ export default function PanierPage() {
   const [enriched,      setEnriched]      = useState<EnrichedItem[]>([])
   const [loading,       setLoading]       = useState(true)
   const [checkingOut,   setCheckingOut]   = useState(false)
+  const [installments,  setInstallments]  = useState<1 | 2 | 3 | 4>(1)
   const tracked = useRef(false)
 
   // Track checkout_start + email notification once per page load (when cart is non-empty)
@@ -79,7 +80,7 @@ export default function PanierPage() {
       const res  = await fetch('/api/checkout', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ items: lineItems, zone: zone?.name }),
+        body:    JSON.stringify({ items: lineItems, zone: zone?.name, installments }),
       })
       const data = await res.json()
 
@@ -230,12 +231,53 @@ export default function PanierPage() {
                 </div>
               </div>
 
+              {/* Installment selector */}
+              <div className="mb-5">
+                <p className="text-xs font-semibold mb-2" style={{ color: 'oklch(0.18 0.004 264 / 0.6)' }}>
+                  Mode de paiement
+                </p>
+                <div className="grid grid-cols-4 gap-1.5">
+                  {([1, 2, 3, 4] as const).map(n => {
+                    const perMonth = n === 1 ? null : formatPrice((subtotal + shipping) / n)
+                    const isActive = installments === n
+                    return (
+                      <button
+                        key={n}
+                        onClick={() => setInstallments(n)}
+                        className="py-2 rounded-xl text-center transition-all"
+                        style={{
+                          fontSize: '0.7rem',
+                          fontWeight: 600,
+                          border: isActive ? '2px solid var(--gold-deep)' : '1.5px solid var(--border)',
+                          background: isActive ? 'var(--gold-deep)' : 'transparent',
+                          color: isActive ? '#fff' : 'inherit',
+                        }}
+                      >
+                        <span style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700 }}>
+                          {n === 1 ? '1×' : `${n}×`}
+                        </span>
+                        {perMonth && (
+                          <span style={{ display: 'block', opacity: 0.85, marginTop: '1px' }}>
+                            {perMonth}
+                          </span>
+                        )}
+                        {n === 1 && (
+                          <span style={{ display: 'block', opacity: 0.7, marginTop: '1px' }}>
+                            Comptant
+                          </span>
+                        )}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
               <button
                 onClick={handleCheckout}
                 disabled={checkingOut || !enriched.length}
                 className="jc-btn-primary w-full"
               >
-                {checkingOut ? 'Redirection…' : 'Passer la commande →'}
+                {checkingOut ? 'Redirection…' : installments === 1 ? 'Passer la commande →' : `Payer en ${installments}× →`}
               </button>
 
               <p className="text-xs text-center mt-3" style={{ color: 'oklch(0.18 0.004 264 / 0.4)' }}>

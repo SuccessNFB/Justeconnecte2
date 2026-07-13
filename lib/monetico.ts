@@ -55,9 +55,15 @@ export function buildPaymentForm(opts: {
     societe,
     url_retour_ok:  opts.successUrl,
     url_retour_err: opts.cancelUrl,
-    // Required for v3.0 (3DS v2 context) — addressLine1/city/country/postalCode are mandatory
+    // Required for Monetico v3.0 (3DS v2). Fields must be non-empty; postal code 5 digits for FR.
+    // TODO production: collect real billing address from customer during checkout.
     contexte_commande: Buffer.from(JSON.stringify({
-      billing: { addressLine1: '', city: '', postalCode: '', country: 'FR' },
+      billing: {
+        addressLine1: 'Adresse non renseignee',
+        city: 'Non renseignee',
+        postalCode: '97200',
+        country: 'FR',
+      },
     })).toString('base64'),
   }
   if (opts.email) fields.mail = opts.email

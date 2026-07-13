@@ -236,8 +236,8 @@ export default function PanierPage() {
                 <p className="text-xs font-semibold mb-2" style={{ color: 'oklch(0.18 0.004 264 / 0.6)' }}>
                   Mode de paiement
                 </p>
-                <div className="grid grid-cols-2 gap-1.5">
-                  {([1, 2] as const).map(n => {
+                <div className="grid grid-cols-4 gap-1.5">
+                  {([1, 2, 3, 4] as const).map(n => {
                     const perMonth = n === 1 ? null : formatPrice((subtotal + shipping) / n)
                     const isActive = installments === n
                     return (

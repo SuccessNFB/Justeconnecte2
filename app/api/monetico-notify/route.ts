@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyNotifyMac } from '@/lib/monetico'
+import { createServiceClient } from '@/lib/supabase'
 
 function ack(ok: boolean) {
   return new NextResponse(`version=2\ncdr=${ok ? 0 : 1}`, {
@@ -32,6 +33,18 @@ export async function POST(req: NextRequest) {
       const zoneMatch   = texteLibre.match(/^zone:([^|]+)\|/)
       const zone        = zoneMatch?.[1] ?? undefined
       const reference   = params['reference'] ?? ''
+
+      // Mark order as paid
+      if (process.env.SUPABASE_SERVICE_ROLE_KEY && reference) {
+        const supabase = createServiceClient()
+        await supabase
+          .from('orders')
+          .update({ status: 'paid', paid_at: new Date().toISOString() })
+          .eq('reference', reference)
+          .then(({ error }) => {
+            if (error) console.error('[monetico-notify] order update error:', error.message)
+          })
+      }
 
       const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://justeconnecte.fr'
       await fetch(`${siteUrl}/api/notify-sale`, {

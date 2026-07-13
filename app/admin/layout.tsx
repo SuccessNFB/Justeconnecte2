@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { LayoutDashboard, Package, Boxes, BarChart2, LogOut, Zap, Menu, X, FileText, Layout, Images, ScrollText } from 'lucide-react'
+import { LayoutDashboard, Package, Boxes, BarChart2, LogOut, Zap, Menu, X, FileText, Layout, Images, ScrollText, ShoppingBag } from 'lucide-react'
 import AdminNotifBadge from '@/components/AdminNotifBadge'
 import { createClient } from '@/lib/supabase'
 import type { Session } from '@supabase/supabase-js'
@@ -12,11 +12,12 @@ export const dynamic = 'force-dynamic'
 const NAV = [
   { href: '/admin',               icon: LayoutDashboard, label: 'Dashboard'   },
   { href: '/admin/analytiques',   icon: BarChart2,       label: 'Analytiques' },
+  { href: '/admin/commandes',     icon: ShoppingBag,     label: 'Commandes'   },
   { href: '/admin/produits',      icon: Package,         label: 'Produits'    },
   { href: '/admin/stock',         icon: Boxes,           label: 'Stock'       },
   { href: '/admin/contenu',       icon: FileText,        label: 'Contenu'     },
   { href: '/admin/pages',         icon: Layout,          label: 'Pages'       },
-  { href: '/admin/images',         icon: Images,          label: 'Images'      },
+  { href: '/admin/images',        icon: Images,          label: 'Images'      },
   { href: '/admin/pages-legales', icon: ScrollText,      label: 'Pages légales' },
 ]
 

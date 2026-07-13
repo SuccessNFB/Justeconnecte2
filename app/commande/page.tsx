@@ -98,7 +98,7 @@ export default function CommandePage() {
       const res  = await fetch('/api/checkout', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ items: lineItems, zone: deliveryZone, email: customer.email }),
+        body:    JSON.stringify({ items: lineItems, zone: deliveryZone, customer }),
       })
       const data = await res.json()
 

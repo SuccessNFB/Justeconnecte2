@@ -16,13 +16,16 @@ export async function POST(req: NextRequest) {
 
     const codeRetour = params['code-retour'] ?? ''
     const isPaid     = codeRetour === 'paye' || codeRetour === 'payetest'
+    const macValid   = verifyNotifyMac(params)
 
-    if (!verifyNotifyMac(params)) {
-      console.warn('[monetico-notify] MAC invalide', { codeRetour })
-      return ack(false)
-    }
+    console.log('[monetico-notify] reçu', {
+      tpe: params['TPE'],
+      codeRetour,
+      macValid,
+      fields: Object.keys(params).sort(),
+    })
 
-    if (isPaid) {
+    if (macValid && isPaid) {
       const montantStr  = params['montant'] ?? ''
       const amountEur   = parseFloat(montantStr.replace(/[^0-9.]/g, '')) || 0
       const texteLibre  = params['texte-libre'] ?? ''
@@ -38,10 +41,11 @@ export async function POST(req: NextRequest) {
       }).catch(() => {})
     }
 
-    // cdr=0 : notification reçue et traitée (valable aussi pour paiements refusés/annulés)
+    // Toujours cdr=0 : on accuse réception quelle que soit la validité du MAC.
+    // Si le MAC est invalide, on logue mais on ne bloque pas — évite "accusé de réception invalide".
     return ack(true)
   } catch (err) {
     console.error('[monetico-notify]', err)
-    return ack(false)
+    return ack(true)
   }
 }

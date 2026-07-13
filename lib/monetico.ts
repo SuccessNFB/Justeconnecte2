@@ -23,6 +23,9 @@ const NOTIFY_MAC_FIELDS = [
   'TPE', 'date', 'montant', 'reference', 'texte-libre', 'code-retour',
   'cvx', 'vld', 'brand', 'status3ds', 'numauto', 'originecb',
   'bincb', 'hpancb', 'ipclient', 'originetr', 'veres', 'pares',
+  // champs supplémentaires v3.0 / 3DS v2
+  'modepaiement', 'filtrage', 'filtragecause', 'filtragevaleur',
+  'cbenregistree', 'numcontrat', 'authentification', 'authentificationvalue',
 ]
 
 export function generateReference(): string {

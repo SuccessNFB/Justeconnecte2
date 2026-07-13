@@ -26,11 +26,10 @@ type AEvent = {
 type PeriodOption = { label: string; hours: number }
 
 const PERIODS: PeriodOption[] = [
-  { label: '24h',      hours: 24   },
-  { label: '7 jours',  hours: 168  },
-  { label: '30 jours', hours: 720  },
-  { label: '90 jours', hours: 2160 },
-  { label: 'All Time', hours: 0    },
+  { label: 'Jour',  hours: 24   },
+  { label: 'Mois',  hours: 720  },
+  { label: 'Année', hours: 8760 },
+  { label: 'Tout',  hours: 0    },
 ]
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -275,7 +274,7 @@ const ZONE_LABEL: Record<string, string> = {
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function AnalytiquesPage() {
-  const [hours, setHours]   = useState(168) // default 7j
+  const [hours, setHours]   = useState(24) // default Jour
   const [events, setEvents] = useState<AEvent[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError]   = useState(false)
@@ -448,7 +447,7 @@ export default function AnalytiquesPage() {
             <KpiCard icon={Users}        color="#6366f1"           label="Visiteurs uniques"
               value={stats.visitors.toLocaleString('fr-FR')}  sub={`sans doublons — ${pLabel}`} />
             <KpiCard icon={ShoppingCart} color="#22c55e"           label="Ventes confirmées"
-              value={stats.salesCount.toLocaleString('fr-FR')} sub="paiements Stripe" />
+              value={stats.salesCount.toLocaleString('fr-FR')} sub="paiements CM-CIC confirmés" />
             <KpiCard icon={CreditCard}   color="var(--gold)"       label="Chiffre d'affaires"
               value={fmtEur(stats.revenue)}                    sub={`revenus — ${pLabel}`} />
           </div>

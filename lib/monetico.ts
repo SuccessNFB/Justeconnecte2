@@ -53,10 +53,10 @@ export function buildPaymentForm(opts: {
     version:        '3.0',
     lgue:           'FR',
     societe,
-    mail:           opts.email ?? '',
     url_retour_ok:  opts.successUrl,
     url_retour_err: opts.cancelUrl,
   }
+  if (opts.email) fields.mail = opts.email
 
   // MAC = HMAC-SHA1 of all fields as "key=value" pairs joined by "*", sorted ASCII order
   const macStr = Object.keys(fields).sort().map(k => `${k}=${fields[k]}`).join('*')

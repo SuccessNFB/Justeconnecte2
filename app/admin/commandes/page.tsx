@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState, useMemo } from 'react'
-import { ShoppingBag, User, MapPin, Clock, CheckCircle, RefreshCw, Archive, ArchiveRestore, Search, SlidersHorizontal, X } from 'lucide-react'
+import { ShoppingBag, User, MapPin, Clock, CheckCircle, RefreshCw, Archive, ArchiveRestore, Search, SlidersHorizontal, X, BadgeCheck } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import { formatPrice } from '@/lib/utils'
 
@@ -51,6 +51,12 @@ function relTime(iso: string) {
 }
 
 function StatusBadge({ status, archived }: { status: string; archived: boolean }) {
+  if (status === 'validated') return (
+    <span className="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full"
+      style={{ background: 'rgba(99,102,241,0.12)', color: '#6366f1' }}>
+      <BadgeCheck size={11} /> Validée
+    </span>
+  )
   if (archived) return (
     <span className="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full"
       style={{ background: 'rgba(100,100,100,0.1)', color: '#888' }}>
@@ -113,6 +119,12 @@ export default function CommandesPage() {
     if (expanded === order.id) setExpanded(null)
   }
 
+  async function validateOrder(order: Order) {
+    await supabase.from('orders').update({ status: 'validated', archived: true }).eq('id', order.id)
+    setOrders(prev => prev.map(o => o.id === order.id ? { ...o, status: 'validated', archived: true } : o))
+    setExpanded(null)
+  }
+
   const hasFilters = !!(searchNom || searchProduit || filterZone !== 'all' || filterStatut !== 'all' || filterDate !== 'all')
 
   const filtered = useMemo(() => {
@@ -127,8 +139,7 @@ export default function CommandesPage() {
         if (!o.items.some(i => i.name.toLowerCase().includes(searchProduit.toLowerCase()))) return false
       }
       if (filterZone !== 'all' && o.delivery_zone !== filterZone) return false
-      if (filterStatut === 'paid' && o.status !== 'paid') return false
-      if (filterStatut === 'pending' && o.status !== 'pending') return false
+      if (filterStatut !== 'all' && o.status !== filterStatut) return false
       if (filterDate !== 'all') {
         const c = new Date(o.created_at), now = new Date()
         if (filterDate === 'today' && c.toDateString() !== now.toDateString()) return false
@@ -220,6 +231,7 @@ export default function CommandesPage() {
             <option value="all">Tous statuts</option>
             <option value="paid">Payé</option>
             <option value="pending">En attente</option>
+            <option value="validated">Validée</option>
           </select>
 
           <select value={filterDate} onChange={e => setFilterDate(e.target.value)} style={selectStyle}>
@@ -273,7 +285,7 @@ export default function CommandesPage() {
         <div className="flex flex-col gap-3">
           {filtered.map(order => {
             const isOpen      = expanded === order.id
-            const borderColor = order.archived ? '#aaa' : order.status === 'paid' ? '#16a34a' : '#ca8a04'
+            const borderColor = order.status === 'validated' ? '#6366f1' : order.archived ? '#aaa' : order.status === 'paid' ? '#16a34a' : '#ca8a04'
             return (
               <div key={order.id} className="jc-card overflow-hidden"
                 style={{ borderLeft: `3px solid ${borderColor}`, opacity: order.archived ? 0.65 : 1 }}>
@@ -379,15 +391,24 @@ export default function CommandesPage() {
                       </div>
                     </div>
 
-                    {/* Archive */}
-                    <div className="px-5 py-3">
+                    {/* Actions */}
+                    <div className="px-5 py-3 flex items-center gap-2 flex-wrap">
+                      {order.status !== 'validated' && (
+                        <button
+                          onClick={() => validateOrder(order)}
+                          className="flex items-center gap-2 text-xs font-bold px-3 py-1.5 rounded-lg transition-colors"
+                          style={{ background: 'rgba(99,102,241,0.12)', color: '#6366f1', border: '1.5px solid rgba(99,102,241,0.25)' }}
+                        >
+                          <BadgeCheck size={13} /> Valider la commande
+                        </button>
+                      )}
                       <button
                         onClick={() => toggleArchive(order)}
                         className="flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors hover:bg-black/5"
                         style={{ border: '1.5px solid var(--border)', color: 'oklch(0.18 0.004 264 / 0.5)' }}
                       >
                         {order.archived ? <ArchiveRestore size={13} /> : <Archive size={13} />}
-                        {order.archived ? 'Désarchiver' : 'Archiver cette commande'}
+                        {order.archived ? 'Désarchiver' : 'Archiver'}
                       </button>
                     </div>
                   </div>

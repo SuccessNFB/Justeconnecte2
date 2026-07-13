@@ -19,8 +19,7 @@ export async function POST(req: NextRequest) {
 
     if (!verifyNotifyMac(params)) {
       console.warn('[monetico-notify] MAC invalide', { codeRetour })
-      // In test mode payetest, MAC may not verify — allow it through
-      if (!isPaid) return ack(false)
+      return ack(false)
     }
 
     if (isPaid) {
@@ -39,7 +38,8 @@ export async function POST(req: NextRequest) {
       }).catch(() => {})
     }
 
-    return ack(isPaid)
+    // cdr=0 : notification reçue et traitée (valable aussi pour paiements refusés/annulés)
+    return ack(true)
   } catch (err) {
     console.error('[monetico-notify]', err)
     return ack(false)

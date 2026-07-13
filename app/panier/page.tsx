@@ -1,5 +1,6 @@
 'use client'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Minus, Plus, Trash2, ShoppingBag } from 'lucide-react'
 import { useCart } from '@/contexts/CartContext'
 import { useZone } from '@/contexts/ZoneContext'
@@ -18,12 +19,11 @@ type EnrichedItem = {
 }
 
 export default function PanierPage() {
+  const router = useRouter()
   const { items, updateQuantity, removeItem } = useCart()
   const { zone } = useZone()
-  const [enriched,      setEnriched]      = useState<EnrichedItem[]>([])
-  const [loading,       setLoading]       = useState(true)
-  const [checkingOut,   setCheckingOut]   = useState(false)
-  const [installments,  setInstallments]  = useState<1 | 2 | 3 | 4>(1)
+  const [enriched, setEnriched] = useState<EnrichedItem[]>([])
+  const [loading,  setLoading]  = useState(true)
   const tracked = useRef(false)
 
   // Track checkout_start + email notification once per page load (when cart is non-empty)
@@ -67,52 +67,6 @@ export default function PanierPage() {
 
   const subtotal = enriched.reduce((s, i) => s + (getPrice(i.variant) ?? 0) * i.quantity, 0)
   const shipping = 0
-
-  async function handleCheckout() {
-    setCheckingOut(true)
-    const lineItems = enriched.map(item => ({
-      name:     `${(item.variant as any).products?.name ?? 'Produit'} · ${item.variant.color_name} · ${item.variant.storage}`,
-      price:    Math.round((getPrice(item.variant) ?? 0) * 100),
-      quantity: item.quantity,
-      image:    (item.variant as any).products?.image_url ?? undefined,
-    }))
-    try {
-      const res  = await fetch('/api/checkout', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ items: lineItems, zone: zone?.name, installments }),
-      })
-      const data = await res.json()
-
-      if (data.action && data.fields) {
-        // Monetico — stocker le montant pour la page merci
-        if (data.reference) {
-          try { sessionStorage.setItem('jc_ref', data.reference) } catch {}
-          try { sessionStorage.setItem('jc_amount', (subtotal).toFixed(2)) } catch {}
-        }
-        // Soumettre le formulaire Monetico (POST requis)
-        const form = document.createElement('form')
-        form.method = 'POST'
-        form.action = data.action
-        form.style.display = 'none'
-        Object.entries(data.fields as Record<string, string>).forEach(([name, value]) => {
-          const input = document.createElement('input')
-          input.type  = 'hidden'
-          input.name  = name
-          input.value = value
-          form.appendChild(input)
-        })
-        document.body.appendChild(form)
-        form.submit()
-      } else {
-        alert(data.error ?? 'Une erreur est survenue.')
-        setCheckingOut(false)
-      }
-    } catch {
-      alert('Impossible de joindre le serveur. Réessayez.')
-      setCheckingOut(false)
-    }
-  }
 
   if (loading) return (
     <div className="py-24 text-center" style={{ color: 'oklch(0.18 0.004 264 / 0.4)' }}>Chargement…</div>
@@ -231,53 +185,12 @@ export default function PanierPage() {
                 </div>
               </div>
 
-              {/* Installment selector */}
-              <div className="mb-5">
-                <p className="text-xs font-semibold mb-2" style={{ color: 'oklch(0.18 0.004 264 / 0.6)' }}>
-                  Mode de paiement
-                </p>
-                <div className="grid grid-cols-4 gap-1.5">
-                  {([1, 2, 3, 4] as const).map(n => {
-                    const perMonth = n === 1 ? null : formatPrice((subtotal + shipping) / n)
-                    const isActive = installments === n
-                    return (
-                      <button
-                        key={n}
-                        onClick={() => setInstallments(n)}
-                        className="py-2 rounded-xl text-center transition-all"
-                        style={{
-                          fontSize: '0.7rem',
-                          fontWeight: 600,
-                          border: isActive ? '2px solid var(--gold-deep)' : '1.5px solid var(--border)',
-                          background: isActive ? 'var(--gold-deep)' : 'transparent',
-                          color: isActive ? '#fff' : 'inherit',
-                        }}
-                      >
-                        <span style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700 }}>
-                          {n === 1 ? '1×' : `${n}×`}
-                        </span>
-                        {perMonth && (
-                          <span style={{ display: 'block', opacity: 0.85, marginTop: '1px' }}>
-                            {perMonth}
-                          </span>
-                        )}
-                        {n === 1 && (
-                          <span style={{ display: 'block', opacity: 0.7, marginTop: '1px' }}>
-                            Comptant
-                          </span>
-                        )}
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-
               <button
-                onClick={handleCheckout}
-                disabled={checkingOut || !enriched.length}
+                onClick={() => router.push('/commande')}
+                disabled={!enriched.length}
                 className="jc-btn-primary w-full"
               >
-                {checkingOut ? 'Redirection…' : installments === 1 ? 'Passer la commande →' : `Payer en ${installments}× →`}
+                Passer la commande →
               </button>
 
               <p className="text-xs text-center mt-3" style={{ color: 'oklch(0.18 0.004 264 / 0.4)' }}>

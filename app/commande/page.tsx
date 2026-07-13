@@ -82,10 +82,13 @@ export default function CommandePage() {
     setSubmitting(true)
 
     const lineItems = enriched.map(item => ({
-      name:     `${(item.variant as any).products?.name ?? 'Produit'} · ${item.variant.color_name} · ${item.variant.storage}`,
-      price:    Math.round((getPrice(item.variant) ?? 0) * 100),
-      quantity: item.quantity,
-      image:    (item.variant.images ?? [])[0] ?? (item.variant as any).products?.image_url ?? undefined,
+      name:       `${(item.variant as any).products?.name ?? 'Produit'} · ${item.variant.color_name} · ${item.variant.storage}`,
+      price:      Math.round((getPrice(item.variant) ?? 0) * 100),
+      quantity:   item.quantity,
+      image:      (item.variant.images ?? [])[0] ?? (item.variant as any).products?.image_url ?? undefined,
+      color_name: item.variant.color_name,
+      color_hex:  item.variant.color_hex,
+      storage:    item.variant.storage,
     }))
 
     await fetch('/api/notify-commande', {

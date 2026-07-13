@@ -6,6 +6,16 @@ import { formatPrice } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
 
+type OrderItem = {
+  name:        string
+  price:       number
+  quantity:    number
+  image?:      string
+  color_name?: string
+  color_hex?:  string
+  storage?:    string
+}
+
 type Order = {
   id:                 string
   reference:          string
@@ -16,7 +26,7 @@ type Order = {
   customer_telephone: string
   customer_adresse:   string
   delivery_zone:      string
-  items:              { name: string; price: number; quantity: number; image?: string }[]
+  items:              OrderItem[]
   total_eur:          number
   created_at:         string
   paid_at:            string | null
@@ -225,17 +235,51 @@ export default function CommandesPage() {
                       <div className="flex flex-col gap-2">
                         {(order.items ?? []).map((item, i) => (
                           <div key={i} className="flex items-center gap-3">
-                            {item.image && (
-                              <div className="shrink-0 w-10 h-10 rounded-lg overflow-hidden" style={{ background: 'var(--surface-soft)' }}>
+                            {item.image ? (
+                              <div className="shrink-0 w-12 h-12 rounded-lg overflow-hidden" style={{ background: 'var(--surface-soft)' }}>
                                 <img src={item.image} alt="" className="w-full h-full object-cover" />
+                              </div>
+                            ) : (
+                              <div className="shrink-0 w-12 h-12 rounded-lg flex items-center justify-center" style={{ background: 'var(--surface-soft)' }}>
+                                <svg viewBox="0 0 60 100" className="w-7 h-auto" fill="none">
+                                  <rect x="5" y="2" width="50" height="96" rx="8" fill={item.color_hex ?? '#ccc'} opacity="0.9"/>
+                                  <rect x="9" y="8" width="42" height="72" rx="4" fill="oklch(0.88 0.002 247)"/>
+                                </svg>
                               </div>
                             )}
                             <div className="flex-1 min-w-0 text-sm">
-                              <p className="font-medium truncate">{item.name}</p>
+                              <p className="font-medium truncate">
+                                {/* Product name without color/storage suffix */}
+                                {item.name.split(' · ')[0]}
+                              </p>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                {item.color_hex && (
+                                  <span
+                                    className="inline-block w-3 h-3 rounded-full border"
+                                    style={{ background: item.color_hex, borderColor: 'var(--border)' }}
+                                  />
+                                )}
+                                {item.color_name && (
+                                  <span className="text-xs" style={{ opacity: 0.6 }}>{item.color_name}</span>
+                                )}
+                                {item.storage && (
+                                  <>
+                                    <span className="text-xs" style={{ opacity: 0.3 }}>·</span>
+                                    <span
+                                      className="text-xs font-semibold px-1.5 py-0.5 rounded"
+                                      style={{ background: 'var(--surface-soft)', opacity: 0.8 }}
+                                    >
+                                      {item.storage}
+                                    </span>
+                                  </>
+                                )}
+                              </div>
                             </div>
                             <div className="shrink-0 text-right text-sm">
                               <p className="font-bold">{formatPrice((item.price * item.quantity) / 100)}</p>
-                              <p className="text-xs" style={{ opacity: 0.4 }}>×{item.quantity}</p>
+                              {item.quantity > 1 && (
+                                <p className="text-xs" style={{ opacity: 0.4 }}>×{item.quantity}</p>
+                              )}
                             </div>
                           </div>
                         ))}

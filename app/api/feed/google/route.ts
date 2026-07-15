@@ -79,6 +79,8 @@ export async function GET() {
       <g:price>${regularPrice}</g:price>${salePriceStr ? `\n      <g:sale_price>${salePriceStr}</g:sale_price>` : ''}
       <g:brand>${esc(product.brands?.name)}</g:brand>
       <g:condition>new</g:condition>
+      <g:google_product_category>267</g:google_product_category>
+      <g:identifier_exists>no</g:identifier_exists>
       <g:color>${esc(variant.color_name)}</g:color>
       <g:storage_capacity>${esc(variant.storage)}</g:storage_capacity>
       <g:shipping>

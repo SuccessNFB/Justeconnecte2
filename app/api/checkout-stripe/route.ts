@@ -49,8 +49,9 @@ export async function POST(req: NextRequest) {
   try {
     const stripe  = getStripe()
     const session = await stripe.checkout.sessions.create({
-      mode:                 'payment',
-      payment_method_types: ['scalapay'],
+      mode: 'payment',
+      // Pas de payment_method_types fixe : Stripe affiche dynamiquement toutes
+      // les méthodes activées sur le compte (Scalapay, carte, etc.) au client.
       line_items: items.map(i => ({
         price_data: {
           currency:    'eur',

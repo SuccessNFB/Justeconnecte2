@@ -76,7 +76,7 @@ export default function CommandePage() {
 
   const subtotal = enriched.reduce((s, i) => s + (getPrice(i.variant) ?? 0) * i.quantity, 0)
 
-  const step1Valid = !!(customer.nom.trim() && customer.prenom.trim() && customer.email.trim() && customer.telephone.trim())
+  const step1Valid = !!(customer.nom.trim() && customer.prenom.trim() && customer.email.trim() && customer.telephone.trim() && customer.adresse.trim())
 
   async function handlePayment(method: 'monetico' | 'stripe') {
     setSubmitting(true)
@@ -245,7 +245,7 @@ export default function CommandePage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold mb-1.5" style={{ color: 'oklch(0.18 0.004 264 / 0.6)' }}>Adresse</label>
+                <label className="block text-xs font-semibold mb-1.5" style={{ color: 'oklch(0.18 0.004 264 / 0.6)' }}>Adresse *</label>
                 <input
                   type="text"
                   value={customer.adresse}

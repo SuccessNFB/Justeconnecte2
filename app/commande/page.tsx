@@ -78,7 +78,7 @@ export default function CommandePage() {
 
   const step1Valid = !!(customer.nom.trim() && customer.prenom.trim() && customer.email.trim() && customer.telephone.trim())
 
-  async function handlePayment() {
+  async function handlePayment(method: 'monetico' | 'stripe') {
     setSubmitting(true)
 
     const lineItems = enriched.map(item => ({
@@ -98,18 +98,33 @@ export default function CommandePage() {
     }).catch(() => {})
 
     try {
-      const res  = await fetch('/api/checkout', {
+      const endpoint = method === 'stripe' ? '/api/checkout-stripe' : '/api/checkout'
+      const res  = await fetch(endpoint, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ items: lineItems, zone: deliveryZone, customer }),
       })
       const data = await res.json()
 
+      if (!res.ok) {
+        alert(data.error ?? 'Une erreur est survenue.')
+        setSubmitting(false)
+        return
+      }
+
+      if (data.reference) {
+        try { sessionStorage.setItem('jc_ref', data.reference) } catch {}
+        try { sessionStorage.setItem('jc_amount', subtotal.toFixed(2)) } catch {}
+      }
+
+      // Stripe (Scalapay) — page hébergée par Stripe, simple redirection
+      if (method === 'stripe' && data.url) {
+        window.location.href = data.url
+        return
+      }
+
+      // Monetico — soumission d'un formulaire caché vers la page de paiement
       if (data.action && data.fields) {
-        if (data.reference) {
-          try { sessionStorage.setItem('jc_ref', data.reference) } catch {}
-          try { sessionStorage.setItem('jc_amount', subtotal.toFixed(2)) } catch {}
-        }
         const form = document.createElement('form')
         form.method = 'POST'
         form.action = data.action
@@ -414,13 +429,20 @@ export default function CommandePage() {
                 <ChevronLeft size={15} /> Retour
               </button>
               <button
-                onClick={handlePayment}
+                onClick={() => handlePayment('monetico')}
                 disabled={submitting}
                 className="jc-btn-primary flex-1"
               >
-                {submitting ? 'Redirection…' : 'Procéder au paiement →'}
+                {submitting ? 'Redirection…' : 'Payer en 1 fois →'}
               </button>
             </div>
+            <button
+              onClick={() => handlePayment('stripe')}
+              disabled={submitting}
+              className="jc-btn-ghost w-full mt-2.5"
+            >
+              Payer en 4× sans frais avec Scalapay
+            </button>
             <p className="text-xs text-center mt-3" style={{ color: 'oklch(0.18 0.004 264 / 0.4)' }}>
               🔒 Paiement sécurisé — SSL
             </p>

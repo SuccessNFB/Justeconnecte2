@@ -27,6 +27,7 @@ type Order = {
   customer_telephone: string
   customer_adresse:   string
   delivery_zone:      string
+  payment_method:     string
   items:              OrderItem[]
   total_eur:          number
   created_at:         string
@@ -301,6 +302,12 @@ export default function CommandesPage() {
                         <span className="text-xs px-2 py-0.5 rounded-full"
                           style={{ background: 'var(--surface-soft)', color: 'oklch(0.18 0.004 264 / 0.6)' }}>
                           {ZONE_LABEL[order.delivery_zone] ?? order.delivery_zone}
+                        </span>
+                      )}
+                      {order.payment_method === 'scalapay' && (
+                        <span className="text-xs px-2 py-0.5 rounded-full font-semibold"
+                          style={{ background: 'rgba(255,74,141,0.12)', color: '#FF4A8D' }}>
+                          Scalapay 4×
                         </span>
                       )}
                     </div>

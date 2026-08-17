@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { buildPaymentForm, generateReference } from '@/lib/monetico'
 import { createServiceClient } from '@/lib/supabase'
 import { resolveLineItems, type RequestedItem } from '@/lib/pricing'
+import { isDuplicateOrder } from '@/lib/anti-spam'
 
 interface CustomerInfo {
   prenom:    string
@@ -39,6 +40,12 @@ export async function POST(req: NextRequest) {
 
   const origin     = process.env.NEXT_PUBLIC_SITE_URL ?? req.nextUrl.origin
   const totalCents = resolved.reduce((s, i) => s + i.price * i.quantity, 0)
+  const totalEur   = (totalCents / 100).toFixed(2)
+
+  if (await isDuplicateOrder(supabase, customer?.email, totalEur)) {
+    return NextResponse.json({ error: 'Une commande identique est déjà en cours. Merci de patienter une minute.' }, { status: 429 })
+  }
+
   const reference  = generateReference()
   const description = resolved.map(i => `${i.quantity}x ${i.name}`).join(', ')
 
@@ -64,7 +71,7 @@ export async function POST(req: NextRequest) {
       customer_adresse:   customer?.adresse   ?? '',
       delivery_zone:      zone ?? '',
       items:              resolved,
-      total_eur:          (totalCents / 100).toFixed(2),
+      total_eur:          totalEur,
     }).then(({ error }) => {
       if (error) console.error('[checkout] order save error:', error.message)
     })

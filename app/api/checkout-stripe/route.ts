@@ -1,12 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getStripe } from '@/lib/stripe'
 import { createServiceClient } from '@/lib/supabase'
-
-interface LineItem {
-  name:     string
-  price:    number   // cents EUR
-  quantity: number
-}
+import { resolveLineItems, type RequestedItem } from '@/lib/pricing'
 
 interface CustomerInfo {
   prenom:    string
@@ -25,25 +20,29 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Paiement en plusieurs fois non configuré.' }, { status: 500 })
   }
 
-  let items:    LineItem[]
-  let zone:     string | undefined
-  let customer: CustomerInfo | undefined
+  let items:         RequestedItem[]
+  let zone:          string | undefined
+  let pricingZoneId: string
+  let customer:      CustomerInfo | undefined
 
   try {
-    const body = await req.json()
-    items    = body.items
-    zone     = body.zone
-    customer = body.customer
+    const body    = await req.json()
+    items         = body.items
+    zone          = body.zone
+    pricingZoneId = body.pricingZoneId
+    customer      = body.customer
   } catch {
     return NextResponse.json({ error: 'Requête invalide.' }, { status: 400 })
   }
 
-  if (!Array.isArray(items) || !items.length) {
-    return NextResponse.json({ error: 'Panier vide.' }, { status: 400 })
+  const supabase = createServiceClient()
+  const resolved = await resolveLineItems(supabase, items, pricingZoneId)
+  if (!resolved) {
+    return NextResponse.json({ error: 'Panier invalide ou produits indisponibles.' }, { status: 400 })
   }
 
   const origin     = process.env.NEXT_PUBLIC_SITE_URL ?? req.nextUrl.origin
-  const totalCents = items.reduce((s, i) => s + i.price * i.quantity, 0)
+  const totalCents = resolved.reduce((s, i) => s + i.price * i.quantity, 0)
   const reference  = generateReference()
 
   try {
@@ -52,7 +51,7 @@ export async function POST(req: NextRequest) {
       mode: 'payment',
       // Pas de payment_method_types fixe : Stripe affiche dynamiquement toutes
       // les méthodes activées sur le compte (Scalapay, carte, etc.) au client.
-      line_items: items.map(i => ({
+      line_items: resolved.map(i => ({
         price_data: {
           currency:    'eur',
           unit_amount: i.price,
@@ -69,7 +68,6 @@ export async function POST(req: NextRequest) {
 
     // Save order to Supabase (best-effort — never blocks payment)
     if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      const supabase = createServiceClient()
       await supabase.from('orders').insert({
         reference,
         status:             'pending',
@@ -80,7 +78,7 @@ export async function POST(req: NextRequest) {
         customer_telephone: customer?.telephone ?? '',
         customer_adresse:   customer?.adresse   ?? '',
         delivery_zone:      zone ?? '',
-        items,
+        items:              resolved,
         total_eur:          (totalCents / 100).toFixed(2),
       }).then(({ error }) => {
         if (error) console.error('[checkout-stripe] order save error:', error.message)

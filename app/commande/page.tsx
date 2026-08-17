@@ -81,6 +81,8 @@ export default function CommandePage() {
   async function handlePayment(method: 'monetico' | 'stripe') {
     setSubmitting(true)
 
+    // Contenu affiché dans l'email de notification (informatif uniquement —
+    // le montant réellement facturé est recalculé côté serveur, voir plus bas).
     const lineItems = enriched.map(item => ({
       name:       `${(item.variant as any).products?.name ?? 'Produit'} · ${item.variant.color_name} · ${item.variant.storage}`,
       price:      Math.round((getPrice(item.variant) ?? 0) * 100),
@@ -89,6 +91,13 @@ export default function CommandePage() {
       color_name: item.variant.color_name,
       color_hex:  item.variant.color_hex,
       storage:    item.variant.storage,
+    }))
+
+    // Ce qui part au paiement : juste variantId + quantité. Le serveur revient
+    // chercher le vrai prix en base — jamais celui envoyé par le navigateur.
+    const checkoutItems = enriched.map(item => ({
+      variantId: item.variantId,
+      quantity:  item.quantity,
     }))
 
     await fetch('/api/notify-commande', {
@@ -102,7 +111,7 @@ export default function CommandePage() {
       const res  = await fetch(endpoint, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ items: lineItems, zone: deliveryZone, customer }),
+        body:    JSON.stringify({ items: checkoutItems, zone: deliveryZone, pricingZoneId: zone?.id, customer }),
       })
       const data = await res.json()
 

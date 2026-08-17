@@ -41,6 +41,12 @@ export function buildPaymentForm(opts: {
   successUrl:    string
   cancelUrl:     string
   installments?: 1 | 2 | 3 | 4
+  billingAddress?: {
+    addressLine1: string
+    city:         string
+    postalCode:   string
+    country?:     string
+  }
 }): { action: string; fields: Record<string, string> } {
   const installments = opts.installments ?? 1
   const isFractionne = installments > 1
@@ -70,13 +76,12 @@ export function buildPaymentForm(opts: {
     url_retour_ok:  opts.successUrl,
     url_retour_err: opts.cancelUrl,
     // Required for Monetico v3.0 (3DS v2). Fields must be non-empty; postal code 5 digits for FR.
-    // TODO production: collect real billing address from customer during checkout.
     contexte_commande: Buffer.from(JSON.stringify({
       billing: {
-        addressLine1: 'Adresse non renseignee',
-        city: 'Non renseignee',
-        postalCode: '97200',
-        country: 'FR',
+        addressLine1: opts.billingAddress?.addressLine1 || 'Adresse non renseignee',
+        city:         opts.billingAddress?.city         || 'Non renseignee',
+        postalCode:   opts.billingAddress?.postalCode    || '97200',
+        country:      opts.billingAddress?.country       || 'FR',
       },
     })).toString('base64'),
   }

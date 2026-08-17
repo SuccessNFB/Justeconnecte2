@@ -12,6 +12,15 @@ interface CustomerInfo {
   adresse?:  string
 }
 
+// Ville/code postal par défaut par zone de livraison — utilisés pour compléter
+// l'adresse de facturation envoyée à Monetico (3DS v2) quand le client n'a
+// saisi qu'une ligne d'adresse libre, sans ville ni code postal séparés.
+const ZONE_BILLING_DEFAULTS: Record<string, { city: string; postalCode: string }> = {
+  martinique: { city: 'Fort-de-France', postalCode: '97200' },
+  guadeloupe: { city: 'Pointe-à-Pitre',  postalCode: '97110' },
+  guyane:     { city: 'Cayenne',        postalCode: '97300' },
+}
+
 export async function POST(req: NextRequest) {
   if (!process.env.MONETICO_TPE || !process.env.MONETICO_KEY || !process.env.MONETICO_URL) {
     return NextResponse.json({ error: 'Paiement non configuré.' }, { status: 500 })
@@ -49,6 +58,11 @@ export async function POST(req: NextRequest) {
   const reference  = generateReference()
   const description = resolved.map(i => `${i.quantity}x ${i.name}`).join(', ')
 
+  const zoneDefaults = ZONE_BILLING_DEFAULTS[zone ?? ''] ?? ZONE_BILLING_DEFAULTS.martinique
+  const billingAddress = customer?.adresse
+    ? { addressLine1: customer.adresse, ...zoneDefaults, country: 'FR' }
+    : undefined
+
   const form = buildPaymentForm({
     amountCents: totalCents,
     reference,
@@ -57,6 +71,7 @@ export async function POST(req: NextRequest) {
     email:      customer?.email,
     successUrl: `${origin}/merci`,
     cancelUrl:  `${origin}/panier`,
+    billingAddress,
   })
 
   // Save order to Supabase (best-effort — never blocks payment)

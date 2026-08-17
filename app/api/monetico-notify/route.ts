@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { verifyNotifyMac } from '@/lib/monetico'
+import { verifyNotifyMac, computeNotifyMac } from '@/lib/monetico'
 import { createServiceClient } from '@/lib/supabase'
 
 function ack(ok: boolean) {
@@ -18,6 +18,7 @@ export async function POST(req: NextRequest) {
     const codeRetour = params['code-retour'] ?? ''
     const isPaid     = codeRetour === 'paye' || codeRetour === 'payetest'
     const macValid   = verifyNotifyMac(params)
+    const reference  = params['reference'] ?? ''
 
     console.log('[monetico-notify] reçu', {
       tpe: params['TPE'],
@@ -26,24 +27,25 @@ export async function POST(req: NextRequest) {
       fields: Object.keys(params).sort(),
     })
 
+    const supabase = process.env.SUPABASE_SERVICE_ROLE_KEY ? createServiceClient() : null
+    let orderMatched: boolean | null = null
+
     if (macValid && isPaid) {
       const montantStr  = params['montant'] ?? ''
       const amountEur   = parseFloat(montantStr.replace(/[^0-9.]/g, '')) || 0
       const texteLibre  = params['texte-libre'] ?? ''
       const zoneMatch   = texteLibre.match(/^zone:([^|]+)\|/)
       const zone        = zoneMatch?.[1] ?? undefined
-      const reference   = params['reference'] ?? ''
 
       // Mark order as paid
-      if (process.env.SUPABASE_SERVICE_ROLE_KEY && reference) {
-        const supabase = createServiceClient()
-        await supabase
+      if (supabase && reference) {
+        const { data: updated, error } = await supabase
           .from('orders')
           .update({ status: 'paid', paid_at: new Date().toISOString() })
           .eq('reference', reference)
-          .then(({ error }) => {
-            if (error) console.error('[monetico-notify] order update error:', error.message)
-          })
+          .select('id')
+        if (error) console.error('[monetico-notify] order update error:', error.message)
+        orderMatched = !error && !!updated && updated.length > 0
       }
 
       const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://justeconnecte.fr'
@@ -52,6 +54,21 @@ export async function POST(req: NextRequest) {
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ zone, items: 1, amount: amountEur, reference }),
       }).catch(() => {})
+    }
+
+    // Journal de diagnostic temporaire — à retirer une fois le problème confirmé résolu.
+    if (supabase) {
+      await supabase.from('monetico_notify_log').insert({
+        reference,
+        tpe:           params['TPE'] ?? null,
+        code_retour:   codeRetour,
+        mac_received:  params['MAC'] ?? null,
+        mac_expected:  computeNotifyMac(params),
+        mac_valid:     macValid,
+        order_matched: orderMatched,
+      }).then(({ error }) => {
+        if (error) console.error('[monetico-notify] debug log error:', error.message)
+      })
     }
 
     // Toujours cdr=0 : on accuse réception quelle que soit la validité du MAC.

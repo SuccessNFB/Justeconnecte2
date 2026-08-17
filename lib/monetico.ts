@@ -101,16 +101,20 @@ export function buildPaymentForm(opts: {
   return { action: url, fields }
 }
 
-export function verifyNotifyMac(params: Record<string, string>): boolean {
+export function computeNotifyMac(params: Record<string, string>): string | null {
   const tpe = params['TPE'] ?? ''
   const hexKey = tpe === (process.env.MONETICO_TPE_FRACTIONNE ?? '\0')
     ? process.env.MONETICO_KEY_FRACTIONNE
     : process.env.MONETICO_KEY
-  if (!hexKey) return false
+  if (!hexKey) return null
   const { MAC, ...rest } = params
-  if (!MAC) return false
   const presentFields = NOTIFY_MAC_FIELDS.filter(f => f in rest)
   const macStr = presentFields.map(f => rest[f]).join('*')
-  const expected = hmacSha1(usableKey(hexKey), macStr)
-  return MAC.toLowerCase() === expected.toLowerCase()
+  return hmacSha1(usableKey(hexKey), macStr)
+}
+
+export function verifyNotifyMac(params: Record<string, string>): boolean {
+  const expected = computeNotifyMac(params)
+  if (!expected || !params.MAC) return false
+  return params.MAC.toLowerCase() === expected.toLowerCase()
 }

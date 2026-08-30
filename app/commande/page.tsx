@@ -427,7 +427,7 @@ export default function CommandePage() {
               </button>
             </div>
             <p className="text-xs text-center mt-3" style={{ color: 'oklch(0.18 0.004 264 / 0.4)' }}>
-              🔒 Paiement sécurisé — PayPal
+              🔒 Paiement sécurisé PayPal
             </p>
           </div>
         )}

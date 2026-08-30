@@ -8,7 +8,7 @@ const BRANDS = [
   {
     id: 'apple',
     name: 'Apple',
-    tagline: 'iPhone 17 Pro Max — appareil photo cinématique, puce A19 Pro, titanium.',
+    tagline: 'iPhone 17 Pro Max : appareil photo cinématique, puce A19 Pro, titanium.',
     model: 'iPhone 17 Pro Max',
     from: 1599,
     glow: 'rgba(196,146,42,0.22)',
@@ -20,7 +20,7 @@ const BRANDS = [
   {
     id: 'samsung',
     name: 'Samsung',
-    tagline: 'Galaxy S26 Ultra — IA embarquée, stylet intégré, écran AMOLED 120 Hz.',
+    tagline: 'Galaxy S26 Ultra : IA embarquée, stylet intégré, écran AMOLED 120 Hz.',
     model: 'Galaxy S26 Ultra',
     from: 1299,
     glow: 'rgba(0,120,255,0.12)',
@@ -32,7 +32,7 @@ const BRANDS = [
   {
     id: 'xiaomi',
     name: 'Xiaomi',
-    tagline: 'Xiaomi 15 — Snapdragon 8 Elite, triple capteur Leica, charge 90 W.',
+    tagline: 'Xiaomi 15 : Snapdragon 8 Elite, triple capteur Leica, charge 90 W.',
     model: 'Xiaomi 15',
     from: 799,
     glow: 'rgba(255,105,0,0.14)',

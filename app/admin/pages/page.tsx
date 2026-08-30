@@ -40,7 +40,7 @@ const FIXED_SECTIONS = [
   { label: 'Avis clients',          emoji: '⭐', hint: 'Permanent · Textes modifiables dans Contenu › FAQ' },
   { label: 'CTA WhatsApp',          emoji: '💬', hint: 'Permanent · Texte modifiable dans Contenu › Section WhatsApp' },
   { label: 'Notre engagement',      emoji: '🤝', hint: 'Permanent' },
-  { label: 'Paiement en 4 fois',    emoji: '💳', hint: 'Permanent' },
+  { label: 'Paiement PayPal',       emoji: '💳', hint: 'Permanent' },
 ]
 
 function sectionPreview(s: SiteSection): string {

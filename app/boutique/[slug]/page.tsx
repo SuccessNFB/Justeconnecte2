@@ -52,7 +52,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const product = await getProduct(params.slug)
   if (!product) return { title: 'Produit introuvable' }
   return {
-    title: `${product.name} — Juste Connecté`,
+    title: product.name,
     description: product.description ?? `${product.name} neuf, scellé. Livraison gratuite en Guadeloupe, Martinique et Guyane.`,
     openGraph: { title: product.name, description: product.description ?? '' },
     alternates: { canonical: `/boutique/${params.slug}` },

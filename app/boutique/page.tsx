@@ -8,7 +8,7 @@ import { DEMO_BRANDS, DEMO_PRODUCTS } from '@/lib/demo-data'
 
 export const metadata: Metadata = {
   title: 'Boutique — Smartphones neufs iPhone, Samsung, Xiaomi',
-  description: 'Découvrez notre catalogue de smartphones neufs : iPhone, Samsung Galaxy, Xiaomi — livrés en Guadeloupe, Martinique et Guyane. Garantie constructeur, paiement en 4× sans frais.',
+  description: 'Découvrez notre catalogue de smartphones neufs : iPhone, Samsung Galaxy, Xiaomi, livrés en Guadeloupe, Martinique et Guyane. Garantie constructeur, paiement sécurisé via PayPal.',
 }
 
 interface SearchParams { marque?: string; categorie?: string; stockage?: string; tri?: string }

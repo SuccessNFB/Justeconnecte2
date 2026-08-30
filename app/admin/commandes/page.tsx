@@ -40,6 +40,12 @@ const ZONE_LABEL: Record<string, string> = {
   guyane:     'Guyane',
 }
 
+const PAYMENT_LABEL: Record<string, string> = {
+  paypal:    'PayPal',
+  monetico:  'Monetico',
+  scalapay:  'Scalapay',
+}
+
 function relTime(iso: string) {
   const d = Math.floor((Date.now() - new Date(iso).getTime()) / 60000)
   if (d < 1)  return "à l'instant"
@@ -304,10 +310,10 @@ export default function CommandesPage() {
                           {ZONE_LABEL[order.delivery_zone] ?? order.delivery_zone}
                         </span>
                       )}
-                      {order.payment_method === 'scalapay' && (
+                      {order.payment_method && (
                         <span className="text-xs px-2 py-0.5 rounded-full font-semibold"
-                          style={{ background: 'rgba(255,74,141,0.12)', color: '#FF4A8D' }}>
-                          Scalapay 4×
+                          style={{ background: 'rgba(0,112,201,0.12)', color: '#0070C9' }}>
+                          {PAYMENT_LABEL[order.payment_method] ?? order.payment_method}
                         </span>
                       )}
                     </div>

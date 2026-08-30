@@ -78,7 +78,7 @@ export default function CommandePage() {
 
   const step1Valid = !!(customer.nom.trim() && customer.prenom.trim() && customer.email.trim() && customer.telephone.trim() && customer.adresse.trim())
 
-  async function handlePayment(method: 'monetico' | 'stripe') {
+  async function handlePayment() {
     setSubmitting(true)
 
     // Contenu affiché dans l'email de notification (informatif uniquement —
@@ -107,8 +107,7 @@ export default function CommandePage() {
     }).catch(() => {})
 
     try {
-      const endpoint = method === 'stripe' ? '/api/checkout-stripe' : '/api/checkout'
-      const res  = await fetch(endpoint, {
+      const res  = await fetch('/api/checkout-paypal', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ items: checkoutItems, zone: deliveryZone, pricingZoneId: zone?.id, customer }),
@@ -126,27 +125,9 @@ export default function CommandePage() {
         try { sessionStorage.setItem('jc_amount', subtotal.toFixed(2)) } catch {}
       }
 
-      // Stripe (Scalapay) — page hébergée par Stripe, simple redirection
-      if (method === 'stripe' && data.url) {
+      // PayPal — page hébergée par PayPal, simple redirection
+      if (data.url) {
         window.location.href = data.url
-        return
-      }
-
-      // Monetico — soumission d'un formulaire caché vers la page de paiement
-      if (data.action && data.fields) {
-        const form = document.createElement('form')
-        form.method = 'POST'
-        form.action = data.action
-        form.style.display = 'none'
-        Object.entries(data.fields as Record<string, string>).forEach(([name, value]) => {
-          const input = document.createElement('input')
-          input.type  = 'hidden'
-          input.name  = name
-          input.value = value
-          form.appendChild(input)
-        })
-        document.body.appendChild(form)
-        form.submit()
       } else {
         alert(data.error ?? 'Une erreur est survenue.')
         setSubmitting(false)
@@ -438,22 +419,15 @@ export default function CommandePage() {
                 <ChevronLeft size={15} /> Retour
               </button>
               <button
-                onClick={() => handlePayment('monetico')}
+                onClick={handlePayment}
                 disabled={submitting}
                 className="jc-btn-primary flex-1"
               >
-                {submitting ? 'Redirection…' : 'Payer en 1 fois →'}
+                {submitting ? 'Redirection…' : 'Payer avec PayPal →'}
               </button>
             </div>
-            <button
-              onClick={() => handlePayment('stripe')}
-              disabled={submitting}
-              className="jc-btn-ghost w-full mt-2.5"
-            >
-              Payer en 4× sans frais avec Scalapay
-            </button>
             <p className="text-xs text-center mt-3" style={{ color: 'oklch(0.18 0.004 264 / 0.4)' }}>
-              🔒 Paiement sécurisé — SSL
+              🔒 Paiement sécurisé — PayPal
             </p>
           </div>
         )}

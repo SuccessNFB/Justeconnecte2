@@ -267,9 +267,9 @@ export default function HeroInteractive({ brandPrices = {} }: { brandPrices?: Re
               <Link href={brand.href} className="jc-btn-dark text-base px-7 py-3">
                 Voir les {brand.name} →
               </Link>
-              <button className="jc-btn-ghost text-base px-7 py-3">
-                Paiement en 4× sans frais
-              </button>
+              <Link href={brand.productHref} className="jc-btn-ghost text-base px-7 py-3">
+                Paiement sécurisé PayPal
+              </Link>
             </div>
 
             <div className="flex flex-wrap gap-5 text-xs opacity-40 font-medium">
@@ -327,7 +327,7 @@ export default function HeroInteractive({ brandPrices = {} }: { brandPrices?: Re
                 >
                   <p className="text-[10px] font-semibold uppercase tracking-wider opacity-40 mb-0.5 whitespace-nowrap">À partir de</p>
                   <p className="font-bold text-xl leading-none jc-gold-text">{fmt(fromPrice)}</p>
-                  <p className="text-[10px] opacity-30 mt-1">ou 4× sans frais</p>
+                  <p className="text-[10px] opacity-30 mt-1">Paiement PayPal sécurisé</p>
                 </div>
 
                 {/* Progress dots */}

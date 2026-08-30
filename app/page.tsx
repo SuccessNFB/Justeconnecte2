@@ -5,6 +5,8 @@ import ProductCard from '@/components/ProductCard'
 import ProductCarousel from '@/components/ProductCarousel'
 import HeroInteractive from '@/components/HeroInteractive'
 import ScrollReveal from '@/components/ScrollReveal'
+import RevealText from '@/components/RevealText'
+import PhoneCheckMockup from '@/components/svg/PhoneCheckMockup'
 import { ShieldCheck, Award, Truck, HeadphonesIcon, MessageCircle } from 'lucide-react'
 import type { Brand, Product, ProductVariant, ProductZonePrice, SiteSection, SiteContent } from '@/lib/types'
 import { DEMO_BRANDS, DEMO_PRODUCTS } from '@/lib/demo-data'
@@ -188,19 +190,22 @@ function ReviewsSection() {
   return (
     <section className="py-16" style={{ background: 'var(--background)' }}>
       <div className="jc-container">
-        <ScrollReveal direction="up">
-          <div className="text-center mb-10">
-            <p className="jc-overline mb-2">Témoignages</p>
-            <h2 className="font-bold mb-3" style={{ fontSize: 'clamp(1.6rem,3.5vw,2.3rem)' }}>
-              Ils ont commandé depuis les Antilles
-            </h2>
+        <div className="text-center mb-10">
+          <ScrollReveal direction="up"><p className="jc-overline mb-2">Témoignages</p></ScrollReveal>
+          <RevealText
+            as="h2"
+            text="Ils ont commandé depuis les Antilles"
+            className="font-bold mb-3 block"
+            style={{ fontSize: 'clamp(1.6rem,3.5vw,2.3rem)' }}
+          />
+          <ScrollReveal direction="up" delay={200}>
             <div className="flex items-center justify-center gap-2">
               <span className="jc-stars text-base">★★★★★</span>
               <span className="font-bold text-sm" style={{ color: 'var(--gold)' }}>4.8</span>
               <span className="text-sm opacity-40">· 127 avis vérifiés</span>
             </div>
-          </div>
-        </ScrollReveal>
+          </ScrollReveal>
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {HOMEPAGE_REVIEWS.map((r, i) => (
             <ScrollReveal key={r.name} delay={i * 80} direction="up">
@@ -387,6 +392,59 @@ function BannerSection({ text, cta, cta_href }: { text: string; cta: string; cta
   )
 }
 
+const QUALITY_CHECKS = [
+  'Écran (pixels morts, tactile, luminosité)',
+  'Batterie (capacité réelle mesurée)',
+  'Caméras (photo, vidéo, autofocus)',
+  'Boutons, ports & connectique',
+  'Châssis, vitre arrière & étanchéité',
+]
+
+function QualityCheckSection() {
+  return (
+    <section className="py-20 overflow-hidden" style={{ background: 'var(--surface)' }}>
+      <div className="jc-container">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 items-center">
+          <div className="order-2 lg:order-1">
+            <p className="jc-overline mb-3">Contrôle qualité</p>
+            <RevealText
+              as="h2"
+              text="40 points vérifiés avant chaque envoi"
+              className="font-bold block mb-5"
+              style={{ fontSize: 'clamp(1.8rem,3.5vw,2.6rem)', lineHeight: 1.15 }}
+            />
+            <ScrollReveal direction="up" delay={120}>
+              <p className="text-sm leading-relaxed opacity-55 mb-7 max-w-md">
+                Chaque smartphone passe par une grille de contrôle stricte avant expédition —
+                pas d&apos;annonce vague de type &laquo;&nbsp;bon état&nbsp;&raquo;, mais une
+                vérification pièce par pièce.
+              </p>
+            </ScrollReveal>
+            <ul className="flex flex-col gap-3">
+              {QUALITY_CHECKS.map((label, i) => (
+                <ScrollReveal key={label} direction="left" delay={160 + i * 90}>
+                  <li className="flex items-center gap-3 text-sm font-medium">
+                    <span
+                      className="flex items-center justify-center w-5 h-5 rounded-full flex-shrink-0 text-white text-[10px] font-bold"
+                      style={{ background: 'var(--gold)' }}
+                    >
+                      ✓
+                    </span>
+                    {label}
+                  </li>
+                </ScrollReveal>
+              ))}
+            </ul>
+          </div>
+          <div className="order-1 lg:order-2">
+            <PhoneCheckMockup />
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 function EngagementSection() {
   return (
     <section className="py-16" style={{ background: 'var(--background)' }}>
@@ -410,7 +468,7 @@ function EngagementSection() {
           <ScrollReveal direction="right" delay={150} duration={750}>
             <div>
               <p className="jc-overline mb-3">Notre engagement</p>
-              <h2 className="font-bold text-3xl sm:text-4xl mb-2">Juste Connecté</h2>
+              <RevealText as="h2" text="Juste Connecté" className="font-bold text-3xl sm:text-4xl mb-2 block" />
               <p className="text-base mb-5 italic" style={{ color: 'var(--gold)' }}>la technologie, simplement</p>
               <p className="text-sm leading-relaxed opacity-55 mb-7">
                 Chacun devrait pouvoir accéder à la technologie au prix le plus juste, quel que soit l'endroit où il vit.
@@ -448,6 +506,9 @@ export default async function HomePage() {
 
       {/* Social proof chiffrée — credibilité immédiate */}
       <SocialProofStrip />
+
+      {/* Contrôle qualité — spécifique au reconditionné, pas un bloc générique */}
+      <QualityCheckSection />
 
       {/* Dynamic sections from admin page builder */}
       {sections.length > 0 ? (
@@ -487,17 +548,17 @@ export default async function HomePage() {
       {/* Notre engagement */}
       <EngagementSection />
 
-      {/* Paiement en 4 fois */}
+      {/* Paiement sécurisé */}
       <section className="py-16" style={{ background: 'var(--background)' }}>
         <div className="jc-container text-center">
-          <ScrollReveal direction="up">
-            <p className="jc-overline mb-3">Paiement</p>
-            <h2 className="font-bold text-3xl sm:text-4xl mb-3">Payez en 4 fois sans frais</h2>
+          <ScrollReveal direction="up"><p className="jc-overline mb-3">Paiement</p></ScrollReveal>
+          <RevealText as="h2" text="Payez en toute sécurité avec PayPal" className="font-bold text-3xl sm:text-4xl mb-3 block" />
+          <ScrollReveal direction="up" delay={150}>
             <p className="text-sm opacity-45 mb-8">
-              Un iPhone 17 Pro à 1 599 € : 4 versements de 399,75 €. Zéro intérêt, zéro frais.
+              Carte bancaire, solde PayPal, ou paiement en plusieurs fois si votre compte y est éligible.
             </p>
           </ScrollReveal>
-          <ScrollReveal direction="up" delay={200}>
+          <ScrollReveal direction="up" delay={250}>
             <PaymentLogosRow />
           </ScrollReveal>
         </div>

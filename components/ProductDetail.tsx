@@ -10,14 +10,13 @@ import { useToast } from '@/contexts/ToastContext'
 import { formatPrice, getStockStatus } from '@/lib/utils'
 import { trackEvent } from '@/lib/analytics'
 import { createClient } from '@/lib/supabase'
+import { PaymentLogosRow } from '@/components/PaymentLogos'
 import type { Brand, Product, ProductVariant, ProductZonePrice } from '@/lib/types'
 
 type FullProduct = Product & {
   brands: Brand
   product_variants: (ProductVariant & { product_zone_prices: ProductZonePrice[] })[]
 }
-
-const PAYMENT = ['Visa', 'Mastercard', 'Apple Pay', 'Google Pay', 'PayPal']
 
 const REVIEW_POOL = [
   { name: 'Marc S.',      note: 'Très satisfait',             body: "Produit arrivé en 9 jours, emballage d'origine scellé, téléphone neuf et impeccable. Exactement ce que j'avais commandé.", rating: 5, date: 'il y a 2 semaines',  location: 'Guadeloupe'  },
@@ -522,8 +521,8 @@ export default function ProductDetail({ product, faq: faqProp }: { product: Full
 
             {/* Price */}
             {zonePrice && (
-              <div className="rounded-2xl p-4" style={{ background: 'var(--surface-soft)', border: '1px solid var(--border)' }}>
-                <div className="flex items-baseline gap-3 mb-1">
+              <div className="rounded-2xl p-4" style={{ background: 'var(--surface-soft)' }}>
+                <div className="flex items-baseline gap-3 mb-3">
                   <span className="font-bold" style={{ fontSize: '2rem' }}>{formatPrice(zonePrice.price)}</span>
                   {zonePrice.compare_at_price && (
                     <>
@@ -537,12 +536,7 @@ export default function ProductDetail({ product, faq: faqProp }: { product: Full
                     </>
                   )}
                 </div>
-                <div className="flex gap-2 flex-wrap">
-                  {PAYMENT.map(p => (
-                    <span key={p} className="text-[9px] font-semibold px-2 py-1 rounded border opacity-40"
-                      style={{ borderColor: 'var(--border-strong)' }}>{p}</span>
-                  ))}
-                </div>
+                <PaymentLogosRow width={44} height={28} gap={6} />
               </div>
             )}
 

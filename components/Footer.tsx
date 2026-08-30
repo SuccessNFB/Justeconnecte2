@@ -1,65 +1,5 @@
 import Link from 'next/link'
-
-function PaymentLogos() {
-  const card = {
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
-    width: 52, height: 34, borderRadius: 6,
-    border: '1px solid var(--border-strong)',
-    background: 'var(--background)',
-    overflow: 'hidden' as const,
-    flexShrink: 0 as const,
-  }
-  return (
-    <div className="flex flex-wrap gap-2">
-
-      {/* Visa */}
-      <div style={card} title="Visa">
-        <svg viewBox="0 0 52 20" width="42" height="16" aria-label="Visa">
-          <text x="26" y="10" textAnchor="middle" dominantBaseline="central" fontFamily="Arial,Helvetica,sans-serif" fontWeight="900" fontSize="17" fill="#1A1F71" letterSpacing="-1">VISA</text>
-        </svg>
-      </div>
-
-      {/* Mastercard */}
-      <div style={card} title="Mastercard">
-        <svg viewBox="0 0 38 24" height="22" aria-label="Mastercard">
-          <circle cx="14" cy="12" r="10" fill="#EB001B"/>
-          <circle cx="24" cy="12" r="10" fill="#F79E1B"/>
-          <path d="M19 5.3a10 10 0 0 1 0 13.4A10 10 0 0 1 19 5.3z" fill="#FF5F00"/>
-        </svg>
-      </div>
-
-      {/* Apple Pay */}
-      <div style={{ ...card, background: '#000', border: '1px solid #000' }} title="Apple Pay">
-        <span style={{ color: 'white', fontSize: '9px', fontWeight: 700, fontFamily: '-apple-system,BlinkMacSystemFont,Helvetica,sans-serif', letterSpacing: '-0.2px', lineHeight: 1 }}>
-          Apple Pay
-        </span>
-      </div>
-
-      {/* Google Pay */}
-      <div style={card} title="Google Pay">
-        <span style={{ fontSize: '9px', fontWeight: 600, fontFamily: 'Arial,Helvetica,sans-serif', color: '#3C4043', letterSpacing: '-0.2px', lineHeight: 1 }}>
-          Google Pay
-        </span>
-      </div>
-
-      {/* PayPal */}
-      <div style={card} title="PayPal">
-        <svg viewBox="0 0 72 20" width="58" height="16" aria-label="PayPal">
-          <text x="0" y="10" dominantBaseline="central" fontFamily="Arial,Helvetica,sans-serif" fontWeight="800" fontStyle="italic" fontSize="15" fill="#003087">Pay</text>
-          <text x="26" y="10" dominantBaseline="central" fontFamily="Arial,Helvetica,sans-serif" fontWeight="800" fontStyle="italic" fontSize="15" fill="#009cde">Pal</text>
-        </svg>
-      </div>
-
-      {/* Revolut */}
-      <div style={{ ...card, background: '#191C1F', border: '1px solid #191C1F' }} title="Revolut">
-        <span style={{ color: 'white', fontSize: '9px', fontWeight: 700, fontFamily: 'Arial,Helvetica,sans-serif', letterSpacing: '-0.2px', lineHeight: 1 }}>
-          Revolut
-        </span>
-      </div>
-
-    </div>
-  )
-}
+import { PaymentLogosRow } from '@/components/PaymentLogos'
 
 export default function Footer() {
   const year = new Date().getFullYear()
@@ -100,7 +40,7 @@ export default function Footer() {
           {/* Paiement */}
           <div>
             <p className="text-[10px] font-bold uppercase tracking-widest mb-4 opacity-40">Paiement</p>
-            <PaymentLogos />
+            <PaymentLogosRow />
           </div>
         </div>
 

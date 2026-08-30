@@ -108,7 +108,7 @@ const HOMEPAGE_REVIEWS = [
     name: 'Marc S.',
     location: 'Guadeloupe',
     rating: 5,
-    text: 'Paiement en 4 fois sans frais, livraison rapide, téléphone nickel. Le service client répond vite. Je reprendrai certainement.',
+    text: 'Paiement PayPal sécurisé, livraison rapide, téléphone nickel. Le service client répond vite. Je reprendrai certainement.',
     product: 'iPhone 17 Pro',
     initials: 'MS',
     color: '#c4922a',
@@ -220,7 +220,7 @@ function WhatsAppCTA({ waNumber }: { waNumber: string }) {
               </h2>
               <p className="text-sm leading-relaxed max-w-md" style={{ color: 'rgba(255,255,255,0.5)' }}>
                 Notre équipe répond sous 2 heures, 7j/7. Conseils personnalisés,
-                suivi de commande et garantie — tout passe par WhatsApp.
+                suivi de commande et garantie : tout passe par WhatsApp.
               </p>
             </div>
           </ScrollReveal>
@@ -258,7 +258,7 @@ function TrustSection({ items }: { items: { title: string; body: string }[] }) {
             <span className="jc-stars text-sm">★★★★★</span>
             <span className="text-sm font-semibold" style={{ color: 'var(--gold)' }}>4.8</span>
             <span className="text-sm opacity-40">· 127 avis</span>
-            <span className="text-sm opacity-30 mx-1">—</span>
+            <span className="text-sm opacity-40 mx-1">·</span>
             <span className="text-xs opacity-40">Avis vérifiés par Trustpilot</span>
           </div>
         </ScrollReveal>
@@ -334,7 +334,7 @@ function EngagementSection() {
                 <div className="rounded-3xl overflow-hidden shadow-xl">
                   <Image
                     src="/engagement.png"
-                    alt="Juste Connecté — livraison smartphone"
+                    alt="Livraison smartphone Juste Connecté"
                     width={640}
                     height={640}
                     className="w-full h-auto object-cover"

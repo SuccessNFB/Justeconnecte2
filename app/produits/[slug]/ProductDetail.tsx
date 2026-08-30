@@ -98,8 +98,8 @@ function IconReturn() {
 
 const BENEFITS = [
   { icon: IconSavings,      title: 'Prix compétitifs',       body: 'Meilleurs tarifs que les revendeurs locaux sur des appareils 100 % neufs.' },
-  { icon: IconCpu,          title: '100 % neuf',             body: "Jamais utilisé, emballage d'origine scellé — prêt à l'emploi dès l'ouverture." },
-  { icon: IconLeaf,         title: 'Livraison gratuite',     body: 'Expédié depuis la France. Livraison offerte en Guadeloupe, Martinique et Guyane — Taxes et octroi de mer inclus.' },
+  { icon: IconCpu,          title: '100 % neuf',             body: "Jamais utilisé, emballage d'origine scellé, prêt à l'emploi dès l'ouverture." },
+  { icon: IconLeaf,         title: 'Livraison gratuite',     body: 'Expédié depuis la France. Livraison offerte en Guadeloupe, Martinique et Guyane, taxes et octroi de mer inclus.' },
   { icon: IconUnlock,       title: 'Débloqué',               body: 'Compatible tous opérateurs sans restriction.' },
   { icon: IconShieldCheck,  title: 'Garantie constructeur',  body: 'Garantie officielle 12 à 24 mois selon la marque. Batterie incluse.' },
   { icon: IconReturn,       title: 'Retours 14 jours',       body: 'Satisfait ou remboursé, sans condition ni justification.' },
@@ -502,7 +502,7 @@ export default function ProductDetail({ product, faq: faqProp }: { product: Full
               <div>
                 <div className="flex items-center gap-2 text-sm font-medium">
                   {stockStatus === 'in_stock'     && <><CheckCircle size={15} style={{ color: 'var(--success)' }} /><span style={{ color: 'var(--success)' }}>En stock · Expédié sous 24 à 48 h</span></>}
-                  {stockStatus === 'low_stock'    && <><AlertTriangle size={15} style={{ color: 'var(--warning)' }} /><span style={{ color: 'var(--warning)' }}>⚡ Plus que {selectedVariant.stock} en stock — dépêchez-vous !</span></>}
+                  {stockStatus === 'low_stock'    && <><AlertTriangle size={15} style={{ color: 'var(--warning)' }} /><span style={{ color: 'var(--warning)' }}>⚡ Plus que {selectedVariant.stock} en stock, dépêchez-vous !</span></>}
                   {stockStatus === 'out_of_stock' && <><XCircle size={15} style={{ color: 'var(--destructive)' }} /><span style={{ color: 'var(--destructive)' }}>Rupture de stock</span></>}
                 </div>
                 {stockStatus === 'low_stock' && (

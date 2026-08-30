@@ -52,7 +52,6 @@ export default function ProductCard({ product }: Props) {
     if (allP.length) minPrice = Math.min(...allP)
   }
 
-  const scalapayInstalment = minPrice ? (minPrice / 4).toFixed(2).replace('.', ',') : null
   const firstVariant = allVariants[0]
   const colorHex = firstVariant?.color_hex
 
@@ -120,11 +119,6 @@ export default function ProductCard({ product }: Props) {
                   <span className="text-xs line-through opacity-30">{formatPrice(comparePrice)}</span>
                 )}
               </div>
-              {scalapayInstalment && (
-                <p className="text-[10px] mt-0.5" style={{ opacity: 0.4 }}>
-                  ou 4× <span className="font-medium">{scalapayInstalment}&nbsp;€</span> sans frais
-                </p>
-              )}
             </div>
           )}
         </div>

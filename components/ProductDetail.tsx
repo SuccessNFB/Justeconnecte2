@@ -17,7 +17,7 @@ type FullProduct = Product & {
   product_variants: (ProductVariant & { product_zone_prices: ProductZonePrice[] })[]
 }
 
-const PAYMENT = ['Visa', 'Mastercard', 'Apple Pay', 'Google Pay', 'Scalapay']
+const PAYMENT = ['Visa', 'Mastercard', 'Apple Pay', 'Google Pay', 'PayPal']
 
 const REVIEW_POOL = [
   { name: 'Marc S.',      note: 'Très satisfait',             body: "Produit arrivé en 9 jours, emballage d'origine scellé, téléphone neuf et impeccable. Exactement ce que j'avais commandé.", rating: 5, date: 'il y a 2 semaines',  location: 'Guadeloupe'  },
@@ -26,7 +26,7 @@ const REVIEW_POOL = [
   { name: 'Lara D.',      note: 'Prix introuvable en local',  body: 'Prix bien inférieur aux boutiques de Guyane pour le même smartphone neuf. Livraison en 10 jours sans frais. Très contente.', rating: 4, date: 'il y a 1 mois',   location: 'Guyane'      },
   { name: 'Jérémy C.',    note: 'Rapide et fiable',           body: "Commande passée le lundi, reçue le mercredi suivant en Martinique. Emballage nickel, téléphone impeccable. Rien à redire.", rating: 5, date: 'il y a 5 jours',    location: 'Martinique'  },
   { name: 'Nadia F.',     note: 'Exactement comme décrit',    body: "Produit conforme à l'annonce, aucune mauvaise surprise. Le service client a répondu en 30 min à ma question. Super expérience.", rating: 5, date: 'il y a 1 semaine', location: 'Guadeloupe' },
-  { name: 'Thomas R.',    note: 'Paiement en 4× top',         body: "J'ai utilisé Scalapay pour étaler le paiement. Tout s'est passé sans accroc. Le téléphone est arrivé scellé, parfait état.",  rating: 5, date: 'il y a 2 semaines', location: 'Réunion'    },
+  { name: 'Thomas R.',    note: 'Paiement simple',            body: "J'ai payé avec PayPal, tout s'est passé sans accroc. Le téléphone est arrivé scellé, parfait état.",  rating: 5, date: 'il y a 2 semaines', location: 'Réunion'    },
   { name: 'Claudine M.',  note: 'Livraison express',          body: "Surprise par la rapidité. 7 jours seulement depuis la commande jusqu'à ma porte en Guyane. Emballage soigné, téléphone neuf.", rating: 5, date: 'il y a 3 semaines', location: 'Guyane'    },
   { name: 'Florian B.',   note: 'Meilleur prix du marché',    body: "J'ai comparé partout avant d'acheter. C'est ici que j'ai trouvé le meilleur rapport qualité-prix pour un smartphone neuf.",   rating: 5, date: 'il y a 3 semaines', location: 'Martinique' },
   { name: 'Isabelle K.',  note: 'Service au top',             body: "Première commande ici et je ne suis pas déçue. Téléphone arrivé neuf et scellé, correspondance WhatsApp très agréable.",      rating: 5, date: 'il y a 1 mois',     location: 'Guadeloupe'  },
@@ -71,8 +71,8 @@ const FAQ = [
     a: "Chaque appareil est couvert par la garantie officielle du fabricant (Apple, Samsung, Xiaomi…) pour 12 à 24 mois selon la marque. En cas de panne, contactez-nous ou directement le service après-vente constructeur." },
   { q: "Le téléphone est-il débloqué tout opérateur ?",
     a: "Tous nos appareils sont débloqués et compatibles avec tous les opérateurs (Orange, SFR, Bouygues, Free et opérateurs locaux antillais)." },
-  { q: "Comment fonctionne le paiement en 4 fois avec Scalapay ?",
-    a: "Sélectionnez Scalapay au moment du paiement. Vous payez le premier quart immédiatement, puis 3 prélèvements à 30 jours d'intervalle. Zéro frais, zéro intérêt." },
+  { q: "Quels moyens de paiement acceptez-vous ?",
+    a: "Le paiement se fait via PayPal, en toute sécurité : carte bancaire, solde PayPal, ou paiement en plusieurs fois si votre compte PayPal y est éligible." },
 ]
 
 function IconSavings() {
@@ -302,7 +302,6 @@ export default function ProductDetail({ product, faq: faqProp }: { product: Full
   const isOutOfStock      = selectedVariant?.out_of_stock ?? false
   const stockStatus       = isOutOfStock ? 'out_of_stock' : (selectedVariant ? getStockStatus(selectedVariant.stock) : 'out_of_stock')
   const selectedColorName = variants.find(v => v.color_hex === selectedColor)?.color_name ?? ''
-  const scalapay  = zonePrice ? (zonePrice.price / 4).toFixed(2).replace('.', ',') : null
   const discount  = zonePrice?.compare_at_price
     ? Math.round((1 - zonePrice.price / zonePrice.compare_at_price) * 100) : null
 
@@ -538,11 +537,6 @@ export default function ProductDetail({ product, faq: faqProp }: { product: Full
                     </>
                   )}
                 </div>
-                {scalapay && (
-                  <p className="text-xs opacity-50 mb-2">
-                    ou 4× <strong>{scalapay} €</strong> sans frais avec Scalapay
-                  </p>
-                )}
                 <div className="flex gap-2 flex-wrap">
                   {PAYMENT.map(p => (
                     <span key={p} className="text-[9px] font-semibold px-2 py-1 rounded border opacity-40"
@@ -663,7 +657,7 @@ export default function ProductDetail({ product, faq: faqProp }: { product: Full
                 { icon: CheckCircle, label: '100 % Authentique',   sub: 'Sélectionné chez les distributeurs officiels' },
                 { icon: Award,       label: 'Garantie 12 mois',     sub: 'Garantie constructeur, batterie incluse' },
                 { icon: CheckCircle, label: 'Retours 14 jours',     sub: 'Satisfait ou remboursé, sans conditions' },
-                { icon: CheckCircle, label: 'Paiement sécurisé',    sub: 'SSL + 4× sans frais avec Scalapay' },
+                { icon: CheckCircle, label: 'Paiement sécurisé',    sub: 'SSL + PayPal' },
               ].map(({ icon: Icon, label, sub }) => (
                 <div key={label} className="flex gap-2.5 text-xs p-3 rounded-xl"
                   style={{ background: 'var(--surface-soft)', border: '1px solid var(--border)' }}>

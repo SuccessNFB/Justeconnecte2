@@ -42,11 +42,11 @@ function PaymentLogos() {
         </span>
       </div>
 
-      {/* Scalapay */}
-      <div style={card} title="Scalapay">
-        <svg viewBox="0 0 72 20" width="58" height="16" aria-label="Scalapay">
-          <text x="0" y="10" dominantBaseline="central" fontFamily="Arial,Helvetica,sans-serif" fontWeight="800" fontSize="15" fill="#FF4A8D" letterSpacing="-0.5">Scala</text>
-          <text x="38" y="10" dominantBaseline="central" fontFamily="Arial,Helvetica,sans-serif" fontWeight="800" fontSize="15" fill="#1A1A2E" letterSpacing="-0.5">pay</text>
+      {/* PayPal */}
+      <div style={card} title="PayPal">
+        <svg viewBox="0 0 72 20" width="58" height="16" aria-label="PayPal">
+          <text x="0" y="10" dominantBaseline="central" fontFamily="Arial,Helvetica,sans-serif" fontWeight="800" fontStyle="italic" fontSize="15" fill="#003087">Pay</text>
+          <text x="26" y="10" dominantBaseline="central" fontFamily="Arial,Helvetica,sans-serif" fontWeight="800" fontStyle="italic" fontSize="15" fill="#009cde">Pal</text>
         </svg>
       </div>
 

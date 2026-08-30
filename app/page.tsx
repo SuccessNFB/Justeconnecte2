@@ -6,7 +6,6 @@ import ProductCarousel from '@/components/ProductCarousel'
 import HeroInteractive from '@/components/HeroInteractive'
 import ScrollReveal from '@/components/ScrollReveal'
 import RevealText from '@/components/RevealText'
-import PhoneCheckMockup from '@/components/svg/PhoneCheckMockup'
 import { ShieldCheck, Award, Truck, HeadphonesIcon, MessageCircle } from 'lucide-react'
 import type { Brand, Product, ProductVariant, ProductZonePrice, SiteSection, SiteContent } from '@/lib/types'
 import { DEMO_BRANDS, DEMO_PRODUCTS } from '@/lib/demo-data'
@@ -392,59 +391,6 @@ function BannerSection({ text, cta, cta_href }: { text: string; cta: string; cta
   )
 }
 
-const QUALITY_CHECKS = [
-  'Écran (pixels morts, tactile, luminosité)',
-  'Batterie (capacité réelle mesurée)',
-  'Caméras (photo, vidéo, autofocus)',
-  'Boutons, ports & connectique',
-  'Châssis, vitre arrière & étanchéité',
-]
-
-function QualityCheckSection() {
-  return (
-    <section className="py-20 overflow-hidden" style={{ background: 'var(--surface)' }}>
-      <div className="jc-container">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 items-center">
-          <div className="order-2 lg:order-1">
-            <p className="jc-overline mb-3">Contrôle qualité</p>
-            <RevealText
-              as="h2"
-              text="40 points vérifiés avant chaque envoi"
-              className="font-bold block mb-5"
-              style={{ fontSize: 'clamp(1.8rem,3.5vw,2.6rem)', lineHeight: 1.15 }}
-            />
-            <ScrollReveal direction="up" delay={120}>
-              <p className="text-sm leading-relaxed opacity-55 mb-7 max-w-md">
-                Chaque smartphone passe par une grille de contrôle stricte avant expédition —
-                pas d&apos;annonce vague de type &laquo;&nbsp;bon état&nbsp;&raquo;, mais une
-                vérification pièce par pièce.
-              </p>
-            </ScrollReveal>
-            <ul className="flex flex-col gap-3">
-              {QUALITY_CHECKS.map((label, i) => (
-                <ScrollReveal key={label} direction="left" delay={160 + i * 90}>
-                  <li className="flex items-center gap-3 text-sm font-medium">
-                    <span
-                      className="flex items-center justify-center w-5 h-5 rounded-full flex-shrink-0 text-white text-[10px] font-bold"
-                      style={{ background: 'var(--gold)' }}
-                    >
-                      ✓
-                    </span>
-                    {label}
-                  </li>
-                </ScrollReveal>
-              ))}
-            </ul>
-          </div>
-          <div className="order-1 lg:order-2">
-            <PhoneCheckMockup />
-          </div>
-        </div>
-      </div>
-    </section>
-  )
-}
-
 function EngagementSection() {
   return (
     <section className="py-16" style={{ background: 'var(--background)' }}>
@@ -506,9 +452,6 @@ export default async function HomePage() {
 
       {/* Social proof chiffrée — credibilité immédiate */}
       <SocialProofStrip />
-
-      {/* Contrôle qualité — spécifique au reconditionné, pas un bloc générique */}
-      <QualityCheckSection />
 
       {/* Dynamic sections from admin page builder */}
       {sections.length > 0 ? (

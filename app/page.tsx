@@ -323,28 +323,6 @@ function TextSection({ title, body }: { title: string; body: string }) {
   )
 }
 
-function BannerSection({ text, cta, cta_href }: { text: string; cta: string; cta_href: string }) {
-  if (!text) return null
-  return (
-    <section className="py-10" style={{ background: 'var(--primary)' }}>
-      <div className="jc-container flex flex-col sm:flex-row items-center justify-between gap-4">
-        <ScrollReveal direction="left">
-          <p className="font-bold text-xl text-white">{text}</p>
-        </ScrollReveal>
-        {cta && cta_href && (
-          <ScrollReveal direction="right" delay={100}>
-            <Link href={cta_href}
-              className="px-6 py-2.5 rounded-xl font-semibold text-sm transition-all"
-              style={{ background: 'white', color: 'var(--primary)' }}>
-              {cta}
-            </Link>
-          </ScrollReveal>
-        )}
-      </div>
-    </section>
-  )
-}
-
 function EngagementSection() {
   return (
     <section className="py-16" style={{ background: 'var(--background)' }}>
@@ -423,9 +401,8 @@ export default async function HomePage() {
           if (s.type === 'text_block') {
             return <TextSection key={s.id} title={s.config.title ?? ''} body={s.config.body ?? ''} />
           }
-          if (s.type === 'banner') {
-            return <BannerSection key={s.id} text={s.config.text ?? ''} cta={s.config.cta ?? ''} cta_href={s.config.cta_href ?? '/boutique'} />
-          }
+          // Les sections "banner" (annonces/promos) s'affichent maintenant en pop-up
+          // sur tout le site (voir components/PromoPopup.tsx), plus en bandeau ici.
           return null
         })
       ) : (

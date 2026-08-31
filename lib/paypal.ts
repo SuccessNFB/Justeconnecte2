@@ -56,7 +56,7 @@ export async function createOrder(opts: {
   })
   if (!res.ok) throw new Error(`PayPal order create failed: ${await res.text()}`)
   const data = await res.json()
-  const approveUrl = (data.links ?? []).find((l: any) => l.rel === 'approve')?.href
+  const approveUrl = (data.links ?? []).find((l: any) => l.rel === 'approve' || l.rel === 'payer-action')?.href
   if (!approveUrl) throw new Error('PayPal: no approve link returned')
   return { id: data.id, approveUrl }
 }

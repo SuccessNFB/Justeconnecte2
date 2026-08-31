@@ -22,7 +22,7 @@ function formatPrice(amount: number): string {
 }
 
 export async function GET() {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const [productsRes, zonesRes] = await Promise.all([
     supabase

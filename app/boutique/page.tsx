@@ -26,7 +26,7 @@ function getMinPrice(product: ProductRow): number {
 
 async function getData(params: SearchParams) {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const [brandsRes, categoriesRes, productsRes] = await Promise.all([
       supabase.from('brands').select('*').order('sort_order'),
       supabase.from('categories').select('*').order('sort_order'),
@@ -64,7 +64,8 @@ async function getData(params: SearchParams) {
   }
 }
 
-export default async function BoutiquePage({ searchParams }: { searchParams: SearchParams }) {
+export default async function BoutiquePage(props: { searchParams: Promise<SearchParams> }) {
+  const searchParams = await props.searchParams;
   const { brands, categories, products } = await getData(searchParams)
   const activeMarque    = searchParams.marque
   const activeCategorie = searchParams.categorie

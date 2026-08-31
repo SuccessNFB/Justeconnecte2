@@ -46,6 +46,7 @@ export async function createOrder(opts: {
         return_url: opts.returnUrl,
         cancel_url: opts.cancelUrl,
         user_action: 'PAY_NOW',
+        landing_page: 'GUEST_CHECKOUT',
       },
     }),
   })

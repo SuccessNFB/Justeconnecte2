@@ -12,7 +12,7 @@ type FullProduct = Product & {
 
 async function getProduct(slug: string): Promise<FullProduct | null> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data } = await supabase
       .from('products')
       .select(`*, brands(*), product_variants(*, product_zone_prices(*))`)
@@ -26,7 +26,7 @@ async function getProduct(slug: string): Promise<FullProduct | null> {
 
 async function getFaq(): Promise<{ q: string; a: string }[]> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data } = await supabase
       .from('site_content')
       .select('key, value')
@@ -48,7 +48,8 @@ async function getFaq(): Promise<{ q: string; a: string }[]> {
   }
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+export async function generateMetadata(props: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const params = await props.params;
   const product = await getProduct(params.slug)
   if (!product) return { title: 'Produit introuvable' }
   return {
@@ -59,7 +60,8 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   }
 }
 
-export default async function BoutiqueProductPage({ params }: { params: { slug: string } }) {
+export default async function BoutiqueProductPage(props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   const [product, faq] = await Promise.all([getProduct(params.slug), getFaq()])
   if (!product) notFound()
   return <ProductDetail product={product} faq={faq.length ? faq : undefined} />

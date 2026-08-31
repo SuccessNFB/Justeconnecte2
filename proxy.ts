@@ -11,7 +11,7 @@ const SECURITY_HEADERS: [string, string][] = [
   ['Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload'],
 ]
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const response = NextResponse.next({
     request: { headers: request.headers },
   })

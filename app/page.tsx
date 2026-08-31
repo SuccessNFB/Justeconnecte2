@@ -28,7 +28,7 @@ const DEFAULT_TRUST = [
 
 async function getData() {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const [sectionsRes, brandsRes, newRes, bestRes, contactRes, allRes] = await Promise.all([
       supabase.from('site_sections').select('*').eq('page', 'accueil').eq('is_active', true).order('sort_order'),
       supabase.from('brands').select('*').order('sort_order'),

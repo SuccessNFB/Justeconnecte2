@@ -25,7 +25,7 @@ const REVIEW_POOL = [
   { name: 'Lara D.',      note: 'Prix introuvable en local',  body: 'Prix bien inférieur aux boutiques de Guyane pour le même smartphone neuf. Livraison en 10 jours sans frais. Très contente.', rating: 4, date: 'il y a 1 mois',   location: 'Guyane'      },
   { name: 'Jérémy C.',    note: 'Rapide et fiable',           body: "Commande passée le lundi, reçue le mercredi suivant en Martinique. Emballage nickel, téléphone impeccable. Rien à redire.", rating: 5, date: 'il y a 5 jours',    location: 'Martinique'  },
   { name: 'Nadia F.',     note: 'Exactement comme décrit',    body: "Produit conforme à l'annonce, aucune mauvaise surprise. Le service client a répondu en 30 min à ma question. Super expérience.", rating: 5, date: 'il y a 1 semaine', location: 'Guadeloupe' },
-  { name: 'Thomas R.',    note: 'Paiement simple',            body: "J'ai payé avec PayPal, tout s'est passé sans accroc. Le téléphone est arrivé scellé, parfait état.",  rating: 5, date: 'il y a 2 semaines', location: 'Réunion'    },
+  { name: 'Thomas R.',    note: 'Paiement simple',            body: "Le paiement en ligne s'est fait sans accroc. Le téléphone est arrivé scellé, parfait état.",  rating: 5, date: 'il y a 2 semaines', location: 'Réunion'    },
   { name: 'Claudine M.',  note: 'Livraison express',          body: "Surprise par la rapidité. 7 jours seulement depuis la commande jusqu'à ma porte en Guyane. Emballage soigné, téléphone neuf.", rating: 5, date: 'il y a 3 semaines', location: 'Guyane'    },
   { name: 'Florian B.',   note: 'Meilleur prix du marché',    body: "J'ai comparé partout avant d'acheter. C'est ici que j'ai trouvé le meilleur rapport qualité-prix pour un smartphone neuf.",   rating: 5, date: 'il y a 3 semaines', location: 'Martinique' },
   { name: 'Isabelle K.',  note: 'Service au top',             body: "Première commande ici et je ne suis pas déçue. Téléphone arrivé neuf et scellé, correspondance WhatsApp très agréable.",      rating: 5, date: 'il y a 1 mois',     location: 'Guadeloupe'  },
@@ -71,7 +71,7 @@ const FAQ = [
   { q: "Le téléphone est-il débloqué tout opérateur ?",
     a: "Tous nos appareils sont débloqués et compatibles avec tous les opérateurs (Orange, SFR, Bouygues, Free et opérateurs locaux antillais)." },
   { q: "Quels moyens de paiement acceptez-vous ?",
-    a: "Le paiement se fait via PayPal, en toute sécurité : carte bancaire, solde PayPal, ou paiement en plusieurs fois si votre compte PayPal y est éligible." },
+    a: "Le paiement se fait en ligne, en toute sécurité : carte bancaire, ou paiement en plusieurs fois selon votre éligibilité." },
 ]
 
 function IconSavings() {
@@ -651,7 +651,7 @@ export default function ProductDetail({ product, faq: faqProp }: { product: Full
                 { icon: CheckCircle, label: '100 % Authentique',   sub: 'Sélectionné chez les distributeurs officiels' },
                 { icon: Award,       label: 'Garantie 12 mois',     sub: 'Garantie constructeur, batterie incluse' },
                 { icon: CheckCircle, label: 'Retours 14 jours',     sub: 'Satisfait ou remboursé, sans conditions' },
-                { icon: CheckCircle, label: 'Paiement sécurisé',    sub: 'SSL + PayPal' },
+                { icon: CheckCircle, label: 'Paiement sécurisé',    sub: 'Chiffrement SSL' },
               ].map(({ icon: Icon, label, sub }) => (
                 <div key={label} className="flex gap-2.5 text-xs p-3 rounded-xl"
                   style={{ background: 'var(--surface-soft)', border: '1px solid var(--border)' }}>

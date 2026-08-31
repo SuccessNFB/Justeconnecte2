@@ -5,7 +5,7 @@ import { Truck, Shield, CreditCard } from 'lucide-react'
 const MESSAGES = [
   { icon: Truck,       text: 'Livraison gratuite · Taxes et octroi de mer inclus' },
   { icon: Shield,      text: 'Garantie constructeur incluse sur tous les appareils' },
-  { icon: CreditCard,  text: 'Paiement sécurisé avec PayPal' },
+  { icon: CreditCard,  text: 'Paiement 100% sécurisé' },
 ]
 
 export default function AnnouncementBar() {

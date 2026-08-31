@@ -108,7 +108,7 @@ const HOMEPAGE_REVIEWS = [
     name: 'Marc S.',
     location: 'Guadeloupe',
     rating: 5,
-    text: 'Paiement PayPal sécurisé, livraison rapide, téléphone nickel. Le service client répond vite. Je reprendrai certainement.',
+    text: 'Paiement simple et sécurisé, livraison rapide, téléphone nickel. Le service client répond vite. Je reprendrai certainement.',
     product: 'iPhone 17 Pro',
     initials: 'MS',
     color: '#c4922a',
@@ -426,10 +426,10 @@ export default async function HomePage() {
       <section className="py-16" style={{ background: 'var(--background)' }}>
         <div className="jc-container text-center">
           <ScrollReveal direction="up"><p className="jc-overline mb-3">Paiement</p></ScrollReveal>
-          <RevealText as="h2" text="Payez en toute sécurité avec PayPal" className="font-bold text-3xl sm:text-4xl mb-3 block" />
+          <RevealText as="h2" text="Payez en toute sécurité" className="font-bold text-3xl sm:text-4xl mb-3 block" />
           <ScrollReveal direction="up" delay={150}>
             <p className="text-sm opacity-45 mb-8">
-              Carte bancaire, solde PayPal, ou paiement en plusieurs fois si votre compte y est éligible.
+              Carte bancaire ou paiement en plusieurs fois selon votre éligibilité.
             </p>
           </ScrollReveal>
           <ScrollReveal direction="up" delay={250}>

@@ -24,15 +24,15 @@ export const metadata: Metadata = {
     default: 'Juste Connecté — Smartphones neufs livrés aux Antilles & Guyane',
     template: '%s | Juste Connecté',
   },
-  description: 'Achetez votre smartphone neuf : iPhone, Samsung, Xiaomi, livré en Guadeloupe, Martinique et Guyane. Prix compétitifs, garantie constructeur, paiement sécurisé via PayPal.',
-  keywords: ['smartphone neuf', 'iPhone Antilles', 'Samsung Guadeloupe', 'Xiaomi Martinique', 'téléphone Guyane', 'livraison Antilles', 'paiement PayPal'],
+  description: 'Achetez votre smartphone neuf : iPhone, Samsung, Xiaomi, livré en Guadeloupe, Martinique et Guyane. Prix compétitifs, garantie constructeur, paiement 100% sécurisé.',
+  keywords: ['smartphone neuf', 'iPhone Antilles', 'Samsung Guadeloupe', 'Xiaomi Martinique', 'téléphone Guyane', 'livraison Antilles', 'paiement sécurisé'],
   metadataBase: new URL('https://justeconnecte.fr'),
   openGraph: {
     siteName: 'Juste Connecté',
     locale: 'fr_FR',
     type: 'website',
     title: 'Juste Connecté — Smartphones neufs livrés aux Antilles & Guyane',
-    description: 'iPhone, Samsung, Xiaomi neufs livrés en Guadeloupe, Martinique et Guyane. Garantie constructeur, paiement sécurisé via PayPal.',
+    description: 'iPhone, Samsung, Xiaomi neufs livrés en Guadeloupe, Martinique et Guyane. Garantie constructeur, paiement 100% sécurisé.',
   },
   twitter: {
     card: 'summary_large_image',

@@ -42,11 +42,15 @@ export async function createOrder(opts: {
         description:  opts.description.slice(0, 127),
         amount:       { currency_code: 'EUR', value: opts.amountEur },
       }],
-      application_context: {
-        return_url: opts.returnUrl,
-        cancel_url: opts.cancelUrl,
-        user_action: 'PAY_NOW',
-        landing_page: 'GUEST_CHECKOUT',
+      payment_source: {
+        paypal: {
+          experience_context: {
+            return_url:   opts.returnUrl,
+            cancel_url:   opts.cancelUrl,
+            user_action:  'PAY_NOW',
+            landing_page: 'GUEST_CHECKOUT',
+          },
+        },
       },
     }),
   })

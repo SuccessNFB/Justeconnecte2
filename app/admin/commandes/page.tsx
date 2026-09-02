@@ -44,6 +44,7 @@ const PAYMENT_LABEL: Record<string, string> = {
   paypal:    'PayPal',
   monetico:  'Monetico',
   scalapay:  'Scalapay',
+  stripe:    'Stripe',
 }
 
 function relTime(iso: string) {

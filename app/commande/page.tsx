@@ -78,7 +78,7 @@ export default function CommandePage() {
 
   const step1Valid = !!(customer.nom.trim() && customer.prenom.trim() && customer.email.trim() && customer.telephone.trim() && customer.adresse.trim())
 
-  async function handlePayment() {
+  async function handlePayment(method: 'stripe1x' | 'stripe4x') {
     setSubmitting(true)
 
     // Contenu affiché dans l'email de notification (informatif uniquement —
@@ -107,7 +107,8 @@ export default function CommandePage() {
     }).catch(() => {})
 
     try {
-      const res  = await fetch('/api/checkout-paypal', {
+      const endpoint = method === 'stripe4x' ? '/api/checkout-stripe' : '/api/checkout-stripe-1x'
+      const res  = await fetch(endpoint, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ items: checkoutItems, zone: deliveryZone, pricingZoneId: zone?.id, customer }),
@@ -125,7 +126,7 @@ export default function CommandePage() {
         try { sessionStorage.setItem('jc_amount', subtotal.toFixed(2)) } catch {}
       }
 
-      // PayPal — page hébergée par PayPal, simple redirection
+      // Stripe — page hébergée par Stripe, simple redirection
       if (data.url) {
         window.location.href = data.url
       } else {
@@ -419,13 +420,20 @@ export default function CommandePage() {
                 <ChevronLeft size={15} /> Retour
               </button>
               <button
-                onClick={handlePayment}
+                onClick={() => handlePayment('stripe1x')}
                 disabled={submitting}
                 className="jc-btn-primary flex-1"
               >
-                {submitting ? 'Redirection…' : 'Payer maintenant →'}
+                {submitting ? 'Redirection…' : 'Payer en 1 fois →'}
               </button>
             </div>
+            <button
+              onClick={() => handlePayment('stripe4x')}
+              disabled={submitting}
+              className="jc-btn-ghost w-full mt-2.5"
+            >
+              Payer en 4× sans frais avec Scalapay
+            </button>
             <p className="text-xs text-center mt-3" style={{ color: 'oklch(0.18 0.004 264 / 0.4)' }}>
               🔒 Paiement 100% sécurisé et chiffré
             </p>

@@ -50,6 +50,16 @@ export function GooglePayLogo({ width = 52, height = 34 }: { width?: number; hei
   )
 }
 
+export function ScalapayLogo({ width = 52, height = 34 }: { width?: number; height?: number }) {
+  return (
+    <div style={{ ...card, width, height, background: 'var(--background)' }} title="Scalapay">
+      <span style={{ fontSize: 9, fontWeight: 700, fontFamily: 'Arial,Helvetica,sans-serif', color: '#1A1A2E', letterSpacing: '-0.2px', lineHeight: 1 }}>
+        Scalapay
+      </span>
+    </div>
+  )
+}
+
 export function PaymentLogosRow({ width = 52, height = 34, gap = 8, className = '' }: { width?: number; height?: number; gap?: number; className?: string }) {
   return (
     <div className={`flex flex-wrap ${className}`} style={{ gap }}>
@@ -57,6 +67,7 @@ export function PaymentLogosRow({ width = 52, height = 34, gap = 8, className = 
       <MastercardLogo width={width} height={height} />
       <ApplePayLogo width={width} height={height} />
       <GooglePayLogo width={width} height={height} />
+      <ScalapayLogo width={width} height={height} />
     </div>
   )
 }

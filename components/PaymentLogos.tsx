@@ -60,6 +60,17 @@ export function ScalapayLogo({ width = 52, height = 34 }: { width?: number; heig
   )
 }
 
+export function PayPalLogo({ width = 52, height = 34 }: { width?: number; height?: number }) {
+  return (
+    <div style={{ ...card, width, height, background: 'var(--background)' }} title="PayPal">
+      <svg viewBox="0 0 72 20" width={width * 0.8} height={height * 0.45} aria-label="PayPal">
+        <text x="0" y="10" dominantBaseline="central" fontFamily="Arial,Helvetica,sans-serif" fontWeight="800" fontStyle="italic" fontSize="15" fill="#003087">Pay</text>
+        <text x="26" y="10" dominantBaseline="central" fontFamily="Arial,Helvetica,sans-serif" fontWeight="800" fontStyle="italic" fontSize="15" fill="#009cde">Pal</text>
+      </svg>
+    </div>
+  )
+}
+
 export function PaymentLogosRow({ width = 52, height = 34, gap = 8, className = '' }: { width?: number; height?: number; gap?: number; className?: string }) {
   return (
     <div className={`flex flex-wrap ${className}`} style={{ gap }}>
@@ -68,6 +79,7 @@ export function PaymentLogosRow({ width = 52, height = 34, gap = 8, className = 
       <ApplePayLogo width={width} height={height} />
       <GooglePayLogo width={width} height={height} />
       <ScalapayLogo width={width} height={height} />
+      <PayPalLogo width={width} height={height} />
     </div>
   )
 }

@@ -76,7 +76,8 @@ export default function CommandePage() {
 
   const subtotal = enriched.reduce((s, i) => s + (getPrice(i.variant) ?? 0) * i.quantity, 0)
 
-  const step1Valid = !!(customer.nom.trim() && customer.prenom.trim() && customer.email.trim() && customer.telephone.trim() && customer.adresse.trim())
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customer.email.trim())
+  const step1Valid = !!(customer.nom.trim() && customer.prenom.trim() && emailValid && customer.telephone.trim() && customer.adresse.trim())
 
   async function handlePayment(method: 'stripe1x' | 'stripe4x') {
     setSubmitting(true)

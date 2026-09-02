@@ -71,7 +71,7 @@ const FAQ = [
   { q: "Le téléphone est-il débloqué tout opérateur ?",
     a: "Tous nos appareils sont débloqués et compatibles avec tous les opérateurs (Orange, SFR, Bouygues, Free et opérateurs locaux antillais)." },
   { q: "Quels moyens de paiement acceptez-vous ?",
-    a: "Le paiement se fait en ligne, en toute sécurité : carte bancaire en 1 fois, ou en 4 fois sans frais avec Scalapay." },
+    a: "Le paiement se fait en ligne, en toute sécurité : carte bancaire en 1 fois, ou en 4 fois sans frais avec Scalapay ou PayPal." },
   { q: "Comment fonctionne le paiement en 4 fois avec Scalapay ?",
     a: "Sélectionnez Scalapay au moment du paiement. Vous payez le premier quart immédiatement, puis 3 prélèvements à 30 jours d'intervalle. Zéro frais, zéro intérêt." },
 ]
@@ -541,7 +541,7 @@ export default function ProductDetail({ product, faq: faqProp }: { product: Full
                 </div>
                 {scalapay && (
                   <p className="text-xs opacity-50 mb-2">
-                    ou 4× <strong>{scalapay} €</strong> sans frais avec Scalapay
+                    ou 4× <strong>{scalapay} €</strong> sans frais avec Scalapay ou PayPal
                   </p>
                 )}
                 <PaymentLogosRow width={44} height={28} gap={6} />
@@ -659,7 +659,7 @@ export default function ProductDetail({ product, faq: faqProp }: { product: Full
                 { icon: CheckCircle, label: '100 % Authentique',   sub: 'Sélectionné chez les distributeurs officiels' },
                 { icon: Award,       label: 'Garantie 12 mois',     sub: 'Garantie constructeur, batterie incluse' },
                 { icon: CheckCircle, label: 'Retours 14 jours',     sub: 'Satisfait ou remboursé, sans conditions' },
-                { icon: CheckCircle, label: 'Paiement sécurisé',    sub: 'SSL + 4× sans frais avec Scalapay' },
+                { icon: CheckCircle, label: 'Paiement sécurisé',    sub: 'SSL + 4× avec Scalapay ou PayPal' },
               ].map(({ icon: Icon, label, sub }) => (
                 <div key={label} className="flex gap-2.5 text-xs p-3 rounded-xl"
                   style={{ background: 'var(--surface-soft)', border: '1px solid var(--border)' }}>
